@@ -1,38 +1,26 @@
-<!DOCTYPE html>
-<html>
+{{#if signUpSuccess}}
+    <section>
+        <header>Sign Up Successful. Check your email</header>
+    </section>
+{{/if}}
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="../public/stylesheets/main.css">
-    <!-- <link rel="stylesheet" type="text/css" href="css/text.css"> -->
-    <script src="../public/javascripts/loginStudent.js"></script>
-</head>
-
-<body>
-    <div id="contenedor">
-        <div class="contenido">
-            <h1 class="text3">Ready to improve
-                your English?</h1>
-            <h2 class="text4">Log in to your
-                account!</h2>
-            <div class="lgns">
-                <form action="login" method="post" id="forminicio">
-                    <label class="text5">Email</label>
-                    <br>
-                    <input type="text" name="usuario" id="txtusuario" placeholder="alumno@alumnos.upm.es"
-                        class="ovalinpt2" />
-                    <br>
-                    <br>
-                    <label class="text5">Password</label>
-                    <br>
-                    <input type="password" name="pass" id="txtpass" placeholder="Password" class="ovalinpt2" /><br>
-                    <input type="button" value="Sign In" id="btiniciar" class="ovalinpt oval-color" />
-                </form>
+<div id="contenedor">
+    <div class="contenido">
+        <h1 class="text3">Ready to improve your English?</h1>
+        <h2 class="text4">Log in to your account!</h2>
+        <div class="lgns">
+            <form action="/student-login/submit" method="post" id="forminicio">
+                <label class="text5">Email</label>
                 <br>
-                Don't have an account? <a href="../Sign Up/signUpStudent.html">Sign Up!</a>
-            </div>
+                <input type="text" id="email" placeholder="alumno@alumnos.upm.es" />
+                <br>
+                <br>
+                <label class="text5">Password</label>
+                <br>
+                <input type="password" id="password" placeholder="Password" /><br>
+                <button type="submit" class="ovalinpt oval-color">Sign in</button>
+            </form>
+            <br>Don't have an account yet? <a href="student-sign-up">Sign Up!</a>
         </div>
     </div>
-</body>
-
-</html>
+</div>

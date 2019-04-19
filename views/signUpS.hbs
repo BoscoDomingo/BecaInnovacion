@@ -1,45 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>Sign Up</title>
-  <link rel="stylesheet" href="../public/stylesheets/style.css">
-</head>
-
-<body>
-  <header>
+<header>
     <h1>Welcome to EFAPC's interactive platform</h1>
-  </header>
-
-  <section class="container">
-    <form id="my-form">
-      <h1>Add User</h1>
-      <div class="msg"></div>
-      <div>
-        <label for="name">Name:</label>
-        <input type="text" id="name">
-      </div>
-      <div>
-        <label for="email">Email:</label>
-        <input type="text" id="email">
-      </div>
-      <input class="btn" type="submit" value="Submit">
+</header>
+{{#if errors}}
+<section class="errors">
+    <ul>
+        {{#each errors}}
+        <li>{{this.msg}}</li>
+        {{/each}}
+    </ul>
+</section>
+{{/if}}
+<section class="container">
+    <form id="my-form" action="/student-sign-up/submit" method="POST">
+        <h1>Student Sign Up</h1>
+        <div class="msg"></div>
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name">
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email">
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password">
+        </div>
+        <div>
+            <label for="confirmPassword">Confirm your password:</label>
+            <input type="password" id="confirmPassword">
+        </div>
+        <button type="submit">Sign Up</button>
     </form>
-
-    <ul id="users"></ul>
-
-    <!-- <ul class="items">
-        <li class="item">Item 1</li>
-        <li class="item">Item 2</li>
-        <li class="item">Item 3</li>
-      </ul> -->
-  </section>
-
-
-  <script src="main.js"></script>
-</body>
-
-</html>
+</section>
