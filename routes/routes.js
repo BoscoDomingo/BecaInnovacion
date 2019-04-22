@@ -23,19 +23,15 @@ router.get('/student-sign-up', function (req, res, next) {
 
 router.post('/student-sign-up/submit', function (req, res, next) {
     req.check('email', 'Invalid email address').isEmail();
-    let pssMatch = new RegExp('*'); //Proper validation to be added later on
+    let pssMatch = new RegExp('.'); //Proper validation to be added later on
     req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword).matches(pssMatch);
     let errors = req.validationErrors()
     if (errors) {
         req.session.errors = errors;
         req.session.signUpSuccess = false;
         res.redirect('/student-sign-up');
-    res.redirect('/student-login');
-    } else {
-        req.session.errors = "Unable to write to database. Please contact an administrator or faculty";
-        req.session.signUpSuccess = false;
-        res.redirect('/student-sign-up');
     }
+    res.redirect('/student-login');
 });
 
 router.get('/student-login', function (req, res, next) {
