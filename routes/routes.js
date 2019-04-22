@@ -1,7 +1,12 @@
 let express = require('express'),
     router = express.Router(),
+    loginModule = require('./../modules/loginModule'),
+    signUpModule = require('./../modules/signUpModule'),
     crypto = require('crypto');
 require('dotenv').config();
+
+// router.all('/student-section/*', requireAuthentication, loadUser);
+// router.all('/teacher-section/*', requireAuthentication, loadUser);
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -30,7 +35,10 @@ router.post('/student-sign-up/submit', function (req, res, next) {
         req.session.errors = errors;
         req.session.signUpSuccess = false;
         res.redirect('/student-sign-up');
-    res.redirect('/student-login');
+    } else if (signUpModule("s", req.body.email, req.body.password, req.body.name, req.body.surname, req.body.ID)) {
+        req.session.signUpSuccess = true;
+        req.session.errors = null;
+        res.redirect('/student-login');
     } else {
         req.session.errors = "Unable to write to database. Please contact an administrator or faculty";
         req.session.signUpSuccess = false;
@@ -53,6 +61,8 @@ router.get('/student-login', function (req, res, next) {
 
 router.post('/student-login/submit', function (req, res, next) {
     req.check('email', 'Invalid email address').isEmail();
+    let hashPassword = crypto.sha256(req.body.password);
+    req.check('password', 'Invalid password');
     let errors = req.validationErrors()
     if (errors) {
         req.session.errors = errors;
@@ -63,7 +73,6 @@ router.post('/student-login/submit', function (req, res, next) {
         req.session.errors = null;
         res.redirect('/student-section');
     }
-    res.redirect('/student-section');
 });
 
 router.get('/teacher-sign-up', function (req, res, next) {
