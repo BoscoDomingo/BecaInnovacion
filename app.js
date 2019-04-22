@@ -22,10 +22,11 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(expressValidator());
 app.use(express.static(path.join(__dirname, 'public'))); //serves static files from a certain dir under url .com/filename
 //app.use('/static', express.static(path.join(__dirname, 'public')));//serves them under the url .com/static/filename
-app.use(expressValidator());
 app.use(expressSession({ secret: process.env.SECRET, saveUninitialized: false, resave: false }));
+
 
 app.use('/', routes); //defined above
 

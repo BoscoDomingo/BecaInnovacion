@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
+let express = require('express'),
+    router = express.Router(),
+    crypto = require('crypto');
 require('dotenv').config();
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', {
-        title: 'English For Professional and Academic Communication extra credit page',
-        layout: null
+        title: 'English For Professional and Academic Communication extra credit page'
     });
 });
 
@@ -14,43 +14,54 @@ router.get('/student-sign-up', function (req, res, next) {
     res.render('signUpS', {
         title: 'Sign up',
         layout: 'signUpLayout',
-        success: req.session.success,
+        signUpSuccess: req.session.signUpSuccess,
         errors: req.session.errors
     });
     req.session.errors = null;
-    req.session.success = null;
+    req.session.signUpSuccess = null;
 });
 
 router.post('/student-sign-up/submit', function (req, res, next) {
-    req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword);
     req.check('email', 'Invalid email address').isEmail();
+    let pssMatch = new RegExp('*'); //Proper validation to be added later on
+    req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword).matches(pssMatch);
     let errors = req.validationErrors()
     if (errors) {
         req.session.errors = errors;
-        req.session.success = false;
-    }
+        req.session.signUpSuccess = false;
+        res.redirect('/student-sign-up');
     res.redirect('/student-login');
-
+    } else {
+        req.session.errors = "Unable to write to database. Please contact an administrator or faculty";
+        req.session.signUpSuccess = false;
+        res.redirect('/student-sign-up');
+    }
 });
 
 router.get('/student-login', function (req, res, next) {
     res.render('loginS', {
         title: 'Login',
         layout: 'loginLayout',
-        success: req.session.success,
+        signUpSuccess: req.session.signUpSuccess,
+        logInSuccess: req.session.logInSuccess,
         errors: req.session.errors
     });
     req.session.errors = null;
-    req.session.success = null;
+    req.session.logInSuccess = null;
+    req.session.signUpSuccess = null;
 });
 
 router.post('/student-login/submit', function (req, res, next) {
-    req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword);
     req.check('email', 'Invalid email address').isEmail();
     let errors = req.validationErrors()
     if (errors) {
         req.session.errors = errors;
-        req.session.success = false;
+        req.session.signUpSuccess = false;
+        res.redirect('/student-login');
+    } else {
+        req.session.signUpSuccess = true;
+        req.session.errors = null;
+        res.redirect('/student-section');
     }
     res.redirect('/student-section');
 });
@@ -90,26 +101,6 @@ router.get('/student-section', function (req, res, next) {
 //     res.redirect('url path');
 // });
 
-let mysql = require('mysql');
-
-let connection = mysql.createConnection({
-    host: 'localhost',
-    port: '3306',
-    user: process.env.db_user_S,
-    password: process.env.db_pass_S,
-    database: 'test-db'
-});
-
-connection.connect((err) => {
-    if (err) console.log(err);
-})
-
-connection.query('SELECT * FROM students', function (err, rows, fields) {
-    if (err) throw err;
-    console.log('The solution is: ', rows[0])
-})
-
-connection.end()
 
 //Sources: https://o7planning.org/en/11959/connecting-to-mysql-database-using-nodejs
 //https://appdividend.com/2018/08/25/how-to-connect-nodejs-application-to-mysql-database/

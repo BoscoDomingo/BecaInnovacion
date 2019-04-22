@@ -10,25 +10,18 @@ body {
   /*background-attachment: fixed;*/
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #99E0DE;
-  display: table;
+  background-color: rgb(0, 102, 255);
+  /* display: table; */
    
 }
 
-#contenedor{
-  display: table-cell;
-  vertical-align: middle;
- 
-
-}
-
-.contenido{
-  background-color: rgba(255,255,255,0.6);
+.content{
+  background-color: rgba(136, 136, 136, 0.6);
   width: 800px;
   min-height: 400px;
   padding: 20px;
   margin: 0 auto;
-
+  vertical-align: middle;
   -webkit-border-radius: 30px;
   -moz-border-radius: 30px;
   -ms-border-radius: 30px;

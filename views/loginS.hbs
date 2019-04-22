@@ -1,26 +1,25 @@
-{{#if signUpSuccess}}
-    <section>
-        <header>Sign Up Successful. Check your email</header>
-    </section>
+{{# if signUpSuccess}}
+<h1 class="text1">Sign Up Successful!</h1>
 {{/if}}
 
-<div id="contenedor">
-    <div class="contenido">
+
+<div>
+    <div class="content">
         <h1 class="text3">Ready to improve your English?</h1>
         <h2 class="text4">Log in to your account!</h2>
-        <div class="lgns">
-            <form action="/student-login/submit" method="post" id="forminicio">
-                <label class="text5">Email</label>
-                <br>
-                <input type="text" id="email" placeholder="alumno@alumnos.upm.es" />
-                <br>
-                <br>
-                <label class="text5">Password</label>
-                <br>
-                <input type="password" id="password" placeholder="Password" /><br>
-                <button type="submit" class="ovalinpt oval-color">Sign in</button>
+        <section class="container">
+            <form id="my-form" action="/student-login/submit" method="POST">
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Log in</button>
             </form>
-            <br>Don't have an account yet? <a href="student-sign-up">Sign Up!</a>
-        </div>
+        </section>
+        <h5 class="text6">Don't have an account yet? <a href="student-sign-up">Sign Up!</a></h5>
     </div>
 </div>
