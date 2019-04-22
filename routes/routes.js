@@ -35,7 +35,7 @@ router.post('/student-sign-up/submit', function (req, res, next) {
         req.session.errors = errors;
         req.session.signUpSuccess = false;
         res.redirect('/student-sign-up');
-    } else if (signUpModule("s", req.body.email, req.body.password, req.body.name, req.body.surname, req.body.ID)) {
+    } else if (signUpModule("s", req.body.email, crypto.sha256(req.body.password), req.body.name, req.body.surname, req.body.ID)) {
         req.session.signUpSuccess = true;
         req.session.errors = null;
         res.redirect('/student-login');

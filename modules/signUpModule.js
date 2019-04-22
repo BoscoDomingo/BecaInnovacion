@@ -9,12 +9,12 @@ let connection = mysql.createConnection({
     database: 'test-db'
 });
 
-connection.connect((err) => {
-    if (err) console.log(err);
-    else console.log("Connected to DB for signing up");
-});
 
 function studentSignUp(email, password, name, surname, ID) {
+    connection.connect((err) => {
+        if (err) console.log(err);
+        else console.log("Connected to DB for signing up");
+    });
     connection.query("INSERT INTO students VALUES studentID = ?, email = ?, password = ?, name = ?, surname = ?", ID, email, password, name, surname, (err, res, fields) => {
         if (err) {
             console.log("error ocurred", err);
@@ -33,6 +33,10 @@ function studentSignUp(email, password, name, surname, ID) {
 }
 
 function teacherSignup(email, password, name, surname, ID) {
+    connection.connect((err) => {
+        if (err) console.log(err);
+        else console.log("Connected to DB for signing up");
+    });
     connection.query("INSERT INTO teachers VALUES teacherID = ?, email = ?, password = ?, name = ?, surname = ?", ID, email, password, name, surname, (err, res, fields) => {
         if (err) {
             console.log("error ocurred", err);

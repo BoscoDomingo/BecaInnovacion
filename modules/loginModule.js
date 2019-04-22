@@ -9,12 +9,11 @@ let connection = mysql.createConnection({
     database: 'test-db'
 });
 
-connection.connect((err) => {
-    if (err) console.log(err);
-    else console.log("Connected to DB for checking logins");
-});
-
 function checkTeacherLogin(email, password) {
+    connection.connect((err) => {
+        if (err) console.log(err);
+        else console.log("Connected to DB for checking logins");
+    });
     connection.query("SELECT studentID, password FROM teacher WHERE email = ?", email, (err, res, fields) => {
         if (error) {
             console.log("error ocurred", error);
@@ -51,6 +50,10 @@ function checkTeacherLogin(email, password) {
 
 
 function checkStudentLogin(email, password) {
+    connection.connect((err) => {
+        if (err) console.log(err);
+        else console.log("Connected to DB for checking logins");
+    });
     connection.query("SELECT password FROM students WHERE email = ?", email, (err, res, fields) => {
         if (error) {
             console.log("error ocurred", error);
