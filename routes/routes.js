@@ -59,7 +59,6 @@ router.post('/student-login/submit', function (req, res, next) {
         req.session.errors = null;
         res.redirect('/student-section');
     }
-    res.redirect('/student-section');
 });
 
 router.get('/teacher-sign-up', function (req, res, next) {

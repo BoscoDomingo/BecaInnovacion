@@ -1,7 +1,15 @@
 {{# if signUpSuccess}}
 <h1 class="text1">Sign Up Successful!</h1>
 {{/if}}
-
+{{# if errors}}
+<section>
+    <ul>
+        {{#each errors}}
+        <li>{{this.msg}}</li>
+        {{/each}}
+    </ul>
+</section>
+{{/if}}
 
 <div>
     <div class="content">
