@@ -12,59 +12,59 @@
 </head>
 
 <body>
-<header>
-    <h1>Welcome to EFAPC's interactive platform</h1>
-</header>
-{{# if errors}}
-<section>
-    <ul>
-        {{#each errors}}
-        <li>{{this.msg}}</li>
-        {{/each}}
-    </ul>
-</section>
-{{/if}}
-{{# if success}}
-<section>
-    <ul>
-        <li>Sucess!</li>
-    </ul>
-</section>
-{{/if}}
-<section class="container">
-    <form id="my-form" action="/student-sign-up" method="POST">
-        <div>
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div>
-            <label for="surname">Surname</label>
-            <input type="text" id="surname" name="surname" required>
-        </div>
-        <div>
-            <label for="studentID">Student ID</label>
-            <input type="text" id="studentID" name="studentID" required>
-        </div>
-        <div>
-            <label for="studentID">Teacher ID</label>
-            <input type="text" id="teacherID" name="teacherID" required>
-        </div>
-        <div>
-            <label for="email">Academic Email</label>
-            <input type="email" id="email" name="email" required>
-            {{!-- <label>@alumnos.upm.es</label> --}}
-        </div>
-        <div>
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div>
-            <label for="confirmPassword">Confirm your password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required>
-        </div>
-        <button type="submit">Sign Up</button>
-    </form>
-</section>
+    <header>
+        <h1>Welcome to EFAPC's interactive platform</h1>
+    </header>
+    {{# if errors}}
+    <section>
+        <ul>
+            {{#each errors}}
+            <li>{{this.msg}}</li>
+            {{/each}}
+        </ul>
+    </section>
+    {{/if}}
+    {{# if success}}
+    <section>
+        <ul>
+            <li>Sucess!</li>
+        </ul>
+    </section>
+    {{/if}}
+    <section class="container">
+        <form id="my-form" action="/student-sign-up" method="POST">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div>
+                <label for="surname">Surname</label>
+                <input type="text" id="surname" name="surname" required>
+            </div>
+            <div>
+                <label for="studentID">Student ID</label>
+                <input type="text" id="studentID" name="studentID" required>
+            </div>
+            <div>
+                <label for="studentID">Teacher ID</label>
+                <input type="text" id="teacherID" name="teacherID" required>
+            </div>
+            <div>
+                <label for="email">Academic Email</label>
+                <input type="email" id="email" name="email" required>
+                {{!-- <label>@alumnos.upm.es</label> --}}
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div>
+                <label for="confirmPassword">Confirm your password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+    </section>
 </body>
 
 </html>

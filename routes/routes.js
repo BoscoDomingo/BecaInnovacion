@@ -27,24 +27,27 @@ router.get('/student-sign-up', function (req, res, next) {
 });
 
 router.post('/student-sign-up', function (req, res, next) {
-    req.check('email', 'Invalid email address').isEmail();
+    req.check('email', 'Invalid email address').isEmail()//.matches(/[\w]*@alumnos.upm.es/);
     console.log("POST received on signup", req.body);
     //let pssMatch = new RegExp('.*'); //Proper validation to be added later on
     //req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword).matches(pssMatch);//TO-DO
     let errors = req.validationErrors(),
         hash = crypto.createHash('sha256');
     if (errors) {
+        console.log("There are errors on sign up: ", errors);
         req.session.errors = errors;
         req.session.signUpSuccess = false;
-        res.redirect('/student-sign-up');
+        return res.redirect('/student-sign-up');
     } else if (signUpModule("s", req.body.email, hash.update(req.body.password).digest('base64'), req.body.name, req.body.surname, req.body.studentID, req.body.teacherID)) {
+        console.log("Came back from inserting successfully");
         req.session.signUpSuccess = true;
         req.session.errors = null;
-        res.redirect('/student-login');
+        return res.redirect('/student-login');
     } else {
+        console.log("There are errors on DB access (sign up)");
         req.session.errors = "Unable to write to database. Please contact an administrator or faculty";
         req.session.signUpSuccess = false;
-        res.redirect('/student-sign-up');
+        return res.redirect('/student-sign-up');
     }
 });
 
@@ -61,17 +64,24 @@ router.get('/student-login', function (req, res, next) {
 });
 
 router.post('/student-login', function (req, res, next) {
-    req.check('email', 'Invalid email address').isEmail().matches(/[\w]*@alumnos.upm.es/);
-    let hash = crypto.createHash('sha256');
-    let errors = req.validationErrors()
+    req.check('email', 'Invalid email address').isEmail()//.matches(/[\w]*@alumnos.upm.es/);
+    let errors = req.validationErrors(),
+        hash = crypto.createHash('sha256');
     if (errors) {
+        console.log("There are errors on log in: ", errors);
         req.session.errors = errors;
-        req.session.signUpSuccess = false;
-        res.redirect('/student-login');
-    } else {
-        req.session.signUpSuccess = true;
+        req.session.logInSuccess = false;
+        return res.redirect('/student-login');
+    } else if (loginModule("s", req.body.email, hash.update(req.body.password).digest('base64'))) {
+        console.log("Came back from checking successfully");
+        req.session.logInSuccess = true;
         req.session.errors = null;
-        res.redirect('/student-section');
+        return res.redirect('/student-section');
+    } else {
+        console.log("There are errors on DB access (sign up)");
+        req.session.errors = "Unable to write to database. Please contact an administrator or faculty";
+        req.session.logInSuccess = false;
+        return res.sendStatus(404);
     }
 });
 

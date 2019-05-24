@@ -43,8 +43,9 @@ async function studentSignUp(email, password, name, surname, studentID, teacherI
                 // });
             }
         });
-    console.log("Ending connection");
+    console.log("Ending connection, success: ", true);
     await connection.end();
+    console.log("connection ended");
     return success;
 }
 
@@ -77,10 +78,10 @@ function teacherSignup(email, password, name, surname, teacherID) {
     connection.end();
 }
 
-module.exports = function signUp(type, email, password, name, surname, studentID, teacherID) {
+module.exports = async function signUp(type, email, password, name, surname, studentID, teacherID) {
     if (type === "s") {
-        studentSignUp(email, password, name, surname, studentID, teacherID);
+        await studentSignUp(email, password, name, surname, studentID, teacherID);
     } else if (type === "t") {
-        teacherSignup(email, password, name, surname, teacherID);
+        await teacherSignup(email, password, name, surname, teacherID);
     } else return "There was an error. Please, make sure the type of user is ok!";
 }
