@@ -24,8 +24,15 @@
     </ul>
 </section>
 {{/if}}
+{{# if success}}
+<section>
+    <ul>
+        <li>Sucess!</li>
+    </ul>
+</section>
+{{/if}}
 <section class="container">
-    <form id="my-form" action="/student-sign-up/submit" method="POST">
+    <form id="my-form" action="/student-sign-up" method="POST">
         <div>
             <label for="name">Name</label>
             <input type="text" id="name" name="name" required>

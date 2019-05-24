@@ -26,8 +26,9 @@ router.get('/student-sign-up', function (req, res, next) {
     req.session.signUpSuccess = null;
 });
 
-router.post('/student-sign-up/submit', function (req, res, next) {
+router.post('/student-sign-up', function (req, res, next) {
     req.check('email', 'Invalid email address').isEmail();
+    console.log("POST received on signup", req.body);
     //let pssMatch = new RegExp('.*'); //Proper validation to be added later on
     //req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword).matches(pssMatch);//TO-DO
     let errors = req.validationErrors(),
@@ -59,10 +60,9 @@ router.get('/student-login', function (req, res, next) {
     req.session.signUpSuccess = null;
 });
 
-router.post('/student-login/submit', function (req, res, next) {
+router.post('/student-login', function (req, res, next) {
     req.check('email', 'Invalid email address').isEmail().matches(/[\w]*@alumnos.upm.es/);
-    let hashPassword = crypto.sha256(req.body.password);
-    ;
+    let hash = crypto.createHash('sha256');
     let errors = req.validationErrors()
     if (errors) {
         req.session.errors = errors;
