@@ -1,3 +1,4 @@
+'use strict';
 window.addEventListener('load',function(){
     document.getElementById('btiniciar').addEventListener('click', function(){
         var nombre = document.getElementById('txtusuario').value;

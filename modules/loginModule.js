@@ -1,5 +1,5 @@
-let mysql = require('mysql'),
-    crypto = require('crypto');
+'use strict';
+let mysql = require('mysql');
 
 let connection = mysql.createConnection({
     host: 'localhost',
@@ -8,46 +8,6 @@ let connection = mysql.createConnection({
     password: process.env.db_pass_S,
     database: 'test-db'
 });
-
-function checkTeacherLogin(email, password) {
-    connection.connect((err) => {
-        if (err) console.log(err);
-        else console.log("Connected to DB for checking logins");
-    });
-    connection.query("SELECT studentID, password FROM teacher WHERE email = ?", email, (err, res, fields) => {
-        if (error) {
-            console.log("error ocurred", error);
-            res.send({
-                "code": 400,
-                "failed": "There was an error"
-            });
-        } else {
-            if (results.length > 0) {
-                if (results[0].password == crypto.sha256(password)) {
-                    res.send({
-                        "code": 200,
-                        "success": "Login sucessful",
-                        "teacherID": results[0].teacherID
-                    });
-                }
-                else {
-                    res.send({
-                        "code": 204,
-                        "success": "Login unsuccessful"
-                    });
-                }
-            }
-            else {
-                res.send({
-                    "code": 204,
-                    "success": "Login unsuccessful"
-                });
-            }
-        }
-    });
-    connection.end();
-}
-
 
 function checkStudentLogin(email, password) {
     connection.connect((err) => {
@@ -63,7 +23,7 @@ function checkStudentLogin(email, password) {
             });
         } else {
             if (results.length > 0) {
-                if (results[0].password == crypto.sha256(password)) {
+                if (results[0].password == password) {
                     res.send({
                         "code": 200,
                         "success": "Login sucessful",
@@ -86,7 +46,46 @@ function checkStudentLogin(email, password) {
         }
     });
     connection.end();
-}
+};
+
+function checkTeacherLogin(email, password) {
+    connection.connect((err) => {
+        if (err) console.log(err);
+        else console.log("Connected to DB for checking logins");
+    });
+    connection.query("SELECT studentID, password FROM teacher WHERE email = ?", email, (err, res, fields) => {
+        if (error) {
+            console.log("error ocurred", error);
+            res.send({
+                "code": 400,
+                "failed": "There was an error retrieving from database"
+            });
+        } else {
+            if (results.length > 0) {
+                if (results[0].password == password) {
+                    res.send({
+                        "code": 200,
+                        "success": "Login sucessful",
+                        "teacherID": results[0].teacherID
+                    });
+                }
+                else {
+                    res.send({
+                        "code": 204,
+                        "success": "Login unsuccessful"
+                    });
+                }
+            }
+            else {
+                res.send({
+                    "code": 204,
+                    "success": "Login unsuccessful"
+                });
+            }
+        }
+    });
+    connection.end();
+};
 
 module.exports = function checkLogin(type, email, password) {
     if (type === "s") {

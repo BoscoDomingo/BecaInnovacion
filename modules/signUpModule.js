@@ -1,3 +1,4 @@
+'use strict';
 let mysql = require('mysql'),
     crypto = require('crypto');
 
@@ -10,12 +11,38 @@ let connection = mysql.createConnection({
 });
 
 
-function studentSignUp(email, password, name, surname, ID) {
+function studentSignUp(email, password, name, surname, studentID, teacherID) {
     connection.connect((err) => {
         if (err) console.log(err);
         else console.log("Connected to DB for signing up");
     });
-    connection.query("INSERT INTO students VALUES studentID = ?, email = ?, password = ?, name = ?, surname = ?", ID, email, password, name, surname, (err, res, fields) => {
+    let success = true;
+    connection.query("INSERT INTO students (studentID, email, password, name, surname, teacherID) VALUES (?, ?, ?, ?, ?, ?);", [studentID, email, password, name, surname, teacherID], (err, res, fields) => {
+        if (err) {
+            console.log("error ocurred", err);
+            success = false;
+            // res.send({
+            //     "code": 400,
+            //     "failed": "There was an error"
+            // });
+        } else {
+            // res.send({
+            //     "code": 200,
+            //     "success": "Sign Up Sucessful"
+            // });
+            console.log("Successfully inserted");
+        }
+    });
+    connection.end();
+    return success;
+}
+
+function teacherSignup(email, password, name, surname, teacherID) {
+    connection.connect((err) => {
+        if (err) console.log(err);
+        else console.log("Connected to DB for signing up");
+    });
+    connection.query("INSERT INTO teachers (teacherID, email, password, name, surname) VALUES (?, ?, ?, ?, ?)", [teacherID, email, password, name, surname], (err, res, fields) => {
         if (err) {
             console.log("error ocurred", err);
             res.send({
@@ -32,32 +59,10 @@ function studentSignUp(email, password, name, surname, ID) {
     connection.end();
 }
 
-function teacherSignup(email, password, name, surname, ID) {
-    connection.connect((err) => {
-        if (err) console.log(err);
-        else console.log("Connected to DB for signing up");
-    });
-    connection.query("INSERT INTO teachers VALUES teacherID = ?, email = ?, password = ?, name = ?, surname = ?", ID, email, password, name, surname, (err, res, fields) => {
-        if (err) {
-            console.log("error ocurred", err);
-            res.send({
-                "code": 400,
-                "failed": "There was an error"
-            });
-        } else {
-            res.send({
-                "code": 200,
-                "success": "Sign Up Sucessful"
-            });
-        };
-    });
-    connection.end();
-}
-
-module.exports = function signUp(type, email, password, name, surname, ID) {
+module.exports = function signUp(type, email, password, name, surname, studentID, teacherID) {
     if (type === "s") {
-        studentSignUp(email, password, name, surname, ID);
+        studentSignUp(email, password, name, surname, studentID, teacherID);
     } else if (type === "t") {
-        teacherSignup(email, password, name, surname, ID);
+        teacherSignup(email, password, name, surname, teacherID);
     } else return "There was an error. Please, make sure the type of user is ok!";
 }

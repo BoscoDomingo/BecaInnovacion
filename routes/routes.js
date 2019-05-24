@@ -1,3 +1,4 @@
+'use strict';
 let express = require('express'),
     router = express.Router(),
     loginModule = require('./../modules/loginModule'),
@@ -18,7 +19,6 @@ router.get('/', function (req, res, next) {
 router.get('/student-sign-up', function (req, res, next) {
     res.render('signUpS', {
         title: 'Sign up',
-        layout: 'signUpLayout',
         signUpSuccess: req.session.signUpSuccess,
         errors: req.session.errors
     });
@@ -28,14 +28,15 @@ router.get('/student-sign-up', function (req, res, next) {
 
 router.post('/student-sign-up/submit', function (req, res, next) {
     req.check('email', 'Invalid email address').isEmail();
-    let pssMatch = new RegExp('*'); //Proper validation to be added later on
-    req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword).matches(pssMatch);
-    let errors = req.validationErrors()
+    //let pssMatch = new RegExp('.*'); //Proper validation to be added later on
+    //req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword).matches(pssMatch);//TO-DO
+    let errors = req.validationErrors(),
+        hash = crypto.createHash('sha256');
     if (errors) {
         req.session.errors = errors;
         req.session.signUpSuccess = false;
         res.redirect('/student-sign-up');
-    } else if (signUpModule("s", req.body.email, crypto.sha256(req.body.password), req.body.name, req.body.surname, req.body.ID)) {
+    } else if (signUpModule("s", req.body.email, hash.update(req.body.password).digest('base64'), req.body.name, req.body.surname, req.body.studentID, req.body.teacherID)) {
         req.session.signUpSuccess = true;
         req.session.errors = null;
         res.redirect('/student-login');
@@ -49,7 +50,6 @@ router.post('/student-sign-up/submit', function (req, res, next) {
 router.get('/student-login', function (req, res, next) {
     res.render('loginS', {
         title: 'Login',
-        layout: 'loginLayout',
         signUpSuccess: req.session.signUpSuccess,
         logInSuccess: req.session.logInSuccess,
         errors: req.session.errors
@@ -60,9 +60,9 @@ router.get('/student-login', function (req, res, next) {
 });
 
 router.post('/student-login/submit', function (req, res, next) {
-    req.check('email', 'Invalid email address').isEmail();
+    req.check('email', 'Invalid email address').isEmail().matches(/[\w]*@alumnos.upm.es/);
     let hashPassword = crypto.sha256(req.body.password);
-    req.check('password', 'Invalid password');
+    ;
     let errors = req.validationErrors()
     if (errors) {
         req.session.errors = errors;
@@ -78,7 +78,6 @@ router.post('/student-login/submit', function (req, res, next) {
 router.get('/teacher-sign-up', function (req, res, next) {
     res.render('signUpT', {
         title: 'Sign up',
-        layout: 'signUpLayout',
         success: req.session.success,
         errors: req.session.errors
     });
@@ -89,7 +88,6 @@ router.get('/teacher-sign-up', function (req, res, next) {
 router.get('/teacher-login', function (req, res, next) {
     res.render('loginT', {
         title: 'Login',
-        layout: 'loginLayout',
         success: req.session.success,
         errors: req.session.errors
     });
