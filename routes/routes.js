@@ -40,12 +40,12 @@ router.post('/student-sign-up', function (req, res, next) {
         return res.redirect('/student-sign-up');
     }
     signUpModule("s", req.body.email, hash.update(req.body.password).digest('base64'), req.body.name, req.body.surname, req.body.studentID, req.body.teacherID).then(() => {
-        console.log("Came back from inserting successfully");
+        console.log("Came back from inserting successfully\n");
         req.session.signUpSuccess = true;
         req.session.errors = null;
         return res.redirect('/student-login');
     }).catch(() => {
-        console.log("There are errors on DB access (sign up)");
+        console.log("There are errors on DB access (sign up)\n");
         req.session.errors = "Unable to write to database. Please contact an administrator or faculty";
         req.session.signUpSuccess = false;
         return res.redirect('/student-sign-up');

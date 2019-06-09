@@ -16,7 +16,7 @@ let pool = mysql.createPool({
 
 module.exports = function signUp(type, email, password, name, surname, studentID, teacherID) {
     if (type === "s") {
-        let promise = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             pool.query("INSERT INTO students (studentID, email, password, name, surname, teacherID) VALUES (?, ?, ?, ?, ?, ?);",
                 [studentID, email, password, name, surname, teacherID],
                 (err, res, fields) => {
@@ -29,9 +29,8 @@ module.exports = function signUp(type, email, password, name, surname, studentID
                     }
                 });
         });
-        return promise;
     } else if (type === "t") {
-        let promise = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             pool.query("INSERT INTO teachers (teacherID, email, password, name, surname) VALUES (?, ?, ?, ?, ?)",
                 [teacherID, email, password, name, surname],
                 (err, res, fields) => {
@@ -44,7 +43,6 @@ module.exports = function signUp(type, email, password, name, surname, studentID
                     }
                 });
         });
-        return promise;
     } else {
         console.log("There was an error. Please, make sure the type of user is ok!");
         return false;
