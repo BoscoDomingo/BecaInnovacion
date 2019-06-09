@@ -19,11 +19,10 @@ router.get('/', function (req, res, next) {
 router.get('/student-sign-up', function (req, res, next) {
     res.render('signUpS', {
         title: 'Sign up',
-        signUpSuccess: req.session.signUpSuccess,
         errors: req.session.errors
     });
+    //to flush them on reload
     req.session.errors = null;
-    req.session.signUpSuccess = null;
 });
 
 router.post('/student-sign-up', function (req, res, next) {
@@ -39,16 +38,17 @@ router.post('/student-sign-up', function (req, res, next) {
         req.session.signUpSuccess = false;
         return res.redirect('/student-sign-up');
     }
+    //if info is correct, we insert into DB
     signUpModule("s", req.body.email, hash.update(req.body.password).digest('base64'), req.body.name, req.body.surname, req.body.studentID, req.body.teacherID).then(() => {
-        console.log("Came back from inserting successfully\n");
+        console.log("Inserted successfully\n");
         req.session.signUpSuccess = true;
         req.session.errors = null;
         return res.redirect('/student-login');
     }).catch(() => {
         console.log("There are errors on DB access (sign up)\n");
-        req.session.errors = "Unable to write to database. Please contact an administrator or faculty";
+        req.session.errors = { 1: { msg: "Unable to write to database. Please contact an administrator or faculty" } };
         req.session.signUpSuccess = false;
-        return res.redirect('/student-sign-up');
+        return res.redirect('back');
     });
 });
 
@@ -56,11 +56,9 @@ router.get('/student-login', function (req, res, next) {
     res.render('loginS', {
         title: 'Login',
         signUpSuccess: req.session.signUpSuccess,
-        logInSuccess: req.session.logInSuccess,
         errors: req.session.errors
     });
     req.session.errors = null;
-    req.session.logInSuccess = null;
     req.session.signUpSuccess = null;
 });
 
@@ -71,19 +69,16 @@ router.post('/student-login', function (req, res, next) {
     if (errors) {
         console.log("There are errors on log in: ", errors);
         req.session.errors = errors;
-        req.session.logInSuccess = false;
         return res.redirect('/student-login');
-    } else if (loginModule("s", req.body.email, hash.update(req.body.password).digest('base64'))) {
+    }
+    loginModule("s", req.body.email, hash.update(req.body.password).digest('base64')).then(() => {
         console.log("Came back from checking successfully");
-        req.session.logInSuccess = true;
         req.session.errors = null;
         return res.redirect('/student-section');
-    } else {
-        console.log("There are errors on DB access (sign up)");
-        req.session.errors = "Unable to write to database. Please contact an administrator or faculty";
-        req.session.logInSuccess = false;
-        return res.sendStatus(404);
-    }
+    }).catch(() => {
+        console.log("There are errors on DB access (log in)");
+        return res.redirect('back');
+    })
 });
 
 router.get('/teacher-sign-up', function (req, res, next) {

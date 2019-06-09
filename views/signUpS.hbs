@@ -19,19 +19,11 @@
     <section>
         <ul>
             {{#each errors}}
-            <li>{{this.msg}}</li>
+            <li style="color: red">{{this.msg}}</li>
             {{/each}}
         </ul>
     </section>
-    {{/if}}
-    {{# if success}}
-    <section>
-        <ul>
-            <li>Sucess!</li>
-        </ul>
-    </section>
-    {{/if}}
-    
+    {{/if}}    
 
     <section class="container">
         <form id="my-form" action="/student-sign-up" method="POST">

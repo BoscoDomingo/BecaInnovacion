@@ -1,8 +1,5 @@
 'use strict';
-let mysql = require('mysql'),
-    crypto = require('crypto');
-
-let pool = mysql.createPool({
+let pool = require('mysql').createPool({
     connectionLimit: 100,
     waitForConnections: true,
     queueLimit: 10000,//0 for unlimited process in the queue waiting for connection
@@ -21,7 +18,7 @@ module.exports = function signUp(type, email, password, name, surname, studentID
                 [studentID, email, password, name, surname, teacherID],
                 (err, res, fields) => {
                     if (err) {
-                        console.log("WARNING: Error ocurred during DB Query!\n", err);
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
                         reject();
                     } else {
                         console.log("Successfully inserted student");
@@ -35,7 +32,7 @@ module.exports = function signUp(type, email, password, name, surname, studentID
                 [teacherID, email, password, name, surname],
                 (err, res, fields) => {
                     if (err) {
-                        console.log("WARNING: Error ocurred during DB Query!\n", err);
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
                         reject();
                     } else {
                         console.log("Successfully inserted teacher");
