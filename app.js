@@ -44,10 +44,10 @@ app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     
     // render the error page
-    //res.render('error');
+    res.render('error');
 
     //redirect to main page
-    res.redirect('/');
+    //res.redirect('/');
 });
 
 //response headers

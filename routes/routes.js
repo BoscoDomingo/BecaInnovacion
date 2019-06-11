@@ -6,6 +6,11 @@ let express = require('express'),
     crypto = require('crypto');
 require('dotenv').config();
 
+let studentEmailRegExp = /^[\w.!#$%&’*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸç]+(@alumnos.upm.es)$/, //accepted email characters
+    passwordRegEx = /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\W\w\S]{8,}$/;//Has 1 uppercase, 1 lowercase, 1 number
+// /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\w.!#$%&’*+/=?^_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅå ÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/
+// alternative passwordRegEx
+
 // router.all('/student-section/*', requireAuthentication, loadUser);
 // router.all('/teacher-section/*', requireAuthentication, loadUser);
 
@@ -25,11 +30,22 @@ router.get('/student-sign-up', function (req, res, next) {
     req.session.errors = null;
 });
 
+function convertToUPMEmail(emailInput) {
+    let auxIndex = emailInput.indexOf("@");
+    if (auxIndex !== -1) {
+        emailInput = emailInput.substring(0, auxIndex);
+    }
+    emailInput = emailInput + "@alumnos.upm.es";
+    return emailInput;
+}
+
 router.post('/student-sign-up', function (req, res, next) {
-    req.check('email', 'Invalid email address').isEmail()//.matches(/[\w]*@alumnos.upm.es/);
-    console.log("POST received on signup", req.body);
-    //let pssMatch = new RegExp('.*'); //Proper validation to be added later on
-    //req.check('password', 'Invalid password').isLength({ min: 8 }).equals(req.body.confirmPassword).matches(pssMatch);//TO-DO
+    console.log("POST received on signup", req.body); //DELETE BEFORE DELIVERY
+    req.body.email = convertToUPMEmail(req.body.email);
+
+    req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
+    //req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx);
+
     let errors = req.validationErrors(),
         hash = crypto.createHash('sha256');
     if (errors) {
@@ -46,7 +62,11 @@ router.post('/student-sign-up', function (req, res, next) {
         return res.redirect('/student-login');
     }).catch(() => {
         console.log("There are errors on DB access (sign up)\n");
-        req.session.errors = { 1: { msg: "Unable to write to database. Please contact an administrator or faculty" } };
+        req.session.errors = {
+            1: {
+                msg: "Unable to write to database. Please contact an administrator or faculty"
+            }
+        };
         req.session.signUpSuccess = false;
         return res.redirect('back');
     });
@@ -63,7 +83,7 @@ router.get('/student-login', function (req, res, next) {
 });
 
 router.post('/student-login', function (req, res, next) {
-    req.check('email', 'Invalid email address').isEmail()//.matches(/[\w]*@alumnos.upm.es/);
+    req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
     let errors = req.validationErrors(),
         hash = crypto.createHash('sha256');
     if (errors) {
