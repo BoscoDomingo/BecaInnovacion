@@ -32,23 +32,23 @@ header {
   padding: 3rem 2rem;
 }
 
-#signup-form {
+#student-form {
   padding: 2rem;
   background: #f4f4f4;
 }
 
-#signup-form label {
+#student-form label {
   display: block;
 }
-#signup-form .appendEmail {
+#student-form .appendEmail {
   display: inline-block;
   text-align: right;
 }
-#signup-form .emailInput {
+#student-form .emailInput {
   width: 50%;
 }
 
-#signup-form input {
+#student-form input {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -56,24 +56,7 @@ header {
   border: 1px solid #ccc;
 }
 
-#login-form {
-  padding: 2rem;
-  background: #f4f4f4;
-}
-
-#login-form label {
-  display: block;
-}
-
-#login-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-.passwordError {
+#student-form .passwordError {
   color: red;
   display: none;
 }

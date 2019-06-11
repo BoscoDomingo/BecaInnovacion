@@ -15,6 +15,17 @@ let studentEmailRegExp = /^[\w.!#$%&’*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉ
 // router.all('/teacher-section/*', requireAuthentication, loadUser);
 
 /* GET home page. */
+//HELPERS
+function convertToUPMEmail(emailInput) {
+    let auxIndex = emailInput.indexOf("@");
+    if (auxIndex !== -1) {
+        emailInput = emailInput.substring(0, auxIndex);
+    }
+    emailInput = emailInput + "@alumnos.upm.es";
+    return emailInput;
+}
+
+//ROUTES
 router.get('/', function (req, res, next) {
     res.render('index', {
         title: 'English For Professional and Academic Communication extra credit page'
@@ -29,15 +40,6 @@ router.get('/student-sign-up', function (req, res, next) {
     //to flush them on reload
     req.session.errors = null;
 });
-
-function convertToUPMEmail(emailInput) {
-    let auxIndex = emailInput.indexOf("@");
-    if (auxIndex !== -1) {
-        emailInput = emailInput.substring(0, auxIndex);
-    }
-    emailInput = emailInput + "@alumnos.upm.es";
-    return emailInput;
-}
 
 router.post('/student-sign-up', function (req, res, next) {
     console.log("POST received on signup", req.body); //DELETE BEFORE DELIVERY
@@ -83,20 +85,29 @@ router.get('/student-login', function (req, res, next) {
 });
 
 router.post('/student-login', function (req, res, next) {
+    req.body.email = convertToUPMEmail(req.body.email);
     req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
+
     let errors = req.validationErrors(),
         hash = crypto.createHash('sha256');
+
     if (errors) {
         console.log("There are errors on log in: ", errors);
         req.session.errors = errors;
         return res.redirect('/student-login');
     }
+    //if there's no errors, we check DB
     loginModule("s", req.body.email, hash.update(req.body.password).digest('base64')).then(() => {
         console.log("Came back from checking successfully");
         req.session.errors = null;
         return res.redirect('/student-section');
     }).catch(() => {
-        console.log("There are errors on DB access (log in)");
+        console.log("There are errors from DB (log in)");
+        req.session.errors = {
+            1: {
+                msg: "Wrong email or password. Please try again"
+            }
+        };
         return res.redirect('back');
     })
 });

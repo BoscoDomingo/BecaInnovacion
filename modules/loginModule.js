@@ -18,7 +18,7 @@ module.exports = function checkLogin(type, email, password) {
                     console.log("WARNING: Error ocurred during DB Query\n", err);
                     reject();
                 } else if (res.length <= 0 || res[0].password != password) {
-                    console.log("Failed login");
+                    console.log("Login failed");
                     reject();
                 } else {
                     console.log("Login successful");
@@ -33,7 +33,7 @@ module.exports = function checkLogin(type, email, password) {
                     console.log("WARNING: Error ocurred during DB Query\n", err);
                     reject();
                 } else if (res.length <= 0 || res[0].password != password) {
-                    console.log("Failed login");
+                    console.log("Login failed");
                     reject();
                 } else {
                     console.log("Login successful");
@@ -41,5 +41,5 @@ module.exports = function checkLogin(type, email, password) {
                 }
             });
         });
-    } else return "There was an error. Please, make sure the type of user is ok!";
+    } else return "There was an error. Please, make sure user type is correct";
 };
