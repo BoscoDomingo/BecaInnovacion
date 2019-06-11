@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Login Teacher</title>
-    <link rel="stylesheet" type="text/css" href="css/main.css">
-    <link rel="stylesheet" type="text/css" href="css/text.css">
-    <script src="js/valLogTeach.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" href="stylesheets/main.css">
+    <title>{{title}}</title>
 </head>
 
 <body>
@@ -18,15 +19,16 @@
                 <form action="loginteacher" method="post" id="formlt">
                     <label class="text5">Email</label>
                     <br>
-                    <input type="email" name="email" id="emailjs" placeholder="example@upm.es" class="ovalinpt2"
+                    <input type="email" name="email" id="email" placeholder="example@upm.es" class="ovalinpt2"
                         required />
                     <br>
                     <br>
                     <label class="text5">Password</label>
                     <br>
-                    <input type="password" name="password" id="pssjs" placeholder="Password" class="ovalinpt2"
+                    <input type="password" name="password" id="password" placeholder="Password" class="ovalinpt2"
                         required /><br>
-                    <input type="submit" value="Sign In" id="butt" class="ovalinpt oval-color" />
+                    {{!-- <input type="submit" value="Sign In" id="butt" class="ovalinpt oval-color" /> --}}
+                    <button type="submit">Log in</button>
                 </form>
             </div>
         </div>

@@ -32,21 +32,50 @@ header {
   padding: 3rem 2rem;
 }
 
-#my-form {
+#signup-form {
   padding: 2rem;
   background: #f4f4f4;
 }
 
-#my-form label {
+#signup-form label {
   display: block;
 }
+#signup-form .appendEmail {
+  display: inline-block;
+  text-align: right;
+}
+#signup-form .emailInput {
+  width: 50%;
+}
 
-#my-form input {
+#signup-form input {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
+}
+
+#login-form {
+  padding: 2rem;
+  background: #f4f4f4;
+}
+
+#login-form label {
+  display: block;
+}
+
+#login-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.passwordError {
+  color: red;
+  display: none;
 }
 
 .btn {

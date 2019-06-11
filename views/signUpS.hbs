@@ -1,33 +1,67 @@
-<header>
-    <h1>Welcome to EFAPC's interactive platform</h1>
-</header>
-{{# if errors}}
-<section>
-    <ul>
-        {{#each errors}}
-        <li>{{this.msg}}</li>
-        {{/each}}
-    </ul>
-</section>
-{{/if}}
-<section class="container">
-    <form id="my-form" action="/student-sign-up/submit" method="POST">
-        <div>
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div>
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div>
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div>
-            <label for="confirmPassword">Confirm your password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required>
-        </div>
-        <button type="submit">Sign Up</button>
-    </form>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" href="stylesheets/main.css">
+    <script type="text/javascript" src="javascripts/signUpStudent.js"></script>
+    <title>{{title}}</title>
+</head>
+
+<body>
+    <header>
+        <h1>Welcome to EFAPC's interactive platform</h1>
+    </header>
+    {{# if errors}}
+    <section>
+        <ul>
+            {{#each errors}}
+            <li style="color: red">{{this.msg}}</li>
+            {{/each}}
+        </ul>
+    </section>
+    {{/if}}
+
+    <section class="container">
+        <form id="signup-form" action="/student-sign-up" method="POST">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div>
+                <label for="surname">Surname</label>
+                <input type="text" id="surname" name="surname" required>
+            </div>
+            <div>
+                <label for="studentID">Student ID</label>
+                <input type="text" id="studentID" name="studentID" required>
+            </div>
+            <div>
+                <label for="studentID">Teacher ID</label>
+                <input type="text" id="teacherID" name="teacherID" required>
+            </div>
+            <div>
+                <label for="email">Academic Email</label>
+                <input type="text" id="email" name="email" class="emailInput" required>
+                <label for="email" class="appendEmail">@alumnos.upm.es</label>
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" onkeyup="validatePassword()" required>
+                <p class="passwordError" id="correctPassword"></p>
+            </div>
+            <div>
+                <label for="confirmPassword">Confirm your password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" required>
+                <p class="passwordError" id="validatePasswords"></p>
+            </div>
+
+            <button type="submit">Sign Up</button>
+        </form>
+    </section>
+</body>
+
+</html>
