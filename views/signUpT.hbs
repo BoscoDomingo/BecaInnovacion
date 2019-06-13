@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{title}}</title>
     <link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" href="stylesheets/main.css">
     <script src="javascripts/signUpTeacher.js"></script>
 </head>
 
@@ -16,28 +17,32 @@
     </header>
 
     <section class="container">
-        <form id="my-form" action="/sign-up">
+        <form id="teacher-form" action="/teacher-sign-up" method="POST">
             <h1>Teacher Sign Up</h1>
             <div class="msg"></div>
             <div>
                 <label for="name">Name:</label>
-                <input type="text" id="name">
+                <input type="text" id="name" name="name" required>
             </div>
             <div>
                 <label for="surname">Surname:</label>
-                <input type="text" id="surname">
+                <input type="text" id="surname" name="surname" required>
+            </div>
+            <div>
+                <label for="studentID">Teacher ID</label>
+                <input type="text" id="teacherID" name="teacherID" required>
             </div>
             <div>
                 <label for="email">Email:</label>
-                <input type="email" id="email">
+                <input type="email" id="email" name="email" required>
             </div>
             <div>
                 <label for="password">Password:</label>
-                <input type="password" id="password">
+                <input type="password" id="password" name="password" required>
             </div>
             <div>
                 <label for="confirmPassword">Confirm your password:</label>
-                <input type="password" id="confirmPassword">
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
             <button type="submit">Sign Up</button>
         </form>

@@ -1,12 +1,12 @@
 'use strict';
-let express = require('express'),
+const express = require('express'),
     router = express.Router(),
     loginModule = require('./../modules/loginModule'),
     signUpModule = require('./../modules/signUpModule'),
     crypto = require('crypto');
 require('dotenv').config();
 
-let studentEmailRegExp = /^[\w.!#$%&’*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸç]+(@alumnos.upm.es)$/, //accepted email characters
+const studentEmailRegExp = /^[\w.!#$%&’*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸç]+(@alumnos.upm.es)$/, //accepted email characters
     passwordRegEx = /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\W\w\S]{8,}$/;//Has 1 uppercase, 1 lowercase, 1 number
 // /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\w.!#$%&’*+/=?^_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅå ÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/
 // alternative passwordRegEx
@@ -39,9 +39,7 @@ router.get('/student-sign-up', function (req, res, next) {
     });
     //to flush them on reload
     req.session.errors = null;
-});
-
-router.post('/student-sign-up', function (req, res, next) {
+}).post('/student-sign-up', function (req, res, next) {
     console.log("POST received on signup", req.body); //DELETE BEFORE DELIVERY
     req.body.email = convertToUPMEmail(req.body.email);
 
@@ -82,9 +80,7 @@ router.get('/student-login', function (req, res, next) {
     });
     req.session.errors = null;
     req.session.signUpSuccess = null;
-});
-
-router.post('/student-login', function (req, res, next) {
+}).post('/student-login', function (req, res, next) {
     req.body.email = convertToUPMEmail(req.body.email);
     req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
 
@@ -102,7 +98,7 @@ router.post('/student-login', function (req, res, next) {
         req.session.errors = null;
         return res.redirect('/student-section');
     }).catch(() => {
-        console.log("There are errors from DB (log in)");
+        console.log("There are errors from DB access (log in)");
         req.session.errors = {
             1: {
                 msg: "Wrong email or password. Please try again"
@@ -120,6 +116,37 @@ router.get('/teacher-sign-up', function (req, res, next) {
     });
     req.session.errors = null;
     req.session.success = null;
+}).post('/teacher-sign-up', function (req, res, next) {
+    console.log("POST received on teacher signup", req.body); //DELETE BEFORE DELIVERY
+
+    req.check('email', 'Invalid email address').isEmail();
+    //req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx);
+
+    let errors = req.validationErrors(),
+        hash = crypto.createHash('sha256');
+
+    if (errors) {
+        console.log("There are errors on sign up: ", errors);
+        req.session.errors = errors;
+        req.session.signUpSuccess = false;
+        return res.redirect('/teacher-sign-up');
+    }
+    //if info is correct, we insert into DB
+    signUpModule("t", req.body.email, hash.update(req.body.password).digest('base64'), req.body.name, req.body.surname, req.body.teacherID).then(() => {
+        console.log("Inserted successfully\n");
+        req.session.signUpSuccess = true;
+        req.session.errors = null;
+        return res.redirect('/teacher-login');
+    }).catch(() => {
+        console.log("There are errors on DB access (sign up)\n");
+        req.session.errors = {
+            1: {
+                msg: "Unable to write to database. Please contact an administrator or faculty"
+            }
+        };
+        req.session.signUpSuccess = false;
+        return res.redirect('back');
+    });
 });
 
 router.get('/teacher-login', function (req, res, next) {
@@ -130,6 +157,31 @@ router.get('/teacher-login', function (req, res, next) {
     });
     req.session.errors = null;
     req.session.success = null;
+}).post('/teacher-login', function (req, res, next) {
+    req.check('email', 'Invalid email address').isEmail();
+
+    let errors = req.validationErrors(),
+        hash = crypto.createHash('sha256');
+
+    if (errors) {
+        console.log("There are errors on log in: ", errors);
+        req.session.errors = errors;
+        return res.redirect('/teacher-login');
+    }
+    //if there's no errors, we check DB
+    loginModule("t", req.body.email, hash.update(req.body.password).digest('base64')).then(() => {
+        console.log("Came back from checking successfully");
+        req.session.errors = null;
+        return res.redirect('/teacher-section');
+    }).catch(() => {
+        console.log("There are errors from DB access (log in)");
+        req.session.errors = {
+            1: {
+                msg: "Wrong email or password. Please try again"
+            }
+        };
+        return res.redirect('back');
+    })
 });
 
 router.get('/student-section', function (req, res, next) {
@@ -138,15 +190,26 @@ router.get('/student-section', function (req, res, next) {
         layout: 'menuLayout'
     });
 });
-//URL: localhost:port/users/
-/* GET users listing. */
-// router.get('/users', function (req, res, next) {
-//     res.render(...);
-//     res.redirect('url path');
-// });
 
+router.get('/teacher-section', function (req, res, next) {
+    res.render('homePageT', {
+        title: 'Teacher Home Page',
+        layout: 'menuLayout'
+    });
+});
 
-//Sources: https://o7planning.org/en/11959/connecting-to-mysql-database-using-nodejs
-//https://appdividend.com/2018/08/25/how-to-connect-nodejs-application-to-mysql-database/
+router.get('/profile', function (req, res, next) {
+    res.render('profile', {
+        title: 'Profile page',
+        layout: 'menuLayout'
+    });
+});
+
+router.get('/help', function (req, res, next) {
+    res.render('help', {
+        title: 'Need help?',
+        layout: 'menuLayout'
+    });
+});
 
 module.exports = router;

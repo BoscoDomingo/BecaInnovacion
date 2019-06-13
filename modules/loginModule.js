@@ -1,19 +1,29 @@
 'use strict';
-let pool = require('mysql').createPool({
+let studentPool = require('mysql').createPool({
     connectionLimit: 100,
     waitForConnections: true,
     queueLimit: 10000,//0 for unlimited process in the queue waiting for connection
-    host: 'localhost',
-    port: '3306',
+    host: process.env.db_host,
+    port: process.env.db_port,
     user: process.env.db_user_S,
     password: process.env.db_pass_S,
-    database: 'test-db'
-});
+    database: process.env.db_name
+}),
+    teacherPool = require('mysql').createPool({
+        connectionLimit: 100,
+        waitForConnections: true,
+        queueLimit: 10000,//0 for unlimited process in the queue waiting for connection
+        host: process.env.db_host,
+        port: process.env.db_port,
+        user: process.env.db_user_T,
+        password: process.env.db_pass_T,
+        database: process.env.db_name
+    });
 
 module.exports = function checkLogin(type, email, password) {
     if (type === "s") {
         return new Promise((resolve, reject) => {
-            pool.query("SELECT password FROM students WHERE email = ?;", email, (err, res, fields) => {
+            studentPool.query("SELECT password FROM students WHERE email = ?;", email, (err, res, fields) => {
                 if (err) {
                     console.log("WARNING: Error ocurred during DB Query\n", err);
                     reject();
@@ -28,7 +38,7 @@ module.exports = function checkLogin(type, email, password) {
         });
     } else if (type === "t") {
         return new Promise((resolve, reject) => {
-            pool.query("SELECT teacherID, password FROM teachers WHERE email = ?", email, (err, res, fields) => {
+            teacherPool.query("SELECT teacherID, password FROM teachers WHERE email = ?", email, (err, res, fields) => {
                 if (err) {
                     console.log("WARNING: Error ocurred during DB Query\n", err);
                     reject();
