@@ -13,14 +13,13 @@
   -o-transition: 0.5s;
   transition: 0.5s;
   padding: 1px 10px;
-  
+
   background: #e50000;
   color: #fff;
   border: 2px solid white;
-  
-  }
-  
-  .ovall2 {
+}
+
+.ovall2 {
   margin-right: 30px;
   margin-left: 30px;
   margin-bottom: 10px;
@@ -37,10 +36,10 @@
   padding: 10px 22px;
 }
 
-  .colo{
-         position: absolute;
-  }
-  
- .efect2:hover {
+.colo {
+  position: absolute;
+}
+
+.efect2:hover {
   font-size: 20px;
 }

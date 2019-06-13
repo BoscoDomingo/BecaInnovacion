@@ -61,6 +61,35 @@ header {
   display: none;
 }
 
+#teacher-form {
+  padding: 2rem;
+  background: #f4f4f4;
+}
+
+#teacher-form label {
+  display: block;
+}
+#teacher-form .appendEmail {
+  display: inline-block;
+  text-align: right;
+}
+#teacher-form .emailInput {
+  width: 50%;
+}
+
+#teacher-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#teacher-form .passwordError {
+  color: red;
+  display: none;
+}
+
 .btn {
   display: block;
   width: 100%;
