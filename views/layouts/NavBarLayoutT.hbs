@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{title}}</title>
+    <link rel='stylesheet' href='stylesheets/style.css' />
+    <link rel='stylesheet' href='stylesheets/main.css' />
+    <script src="javascripts/main.js"></script>
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1990 12:00:00 GMT" />
+</head>
+
+<body>
+    <section>
+        <ul>
+            <li><a href="/teacher/home">Home</a></li>
+            <li><a href="teacher-profile">Profile</a></li>
+            <li><a href="teacher-help">Help</a></li>
+            <li>
+                <form action="/logout" method="POST">
+                    <button type="submit">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </section>
+
+    {{{body}}}
+</body>
+
+</html>

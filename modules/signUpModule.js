@@ -1,5 +1,5 @@
 'use strict';
-let studentPool = require('mysql').createPool({
+const studentPool = require('mysql').createPool({
     connectionLimit: 100,
     waitForConnections: true,
     queueLimit: 10000,//0 for unlimited process in the queue waiting for connection
@@ -10,15 +10,15 @@ let studentPool = require('mysql').createPool({
     database: process.env.db_name
 }),
     teacherPool = require('mysql').createPool({
-    connectionLimit: 100,
-    waitForConnections: true,
-    queueLimit: 10000,//0 for unlimited process in the queue waiting for connection
-    host: process.env.db_host,
-    port: process.env.db_port,
-    user: process.env.db_user_T,
-    password: process.env.db_pass_T,
-    database: process.env.db_name
-});
+        connectionLimit: 40,
+        waitForConnections: true,
+        queueLimit: 10000,//0 for unlimited process in the queue waiting for connection
+        host: process.env.db_host,
+        port: process.env.db_port,
+        user: process.env.db_user_T,
+        password: process.env.db_pass_T,
+        database: process.env.db_name
+    });
 //source https://github.com/mysqljs/mysql#pooling-connections
 
 module.exports = function signUp(type, email, password, name, surname, studentID, teacherID) {

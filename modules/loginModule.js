@@ -1,5 +1,5 @@
 'use strict';
-let studentPool = require('mysql').createPool({
+const studentPool = require('mysql').createPool({
     connectionLimit: 100,
     waitForConnections: true,
     queueLimit: 10000,//0 for unlimited process in the queue waiting for connection
@@ -10,7 +10,7 @@ let studentPool = require('mysql').createPool({
     database: process.env.db_name
 }),
     teacherPool = require('mysql').createPool({
-        connectionLimit: 100,
+        connectionLimit: 40,
         waitForConnections: true,
         queueLimit: 10000,//0 for unlimited process in the queue waiting for connection
         host: process.env.db_host,
@@ -23,7 +23,7 @@ let studentPool = require('mysql').createPool({
 module.exports = function checkLogin(type, email, password) {
     if (type === "s") {
         return new Promise((resolve, reject) => {
-            studentPool.query("SELECT password FROM students WHERE email = ?;", email, (err, res, fields) => {
+            studentPool.query("SELECT * FROM students WHERE email = ?;", email, (err, res, fields) => {
                 if (err) {
                     console.log("WARNING: Error ocurred during DB Query\n", err);
                     reject();
@@ -32,22 +32,24 @@ module.exports = function checkLogin(type, email, password) {
                     reject();
                 } else {
                     console.log("Login successful");
-                    resolve();
+                    delete res[0].password;
+                    resolve(res[0]);
                 }
             });
         });
     } else if (type === "t") {
         return new Promise((resolve, reject) => {
-            teacherPool.query("SELECT teacherID, password FROM teachers WHERE email = ?", email, (err, res, fields) => {
+            teacherPool.query("SELECT * FROM teachers WHERE email = ?", email, (err, res, fields) => {
                 if (err) {
                     console.log("WARNING: Error ocurred during DB Query\n", err);
                     reject();
                 } else if (res.length <= 0 || res[0].password != password) {
-                    console.log("Login failed");
+                    console.log("Invalid credentials");
                     reject();
                 } else {
                     console.log("Login successful");
-                    resolve();
+                    delete res[0].password;
+                    resolve(res[0]);
                 }
             });
         });

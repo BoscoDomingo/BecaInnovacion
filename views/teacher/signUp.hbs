@@ -15,6 +15,15 @@
     <header>
         <h1>Welcome to EFAPC's interactive platform. This section is for teachers only!</h1>
     </header>
+    {{# if errors}}
+    <section>
+        <ul>
+            {{#each errors}}
+            <li style="color: red">{{this.msg}}</li>
+            {{/each}}
+        </ul>
+    </section>
+    {{/if}}
 
     <section class="container">
         <form id="teacher-form" action="/teacher-sign-up" method="POST">
@@ -38,16 +47,18 @@
             </div>
             <div>
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" onkeyup="validatePassword()" required>
+                <p class="passwordError" id="correctPassword"></p>
             </div>
             <div>
                 <label for="confirmPassword">Confirm your password:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" required>
+                <p class="passwordError" id="validatePasswords"></p>
             </div>
             <button type="submit">Sign Up</button>
         </form>
 
-        <ul id="users"></ul>
+        {{!-- <ul id="users"></ul> --}}
 
         <!-- <ul class="items">
         <li class="item">Item 1</li>
