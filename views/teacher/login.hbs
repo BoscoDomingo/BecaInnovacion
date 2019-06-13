@@ -16,7 +16,7 @@
             <h1 class="text3">Only for teachers!</h1>
             <h2 class="text4">Log in to your account</h2>
             <div class="lgns">
-                <form action="loginteacher" method="post" id="formlt">
+                <form action="/teacher-login" method="POST" id="formlt">
                     <label class="text5">Email</label>
                     <br>
                     <input type="email" name="email" id="email" placeholder="example@upm.es" class="ovalinpt2"
@@ -27,10 +27,12 @@
                     <br>
                     <input type="password" name="password" id="password" placeholder="Password" class="ovalinpt2"
                         required /><br>
-                    {{!-- <input type="submit" value="Sign In" id="butt" class="ovalinpt oval-color" /> --}}
-                    <button type="submit">Log in</button>
+                    <button type="submit" class="ovalinpt oval-color">Log in</button>
+                    <h5>Don't have an account yet? <a href="/teacher-sign-up">Sign Up!</a></h5>
+                    <h5>Not a teacher? <a href="/">Go Back</a></h5>
                 </form>
             </div>
+            
         </div>
     </div>
 </body>

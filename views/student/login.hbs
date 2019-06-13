@@ -28,19 +28,21 @@
             <h1 class="text3">Ready to improve your English?</h1>
             <h2 class="text4">Log in to your account!</h2>
             <section class="container">
-                <form id="login-form" action="/student-login" method="POST">
+                <form id="student-form" action="/student-login" method="POST">
                     <div>
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required>
+                        <label for="email">Academic Email</label>
+                        <input type="text" id="email" name="email" class="emailInput" required>
+                        <label for="email" class="appendEmail">@alumnos.upm.es</label>
                     </div>
                     <div>
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" required>
                     </div>
-                    <button type="submit">Log in</button>
+                    <button type="submit" class="ovalinpt2">Log in</button>
                 </form>
             </section>
             <h5 class="text6">Don't have an account yet? <a href="student-sign-up">Sign Up!</a></h5>
+            <h5 class="text6">Not a student? <a href="/">Go Back</a></h5>
         </div>
     </div>
 </body>
