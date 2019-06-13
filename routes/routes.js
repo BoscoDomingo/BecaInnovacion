@@ -21,22 +21,27 @@ const convertToUPMEmail = (emailInput) => {
     return emailInput;
 };
 const redirectIfNotLoggedIn = (req, res, next) => {
-    if (req.session.studentID || req.session.teacherID) {
-        next();
-    } else {
-        res.redirect('/student-login');
+    if (!req.session.user) {
+        return res.redirect('/');
     }
-}
+    next();
+};
 const redirectIfLoggedIn = (req, res, next) => {
     if (req.session.studentID) {
-        res.redirect('/student-section')
+        return res.redirect('/student-section');
     } else if (req.session.teacherID) {
-        res.redirect('/teacher-section');
+        return res.redirect('/teacher-section');
     } else next();
+};
+const redirectIntruders = (req, res, next) => {
+    if (!req.session.teacherID) {
+        return res.redirect('/');
+    }
+    next();
 }
 
 //ROUTES
-router.get('/', redirectIfLoggedIn, function (req, res, next) {
+router.get('/', function (req, res, next) {
     res.render('index', {
         title: 'English For Professional and Academic Communication extra credit page'
     });
@@ -57,7 +62,13 @@ router.get('/student-sign-up', function (req, res, next) {
         console.log("There are errors on sign up: ", errors);
         req.session.errors = errors;
         req.session.signUpSuccess = false;
-        return res.redirect('/student-sign-up');
+        req.session.save((err) => {
+            if (err) {
+                req.locals.error = err;
+                return res.redirect('/');
+            }
+            return res.redirect('back');
+        });
     }
     //if info is correct, we insert into DB
     const hash = crypto.createHash('sha256');
@@ -65,7 +76,13 @@ router.get('/student-sign-up', function (req, res, next) {
         console.log("Inserted successfully\n");
         req.session.signUpSuccess = true;
         req.session.errors = null;
-        return res.redirect('/student-login');
+        req.session.save((err) => {
+            if (err) {
+                req.locals.error = err;
+                return res.redirect('/');
+            }
+            return res.redirect('/student-login');
+        });
     }).catch(() => {
         console.log("There are errors on DB access (sign up)\n");
         req.session.errors = {
@@ -74,7 +91,13 @@ router.get('/student-sign-up', function (req, res, next) {
             }
         };
         req.session.signUpSuccess = false;
-        return res.redirect('back');
+        req.session.save((err) => {
+            if (err) {
+                req.locals.error = err;
+                return res.redirect('/');
+            }
+            return res.redirect('back');
+        });
     });
 });
 
@@ -93,7 +116,13 @@ router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
     if (errors) {
         console.log("There are errors on log in: ", errors);
         req.session.errors = errors;
-        return res.redirect('/student-login');
+        req.session.save((err) => {
+            if (err) {
+                req.locals.error = err;
+                return res.redirect('/');
+            }
+            res.redirect('back');
+        });
     }
     //if there's no errors, we check DB
     const hash = crypto.createHash('sha256');
@@ -101,10 +130,15 @@ router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
         .then((response) => {
             console.log("Came back from checking DB successfully\n");
             req.session.errors = null;
-            req.session.user = response;
+            req.session.user = JSON.parse(JSON.stringify(response));
             req.session.studentID = response.studentID;
-            console.log(req.session);
-            return res.redirect('/student-section');
+            req.session.save((err) => {
+                if (err) {
+                    req.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/student-section');
+            });
         }).catch(() => {
             console.log("There are errors from DB access (log in)");
             req.session.errors = {
@@ -112,7 +146,13 @@ router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
                     msg: "Wrong email or password. Please try again"
                 }
             };
-            return res.redirect('back');
+            req.session.save((err) => {
+                if (err) {
+                    req.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
         })
 });
 
@@ -132,7 +172,13 @@ router.get('/teacher-sign-up', function (req, res, next) {
         console.log("There are errors on sign up: ", errors);
         req.session.errors = errors;
         req.session.signUpSuccess = false;
-        return res.redirect('/teacher-sign-up');
+        req.session.save((err) => {
+            if (err) {
+                req.locals.error = err;
+                return res.redirect('/');
+            }
+            return res.redirect('back');
+        });
     }
     //if info is correct, we insert into DB
     const hash = crypto.createHash('sha256');
@@ -141,7 +187,13 @@ router.get('/teacher-sign-up', function (req, res, next) {
             console.log("Inserted successfully\n");
             req.session.signUpSuccess = true;
             req.session.errors = null;
-            return res.redirect('/teacher-login');
+            req.session.save((err) => {
+                if (err) {
+                    req.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/teacher-login');
+            });
         }).catch(() => {
             console.log("There are errors on DB access (sign up)\n");
             req.session.errors = {
@@ -150,7 +202,13 @@ router.get('/teacher-sign-up', function (req, res, next) {
                 }
             };
             req.session.signUpSuccess = false;
-            return res.redirect('back');
+            req.session.save((err) => {
+                if (err) {
+                    req.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
         });
 });
 
@@ -168,7 +226,13 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
     if (errors) {
         console.log("There are errors on log in: ", errors);
         req.session.errors = errors;
-        return res.redirect('back');
+        req.session.save((err) => {
+            if (err) {
+                req.locals.error = err;
+                return res.redirect('/');
+            }
+            return res.redirect('back');
+        });
     }
     //if there's no errors, we check DB
     const hash = crypto.createHash('sha256');
@@ -176,9 +240,15 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
         .then((response) => {
             console.log("Came back from checking DB successfully");
             req.session.errors = null;
-            req.session.user = response;
+            req.session.user = JSON.parse(JSON.stringify(response));
             req.session.teacherID = response.teacherID;
-            return res.redirect('/teacher-section');
+            req.session.save((err) => {
+                if (err) {
+                    req.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/teacher-section');
+            });
         }).catch(() => {
             console.log("There are errors from DB access (log in)");
             req.session.errors = {
@@ -186,7 +256,13 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
                     msg: "Wrong email or password. Please try again"
                 }
             };
-            return res.redirect('back');
+            req.session.save((err) => {
+                if (err) {
+                    req.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
         })
 });
 
@@ -197,19 +273,10 @@ router.get('/student-section', redirectIfNotLoggedIn, function (req, res, next) 
     });
 });
 
-router.get('/teacher-section', function (req, res, next) {
-    if (req.session.teacherID) {
-        res.render('teacher/homePage', {
-            title: 'Teacher Home Page',
-            layout: 'NavBarLayoutT'
-        });
-    } else res.redirect('/teacher-login');
-});
-
-router.get('/profile', redirectIfNotLoggedIn, function (req, res, next) {
-    res.render('student/profile', {
-        title: 'Profile page',
-        layout: 'NavBarLayoutS'
+router.get('/teacher-section', redirectIntruders, function (req, res, next) {
+    res.render('teacher/homePage', {
+        title: 'Teacher Home Page',
+        layout: 'NavBarLayoutT'
     });
 });
 
@@ -217,6 +284,29 @@ router.get('/help', redirectIfNotLoggedIn, function (req, res, next) {
     res.render('student/help', {
         title: 'Need help?',
         layout: 'NavBarLayoutS'
+    });
+});
+router.get('/profile', redirectIfNotLoggedIn, function (req, res, next) {
+    const { user } = res.locals;
+    res.render('student/profile', {
+        title: 'Profile page',
+        layout: 'NavBarLayoutS',
+        user: user
+    });
+});
+
+router.get('/teacher-help', redirectIntruders, function (req, res, next) {
+    res.render('teacher/help', {
+        title: 'Need help?',
+        layout: 'NavBarLayoutT'
+    });
+});
+router.get('/teacher-profile', redirectIntruders, function (req, res, next) {
+    const { user } = res.locals;
+    res.render('teacher/profile', {
+        title: 'Profile page',
+        layout: 'NavBarLayoutT',
+        user: user
     });
 });
 

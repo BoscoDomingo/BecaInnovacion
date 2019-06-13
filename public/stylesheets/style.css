@@ -9,15 +9,15 @@ body {
   line-height: 1.6;
 }
 
-ul {
-  list-style: none;
-}
+/* ul {
+  list-style: bullet;
+} */
 
-ul li {
+/* ul li {
   padding: 5px;
   background: #f4f4f4;
   margin: 5px 0;
-}
+} */
 
 header {
   background: #f4f4f4;
@@ -103,6 +103,18 @@ header {
 
 .btn:hover {
   background: #444;
+}
+
+.btn-link {
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    color: #0000EE;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+    font-size: inherit;
 }
 
 .bg-dark {

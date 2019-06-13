@@ -8,7 +8,9 @@ const createError = require('http-errors'),
     path = require('path'),
     cookieParser = require('cookie-parser'),
     logger = require('morgan'), //For request methods
-    hbs = require('express-hbs');
+    hbs = require('express-hbs'),
+    MySQLStore = require('express-mysql-session')(session);
+
 const app = express(),
     INPROD = process.env.NODE_ENV === "production";
 
@@ -26,12 +28,20 @@ app.use(cookieParser());
 app.use(expressValidator());
 app.use(express.static(path.join(__dirname, 'public'))); //serves static files from a certain dir under url .com/filename
 //app.use('/static', express.static(path.join(__dirname, 'public')));//would serve them under the url .com/static/filename
-
 app.use(session({
     name: process.env.SESS_NAME,
     secret: process.env.SESS_SECRET,
     saveUninitialized: false,
     resave: false,
+    store: new MySQLStore({
+        connectionLimit: 40,
+        host: process.env.db_host,
+        port: process.env.db_port,
+        user: process.env.db_session_user,
+        password: process.env.db_session_pass,
+        database: process.env.db_name,
+        clearExpired: true
+    }),
     cookie: {
         maxAge: parseInt(process.env.SESS_LIFETIME),
         sameSite: true,
@@ -39,6 +49,12 @@ app.use(session({
     }
 }));
 
+app.use((req, res, next) => {
+    if (req.session.user) {
+        res.locals.user = req.session.user;
+    }
+    next();
+});
 app.use('/', routes); //defined above
 
 // catch 404 and forward to error handler
