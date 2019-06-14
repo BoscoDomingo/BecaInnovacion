@@ -9,15 +9,15 @@ body {
   line-height: 1.6;
 }
 
-ul {
-  list-style: none;
-}
+/* ul {
+  list-style: bullet;
+} */
 
-ul li {
+/* ul li {
   padding: 5px;
   background: #f4f4f4;
   margin: 5px 0;
-}
+} */
 
 header {
   background: #f4f4f4;
@@ -32,23 +32,23 @@ header {
   padding: 3rem 2rem;
 }
 
-#signup-form {
+#student-form {
   padding: 2rem;
   background: #f4f4f4;
 }
 
-#signup-form label {
+#student-form label {
   display: block;
 }
-#signup-form .appendEmail {
+#student-form .appendEmail {
   display: inline-block;
   text-align: right;
 }
-#signup-form .emailInput {
+#student-form .emailInput {
   width: 50%;
 }
 
-#signup-form input {
+#student-form input {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -56,16 +56,28 @@ header {
   border: 1px solid #ccc;
 }
 
-#login-form {
+#student-form .passwordError {
+  color: red;
+  display: none;
+}
+
+#teacher-form {
   padding: 2rem;
   background: #f4f4f4;
 }
 
-#login-form label {
+#teacher-form label {
   display: block;
 }
+#teacher-form .appendEmail {
+  display: inline-block;
+  text-align: right;
+}
+#teacher-form .emailInput {
+  width: 50%;
+}
 
-#login-form input {
+#teacher-form input {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -73,7 +85,7 @@ header {
   border: 1px solid #ccc;
 }
 
-.passwordError {
+#teacher-form .passwordError {
   color: red;
   display: none;
 }
@@ -91,6 +103,18 @@ header {
 
 .btn:hover {
   background: #444;
+}
+
+.btn-link {
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    color: #0000EE;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+    font-size: inherit;
 }
 
 .bg-dark {
