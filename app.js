@@ -48,6 +48,16 @@ app.use(session({
         secure: INPROD //they will require HTTPS
     }
 }));
+//Limiting number of requests per IP
+// app.use((req, res, next) => {
+//     rateLimiter.consume(req.ip)
+//         .then(() => {
+//             next();
+//         })
+//         .catch(() => {
+//             res.status(429).send('Too Many Requests');
+//         });
+// })
 
 //if user is logged in, we move him to locals
 app.use((req, res, next) => {
