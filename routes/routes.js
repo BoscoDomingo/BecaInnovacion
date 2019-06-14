@@ -223,6 +223,16 @@ router.get('/', function (req, res, next) {
         title: 'English For Professional and Academic Communication extra credit page'
     });
 });
+router.get('/about', function (req, res, next) {
+    res.render('about', {
+        title: 'About us'
+    });
+});
+router.get('/contact', function (req, res, next) {
+    res.render('contact', {
+        title: 'Contact us'
+    });
+});
 
 router.get('/student-sign-up', function (req, res, next) {
     res.render('student/signUp', {

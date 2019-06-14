@@ -1,0 +1,3 @@
+Change NODE_ENV in .env to "production"
+Uncomment password validation in signUpStudent.js and signUpTeacher.js
+Uncomment the password check on both signups
