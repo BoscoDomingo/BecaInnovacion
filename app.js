@@ -51,7 +51,7 @@ app.use(session({
 
 //Limiting number of requests per IP
 /* Would require a new rateLimiterByRequest = new MySQLRateLimiter({...})) here, as well as new env variables such as MAX_REQUESTS and MAX_REQUEST_RESET_TIME
-It would overlap with the login one, which would have to be changed to a user-based block. Might be too much of a hassle for something that may never be needed
+It would overlap with the login one, which would have to be changed to a user-based/email block. Might be too much of a hassle for something that may never be needed
 sources: https://github.com/animir/node-rate-limiter-flexible/wiki/Overall-example
         https://github.com/animir/node-rate-limiter-flexible/wiki/API-methods
 */

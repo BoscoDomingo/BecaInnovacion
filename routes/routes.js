@@ -34,7 +34,7 @@ const express = require('express'),
         password: process.env.db_session_pass
     }),
     { RateLimiterMySQL } = require('rate-limiter-flexible'),
-    rateLimiter = new RateLimiterMySQL({
+    loginRateLimiter = new RateLimiterMySQL({
         storeClient: sessionPool,
         dbName: process.env.db_name,
         tableName: 'rate_limiter',
@@ -46,8 +46,6 @@ const express = require('express'),
     }, (err) => {
         if (err) {// log or/and process exit
             console.log("Error ocurred creating rateLimiter", err);
-        } else {// db and table checked/created
-            console.log("Rate Limiter DB checked and usable");
         }
     });
 
@@ -93,9 +91,9 @@ function signUpStudent(req, res) {
         surname = req.body.surname,
         studentID = req.body.studentID,
         teacherID = req.body.studentID,
-        storedIP = (rateLimiter.getKey(req.ip));
+        storedIP = (loginRateLimiter.getKey(req.ip));
     return new Promise((resolve, reject) => {
-        rateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
+        loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
                 console.log("consumed from IP: " + storedIP);
                 console.log(rateLimiterRes);
@@ -124,9 +122,9 @@ function signUpTeacher(req, res) {
         name = req.body.name,
         surname = req.body.surname,
         teacherID = req.body.teacherID,
-        storedIP = (rateLimiter.getKey(req.ip));
+        storedIP = (loginRateLimiter.getKey(req.ip));
     return new Promise((resolve, reject) => {
-        rateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force break-ins
+        loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force break-ins
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
                 console.log("consumed from IP: " + storedIP);
                 console.log(rateLimiterRes);
@@ -137,7 +135,7 @@ function signUpTeacher(req, res) {
                             reject("Error during DB Query. Please contact an administrator");
                         } else {
                             console.log("Successfully inserted teacher");
-                            rateLimiter.delete(req.ip); //successful sign up, we delete attempts
+                            loginRateLimiter.delete(req.ip); //successful sign up, we delete attempts
                             resolve();
                         }
                     });
@@ -155,9 +153,9 @@ function signUpTeacher(req, res) {
 function checkStudentLogin(req, res) {
     const email = req.body.email,
         password = req.body.password,
-        storedIP = (rateLimiter.getKey(req.ip));
+        storedIP = (loginRateLimiter.getKey(req.ip));
     return new Promise((resolve, reject) => {
-        rateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force break-ins
+        loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force break-ins
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
                 console.log("consumed from IP: " + storedIP);
                 console.log(rateLimiterRes);
@@ -171,7 +169,7 @@ function checkStudentLogin(req, res) {
                     } else {
                         console.log("Login successful");
                         delete results[0].password;
-                        rateLimiter.delete(req.ip); //successful login, we delete attempts
+                        loginRateLimiter.delete(req.ip); //successful login, we delete attempts
                         resolve(results[0]);
                     }
                 });
@@ -187,9 +185,9 @@ function checkStudentLogin(req, res) {
 function checkTeacherLogin(req, res) {
     const email = req.body.email,
         password = req.body.password,
-        storedIP = (rateLimiter.getKey(req.ip));
+        storedIP = (loginRateLimiter.getKey(req.ip));
     return new Promise((resolve, reject) => {
-        rateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
+        loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
                 console.log("consumed from IP: " + storedIP);
                 console.log(rateLimiterRes);
@@ -203,7 +201,7 @@ function checkTeacherLogin(req, res) {
                     } else {
                         console.log("Login successful");
                         delete results[0].password;
-                        rateLimiter.delete(req.ip); //successful login, we delete attempts
+                        loginRateLimiter.delete(req.ip); //successful login, we delete attempts
                         resolve(results[0]);
                     }
                 });
