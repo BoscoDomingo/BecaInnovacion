@@ -31,9 +31,9 @@ app.use(express.static(path.join(__dirname, 'public'))); //serves static files f
 app.use(session({
     name: process.env.SESS_NAME,
     secret: process.env.SESS_SECRET,
-    saveUninitialized: false,
-    resave: false,
-    store: new MySQLStore({
+    saveUninitialized: false, //empty sessions aren't saved
+    resave: false, //unaltered sessions aren't saved
+    store: new MySQLStore({ //sessions are stored in DB, not in browser memory
         connectionLimit: 40,
         host: process.env.db_host,
         port: process.env.db_port,
@@ -43,12 +43,13 @@ app.use(session({
         clearExpired: true
     }),
     cookie: {
-        maxAge: parseInt(process.env.SESS_LIFETIME),
-        sameSite: true,
-        secure: INPROD
+        maxAge: parseInt(process.env.SESS_LIFETIME), //ms before expiration after last request
+        sameSite: true, //cookies only work in our domain
+        secure: INPROD //they will require HTTPS
     }
 }));
 
+//if user is logged in, we move him to locals
 app.use((req, res, next) => {
     if (req.session.user) {
         res.locals.user = req.session.user;
