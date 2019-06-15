@@ -39,7 +39,7 @@ const express = require('express'),
         dbName: process.env.db_name,
         tableName: 'rate_limiter',
         points: parseInt(process.env.LOGIN_ATTEMPTS), // Number of attempts
-        duration: parseInt(process.env.LOGIN_ATTEMPTS_RESET), // Number of seconds before consumed points are reset. 
+        duration: parseInt(process.env.LOGIN_ATTEMPTS_RESET), // Number of seconds before consumed points are reset.
         blockDuration: process.env.LOGIN_BLOCK_TIME, //Number of seconds of user blocking if attempts >= points (before they reset)
         inmemoryBlockOnConsumed: parseInt(process.env.LOGIN_ATTEMPTS), //protection against DDoS, avoids checking with DB if points are consumed
         inmemoryBlockDuration: process.env.LOGIN_BLOCK_TIME, //Number of seconds of of user blocking (memory stored instead of DB)
@@ -216,6 +216,7 @@ function checkTeacherLogin(req, res) {
 }
 
 //ROUTES
+//Common
 router.get('/', function (req, res, next) {
     res.render('index', {
         title: 'English For Professional and Academic Communication extra credit page'
@@ -231,7 +232,18 @@ router.get('/contact', function (req, res, next) {
         title: 'Contact us'
     });
 });
+router.post('/logout', redirectIfNotLoggedIn, (req, res, next) => {
+    req.session.destroy((err) => {
+        if (err) {
+            req.locals.error = err;
+            return res.redirect('/');
+        }
+        res.clearCookie(process.env.SESS_NAME);
+        res.redirect('/');
+    });
+});
 
+//Registration and Login
 router.get('/student-sign-up', function (req, res, next) {
     res.render('student/signUp', {
         title: 'Sign up',
@@ -452,20 +464,14 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
         })
 });
 
+
+//Students
 router.get('/student-section', redirectIfNotLoggedIn, function (req, res, next) {
     res.render('student/homePage', {
         title: 'Home Page',
         layout: 'NavBarLayoutS'
     });
 });
-
-router.get('/teacher-section', redirectIntruders, function (req, res, next) {
-    res.render('teacher/homePage', {
-        title: 'Teacher Home Page',
-        layout: 'NavBarLayoutT'
-    });
-});
-
 router.get('/help', redirectIfNotLoggedIn, function (req, res, next) {
     res.render('student/help', {
         title: 'Need help?',
@@ -481,6 +487,13 @@ router.get('/profile', redirectIfNotLoggedIn, function (req, res, next) {
     });
 });
 
+//Teachers
+router.get('/teacher-section', redirectIntruders, function (req, res, next) {
+    res.render('teacher/homePage', {
+        title: 'Teacher Home Page',
+        layout: 'NavBarLayoutT'
+    });
+});
 router.get('/teacher-help', redirectIntruders, function (req, res, next) {
     res.render('teacher/help', {
         title: 'Need help?',
@@ -496,15 +509,5 @@ router.get('/teacher-profile', redirectIntruders, function (req, res, next) {
     });
 });
 
-router.post('/logout', redirectIfNotLoggedIn, (req, res, next) => {
-    req.session.destroy((err) => {
-        if (err) {
-            req.locals.error = err;
-            return res.redirect('/');
-        }
-        res.clearCookie(process.env.SESS_NAME);
-        res.redirect('/');
-    });
-})
 
 module.exports = router;
