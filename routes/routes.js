@@ -63,6 +63,9 @@ const convertToUPMEmail = (emailInput) => {
     emailInput = emailInput + "@alumnos.upm.es";
     return emailInput;
 };
+const isStudent = (session) => {
+    return session.userType === "student" ? true : false;
+}
 const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests
     if (!req.session.user) {
         return res.redirect('/');
@@ -70,18 +73,44 @@ const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth request
     next();
 };
 const redirectIfLoggedIn = (req, res, next) => { //redirects if already authenticated
-    if (req.session.studentID) {
-        return res.redirect('/student-section');
-    } else if (req.session.teacherID) {
-        return res.redirect('/teacher-section');
-    } else next();
+    if (req.session.user) {
+        return res.redirect('/dashboard');
+    }
+    next();
 };
 const redirectIntruders = (req, res, next) => { //redirects both students and non-auth requests
-    if (!req.session.teacherID) {
+    if (!req.session.userType || isStudent(req.session)) {
         return res.redirect('/');
     }
     next();
+};
+async function loadAllActivities(req, res) { //returns an object with ALL activities
+    return await new Promise((resolve, reject) => {
+        studentPool.query("SELECT * FROM activities;", (err, results, fields) => {
+            if (err) {
+                console.log("WARNING: Error ocurred during DB Query\n", err);
+                reject("Error during DB Query. Please contact an administrator");
+            } else {
+                console.log("Successfully loaded all activities");
+                resolve(Object.assign({}, results));
+            }
+        });
+    });
 }
+async function loadCompletedStudentActivities(req, res) { //returns an object with ALL COMPLETED activities by the user
+    const user = res.locals.user;
+    return await new Promise((resolve, reject) => {
+        studentPool.query("SELECT * FROM students_activities WHERE studentID = ?;", user.studentID, (err, results, fields) => {
+            if (err) {
+                console.log("WARNING: Error ocurred during DB Query\n", err);
+                reject("Error during DB Query. Please contact an administrator");
+            } else {
+                console.log("Successfully loaded completed activities");
+                resolve(Object.assign({}, results));
+            }
+        });
+    });
+};
 
 //SIGNUPS
 function signUpStudent(req, res) {
@@ -91,14 +120,15 @@ function signUpStudent(req, res) {
         surname = req.body.surname,
         studentID = req.body.studentID,
         teacherID = req.body.studentID,
+        includeInRankings = req.body.includeInRankings,
         storedIP = (loginRateLimiter.getKey(req.ip));
     return new Promise((resolve, reject) => {
         loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
                 console.log("consumed from IP: " + storedIP);
                 console.log(rateLimiterRes);
-                studentPool.query("INSERT INTO students (studentID, email, password, name, surname, teacherID) VALUES (?, ?, ?, ?, ?, ?);",
-                    [studentID, email, password, name, surname, teacherID], (err, results, fields) => {
+                studentPool.query("INSERT INTO students (studentID, email, password, name, surname, teacherID, includeInRankings) VALUES (?, ?, ?, ?, ?, ?,?);",
+                    [studentID, email, password, name, surname, teacherID, includeInRankings === "on" ? true : false], (err, results, fields) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
                             reject("Error during DB Query. Please contact an administrator");
@@ -148,7 +178,6 @@ function signUpTeacher(req, res) {
             });
     });
 }
-
 //LOGINS
 function checkStudentLogin(req, res) {
     const email = req.body.email,
@@ -216,18 +245,19 @@ function checkTeacherLogin(req, res) {
 }
 
 //ROUTES
+
 //Common
-router.get('/', function (req, res, next) {
+router.get('/', (req, res, next) => {
     res.render('index', {
         title: 'English For Professional and Academic Communication extra credit page'
     });
 });
-router.get('/about', function (req, res, next) {
+router.get('/about', (req, res, next) => {
     res.render('about', {
         title: 'About us'
     });
 });
-router.get('/contact', function (req, res, next) {
+router.get('/contact', (req, res, next) => {
     res.render('contact', {
         title: 'Contact us'
     });
@@ -235,22 +265,77 @@ router.get('/contact', function (req, res, next) {
 router.post('/logout', redirectIfNotLoggedIn, (req, res, next) => {
     req.session.destroy((err) => {
         if (err) {
-            req.locals.error = err;
+            res.locals.error = err;
             return res.redirect('/');
         }
         res.clearCookie(process.env.SESS_NAME);
         res.redirect('/');
     });
 });
+router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
+    if (isStudent(req.session)) { //if student, we retrieve activities from DB
+        if (!res.locals.activities) { //TODO: parallelise
+            res.locals.activities = await loadAllActivities(req, res);
+            console.log(res.locals.activities[1].activityID);
+            res.locals.completedActivities = await loadCompletedStudentActivities(req, res);
+        }
+        res.render('student/dashboard', {
+            title: 'Home Page',
+            layout: 'NavBarLayoutS',
+            activities: res.locals.activities,
+            completedActivities: res.locals.completedActivities
+        });
+    } else {//if teacher or admin
+        res.render('teacher/dashboard', {
+            title: 'Teacher Home Page',
+            layout: 'NavBarLayoutT'
+        });
+    }
+});
+router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
+    if (res.locals.userType === "student") {
+        //retrieve only students who want to be seen in ranking        
+    } else {
+        //retrieve all students
+    }
+    res.render('ranking', {
+        ranking: {} //TODO:fill this with the studentIDs and their points
+    });
+})
+
+//Activities
+router.get('/activity:id', redirectIfNotLoggedIn, async (req, res, next) => {
+    if (res.locals.activities.includes(req.params.id)) {
+        res.render('student/activity', {
+            layout: 'NavBarLayoutS',
+            questions: {},//TODO: fill this
+            choices: {}
+        });
+    } else {
+        res.redirect('/dashboard')
+    }
+}).post('/activity:id', redirectIfNotLoggedIn, async (req, res, next) => {
+    //send to DB
+    res.redirect('/activity:id/done');//TODO: check in docs if this is the way to use the id or `/activity${res.locals.activity.id}/done` or something
+});
+
+router.get('/activity:id/done', redirectIfNotLoggedIn, async (req, res, next) => {
+    //Once the activity is done, we show the results
+    res.render('student/results', {
+        layout: 'NavBarLayoutS',
+        grade:0,//TODO: use the response
+        points: 0//TODO: award the correct points (grade*multiplier)
+    });
+});
 
 //Registration and Login
-router.get('/student-sign-up', function (req, res, next) {
+router.get('/student-sign-up', (req, res, next) => {
     res.render('student/signUp', {
         title: 'Sign up',
         errors: req.session.errors
     });
     req.session.errors = null; //to flush them on reload
-}).post('/student-sign-up', function (req, res, next) {
+}).post('/student-sign-up', (req, res, next) => {
     req.body.email = convertToUPMEmail(req.body.email);
     req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
     //req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx); //TODO: uncomment
@@ -261,7 +346,7 @@ router.get('/student-sign-up', function (req, res, next) {
         req.session.signUpSuccess = false;
         req.session.save((err) => {
             if (err) {
-                req.locals.error = err;
+                res.locals.error = err;
                 return res.redirect('/');
             }
             return res.redirect('back');
@@ -276,7 +361,7 @@ router.get('/student-sign-up', function (req, res, next) {
             req.session.errors = null;
             req.session.save((err) => {
                 if (err) {
-                    req.locals.error = err;
+                    res.locals.error = err;
                     return res.redirect('/');
                 }
                 return res.redirect('/student-login');
@@ -291,7 +376,7 @@ router.get('/student-sign-up', function (req, res, next) {
             req.session.signUpSuccess = false;
             req.session.save((err) => {
                 if (err) {
-                    req.locals.error = err;
+                    res.locals.error = err;
                     return res.redirect('/');
                 }
                 return res.redirect('back');
@@ -299,7 +384,7 @@ router.get('/student-sign-up', function (req, res, next) {
         });
 });
 
-router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
+router.get('/student-login', redirectIfLoggedIn, (req, res, next) => {
     res.render('student/login', {
         title: 'Login',
         signUpSuccess: req.session.signUpSuccess,
@@ -307,7 +392,7 @@ router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
     });
     req.session.errors = null;
     req.session.signUpSuccess = null;
-}).post('/student-login', function (req, res, next) {
+}).post('/student-login', (req, res, next) => {
     req.body.email = convertToUPMEmail(req.body.email);
     req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
     let errors = req.validationErrors();
@@ -316,7 +401,7 @@ router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
         req.session.errors = errors;
         req.session.save((err) => {
             if (err) {
-                req.locals.error = err;
+                res.locals.error = err;
                 return res.redirect('/');
             }
             res.redirect('back');
@@ -329,13 +414,14 @@ router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
             console.log("Came back from checking DB successfully\n");
             req.session.errors = null;
             req.session.user = JSON.parse(JSON.stringify(response));
-            req.session.studentID = response.studentID;
+            req.session.userType = "student",
+                req.session.studentID = response.studentID;
             req.session.save((err) => {
                 if (err) {
-                    req.locals.error = err;
+                    res.locals.error = err;
                     return res.redirect('/');
                 }
-                return res.redirect('/student-section');
+                return res.redirect('/dashboard');
             });
         }).catch((error) => {
             console.log("There are errors on DB access (student log in)");
@@ -346,7 +432,7 @@ router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
             };
             req.session.save((err) => {
                 if (err) {
-                    req.locals.error = err;
+                    res.locals.error = err;
                     return res.redirect('/');
                 }
                 return res.redirect('back');
@@ -354,7 +440,7 @@ router.get('/student-login', redirectIfLoggedIn, function (req, res, next) {
         })
 });
 
-router.get('/teacher-sign-up', function (req, res, next) {
+router.get('/teacher-sign-up', (req, res, next) => {
     res.render('teacher/signUp', {
         title: 'Sign up',
         success: req.session.success,
@@ -362,7 +448,7 @@ router.get('/teacher-sign-up', function (req, res, next) {
     });
     req.session.errors = null;
     req.session.success = null;
-}).post('/teacher-sign-up', function (req, res, next) {
+}).post('/teacher-sign-up', (req, res, next) => {
     req.check('email', 'Invalid email address').isEmail();
     //req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx); //TODO: Uncomment
     let errors = req.validationErrors();
@@ -372,7 +458,7 @@ router.get('/teacher-sign-up', function (req, res, next) {
         req.session.signUpSuccess = false;
         req.session.save((err) => {
             if (err) {
-                req.locals.error = err;
+                res.locals.error = err;
                 return res.redirect('/');
             }
             return res.redirect('back');
@@ -387,7 +473,7 @@ router.get('/teacher-sign-up', function (req, res, next) {
             req.session.errors = null;
             req.session.save((err) => {
                 if (err) {
-                    req.locals.error = err;
+                    res.locals.error = err;
                     return res.redirect('/');
                 }
                 return res.redirect('/teacher-login');
@@ -402,7 +488,7 @@ router.get('/teacher-sign-up', function (req, res, next) {
             req.session.signUpSuccess = false;
             req.session.save((err) => {
                 if (err) {
-                    req.locals.error = err;
+                    res.locals.error = err;
                     return res.redirect('/');
                 }
                 return res.redirect('back');
@@ -410,7 +496,7 @@ router.get('/teacher-sign-up', function (req, res, next) {
         });
 });
 
-router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
+router.get('/teacher-login', redirectIfLoggedIn, (req, res, next) => {
     res.render('teacher/login', {
         title: 'Login',
         success: req.session.success,
@@ -418,7 +504,7 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
     });
     req.session.errors = null;
     req.session.success = null;
-}).post('/teacher-login', function (req, res, next) {
+}).post('/teacher-login', (req, res, next) => {
     req.check('email', 'Invalid email address').isEmail();
     let errors = req.validationErrors();
     if (errors) {
@@ -426,7 +512,7 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
         req.session.errors = errors;
         req.session.save((err) => {
             if (err) {
-                req.locals.error = err;
+                res.locals.error = err;
                 return res.redirect('/');
             }
             return res.redirect('back');
@@ -442,10 +528,10 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
             req.session.teacherID = response.teacherID;
             req.session.save((err) => {
                 if (err) {
-                    req.locals.error = err;
+                    res.locals.error = err;
                     return res.redirect('/');
                 }
-                return res.redirect('/teacher-section');
+                return res.redirect('/dashboard');
             });
         }).catch((error) => {
             console.log("There are errors on DB access (teacher log in)");
@@ -456,7 +542,7 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
             };
             req.session.save((err) => {
                 if (err) {
-                    req.locals.error = err;
+                    res.locals.error = err;
                     return res.redirect('/');
                 }
                 return res.redirect('back');
@@ -464,21 +550,14 @@ router.get('/teacher-login', redirectIfLoggedIn, function (req, res, next) {
         })
 });
 
-
-//Students
-router.get('/student-section', redirectIfNotLoggedIn, function (req, res, next) {
-    res.render('student/homePage', {
-        title: 'Home Page',
-        layout: 'NavBarLayoutS'
-    });
-});
-router.get('/help', redirectIfNotLoggedIn, function (req, res, next) {
+//Help and profile
+router.get('/help', redirectIfNotLoggedIn, (req, res, next) => {
     res.render('student/help', {
         title: 'Need help?',
         layout: 'NavBarLayoutS'
     });
 });
-router.get('/profile', redirectIfNotLoggedIn, function (req, res, next) {
+router.get('/profile', redirectIfNotLoggedIn, (req, res, next) => {
     const { user } = res.locals;
     res.render('student/profile', {
         title: 'Profile page',
@@ -487,20 +566,13 @@ router.get('/profile', redirectIfNotLoggedIn, function (req, res, next) {
     });
 });
 
-//Teachers
-router.get('/teacher-section', redirectIntruders, function (req, res, next) {
-    res.render('teacher/homePage', {
-        title: 'Teacher Home Page',
-        layout: 'NavBarLayoutT'
-    });
-});
-router.get('/teacher-help', redirectIntruders, function (req, res, next) {
+router.get('/teacher-help', redirectIntruders, (req, res, next) => {
     res.render('teacher/help', {
         title: 'Need help?',
         layout: 'NavBarLayoutT'
     });
 });
-router.get('/teacher-profile', redirectIntruders, function (req, res, next) {
+router.get('/teacher-profile', redirectIntruders, (req, res, next) => {
     const { user } = res.locals;
     res.render('teacher/profile', {
         title: 'Profile page',
@@ -508,6 +580,5 @@ router.get('/teacher-profile', redirectIntruders, function (req, res, next) {
         user: user
     });
 });
-
 
 module.exports = router;

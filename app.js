@@ -73,6 +73,7 @@ sources: https://github.com/animir/node-rate-limiter-flexible/wiki/Overall-examp
 app.use((req, res, next) => {
     if (req.session.user) {
         res.locals.user = req.session.user;
+        res.locals.userType = req.session.userType;
     }
     next();
 });
