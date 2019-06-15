@@ -27,7 +27,7 @@ body {
     background: #fff;
     border-radius: 10px;
     position: relative;
-    margin: 30ex auto 2ex auto;
+    margin: 5ex auto 2ex auto;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
     text-align: center;
 }
@@ -50,4 +50,11 @@ body {
 .button1:hover {
     color: #000000;
     background-color: #0079dc3a;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 5%;
 }
