@@ -91,26 +91,48 @@ async function loadAllActivities(req, res) { //returns an object with ALL activi
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
             } else {
-                console.log("Successfully loaded all activities");
-                resolve(Object.assign({}, results));
+                let parsedActivities = Object.assign({}, results); //Object of objects instead of array of objects
+                Object.values(parsedActivities).forEach((element, index, resultsArray) => {
+                    studentPool.query("SELECT * FROM questions WHERE activityID = ?;", element.activityID, (err, questions, fields) => {
+                        if (err) {
+                            console.log("WARNING: Error ocurred during DB Query\n", err);
+                            reject("Error during DB Query. Please contact an administrator");
+                        } else {
+                            resultsArray[index].questions = Object.assign({}, questions); //adding the questions to each activity
+                        }
+                    });
+                });
+                resolve(parsedActivities);
             }
         });
     });
 }
-async function loadCompletedStudentActivities(req, res) { //returns an object with ALL COMPLETED activities by the user
+async function loadCompletedStudentActivities(req, res) { //returns an object with data of activities COMPLETED by the user
     const user = res.locals.user;
     return await new Promise((resolve, reject) => {
-        studentPool.query("SELECT * FROM students_activities WHERE studentID = ?;", user.studentID, (err, results, fields) => {
+        studentPool.query("SELECT activityID, grade, pointsAwarded, completedOn FROM students_activities WHERE studentID = ?;", user.studentID, (err, results, fields) => {
             if (err) {
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
             } else {
-                console.log("Successfully loaded completed activities");
-                resolve(Object.assign({}, results));
+                resolve(Object.assign({}, Object.values(results)));
             }
         });
     });
 };
+async function loadOwnActivities(req, res) {//returns an object with data of activities CREATED by the user
+    const user = res.locals.user;
+    return await new Promise((resolve, reject) => {
+        studentPool.query("SELECT * FROM activities WHERE teacherID = ?;", user.teacherID, (err, results, fields) => {
+            if (err) {
+                console.log("WARNING: Error ocurred during DB Query\n", err);
+                reject("Error during DB Query. Please contact an administrator");
+            } else {
+                resolve(Object.assign({}, Object.values(results)));
+            }
+        });
+    });
+}
 
 //SIGNUPS
 function signUpStudent(req, res) {
@@ -273,30 +295,41 @@ router.post('/logout', redirectIfNotLoggedIn, (req, res, next) => {
     });
 });
 router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
-    if (isStudent(req.session)) { //if student, we retrieve activities from DB
-        if (!res.locals.activities) { //TODO: parallelise
-            res.locals.activities = await loadAllActivities(req, res);
-            console.log(res.locals.activities[1].activityID);
-            res.locals.completedActivities = await loadCompletedStudentActivities(req, res);
+    if (!req.session.activities) { //TODO: Button to check for new activities from DB which will have a max of 3 attempts/min using rate-limiter
+        req.session.activities = await loadAllActivities(req, res);
+        // console.log(req.session.activities[1]);//this is the way to access them
+    }//TODO: Finish showcasing all activities so teachers and students can be taken to them
+    if (isStudent(req.session)) {
+        if (!req.session.completedActivities) {//if student, we retrieve completed activities from DB
+            req.session.completedActivities = await loadCompletedStudentActivities(req, res);
         }
+        console.log(req.session.activities);
+        console.log(req.session.completedActivities);
         res.render('student/dashboard', {
             title: 'Home Page',
             layout: 'NavBarLayoutS',
-            activities: res.locals.activities,
-            completedActivities: res.locals.completedActivities
+            activities: req.session.activities,
+            completedActivities: req.session.completedActivities
         });
     } else {//if teacher or admin
+        if (!req.session.ownActivities) { //retrieve activities created by this teacher
+            req.session.ownActivities = await loadOwnActivities(req, res);
+        }
         res.render('teacher/dashboard', {
             title: 'Teacher Home Page',
-            layout: 'NavBarLayoutT'
+            layout: 'NavBarLayoutT',
+            activities: req.session.activities,
+            ownActivities: ownActivities
         });
     }
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
     if (res.locals.userType === "student") {
-        //retrieve only students who want to be seen in ranking        
+        //retrieve only students who want to be seen in ranking
+        //TODO:
     } else {
         //retrieve all students
+        //TODO:
     }
     res.render('ranking', {
         ranking: {} //TODO:fill this with the studentIDs and their points
@@ -304,30 +337,39 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
 })
 
 //Activities
-router.get('/activity:id', redirectIfNotLoggedIn, async (req, res, next) => {
-    if (res.locals.activities.includes(req.params.id)) {
+router.get('/activity/:id', redirectIfNotLoggedIn, async (req, res, next) => {
+    console.log(req.params.id);
+    console.log(req.session.activities);
+    console.log(res.locals.user);
+    const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id;
+    if (req.session.activities[id]) {
         res.render('student/activity', {
             layout: 'NavBarLayoutS',
-            questions: {},//TODO: fill this
-            choices: {}
+            activityID: id,
+            questions: req.session.activities[req.params.id].questions,
         });
     } else {
-        res.redirect('/dashboard')
+        res.redirect('/dashboard', 404);
     }
-}).post('/activity:id', redirectIfNotLoggedIn, async (req, res, next) => {
-    //send to DB
-    res.redirect('/activity:id/done');//TODO: check in docs if this is the way to use the id or `/activity${res.locals.activity.id}/done` or something
+}).post('/activity/:id', redirectIfNotLoggedIn, async (req, res, next) => {
+    //TODO: We check the answers and insert or update into student_activities
+    res.redirect(req.baseUrl + '/done');//TODO: check in docs if this is the way: `/activity${res.locals.activity.id}/done`;
 });
 
 router.get('/activity:id/done', redirectIfNotLoggedIn, async (req, res, next) => {
-    //Once the activity is done, we show the results
+    //Once the activity is done, show the results
     res.render('student/results', {
         layout: 'NavBarLayoutS',
-        grade:0,//TODO: use the response
+        grade: 0,//TODO: use the response
         points: 0//TODO: award the correct points (grade*multiplier)
     });
 });
 
+router.get('/create-activity', redirectIntruders, async (req, res, next) => {
+    //render the Activity creation form and insert into DB
+}).post('/create-activity', redirectIntruders, async (req, res, next) => {
+    //Generate pseudo-random ID (aXXXXXXXX), check if it already exists. If it does, generate a new one. If it doesn't, insert into DB
+})
 //Registration and Login
 router.get('/student-sign-up', (req, res, next) => {
     res.render('student/signUp', {
@@ -414,8 +456,7 @@ router.get('/student-login', redirectIfLoggedIn, (req, res, next) => {
             console.log("Came back from checking DB successfully\n");
             req.session.errors = null;
             req.session.user = JSON.parse(JSON.stringify(response));
-            req.session.userType = "student",
-                req.session.studentID = response.studentID;
+            req.session.userType = "student";
             req.session.save((err) => {
                 if (err) {
                     res.locals.error = err;
@@ -525,7 +566,7 @@ router.get('/teacher-login', redirectIfLoggedIn, (req, res, next) => {
             console.log("Came back from checking DB successfully");
             req.session.errors = null;
             req.session.user = JSON.parse(JSON.stringify(response));
-            req.session.teacherID = response.teacherID;
+            req.session.userType = "teacher";
             req.session.save((err) => {
                 if (err) {
                     res.locals.error = err;

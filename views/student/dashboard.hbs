@@ -1,1 +1,17 @@
 <h1>Welcome to the Student Section</h1>
+{{# if activities}}
+<table>
+    <ul>
+        {{#each activities}}
+        <li>Activity ID: {{this.activityID}}</li>
+        <li>Video: <a href="{{this.videoLink}}"></a></li>
+        <li>Question IDs: {{this.questionIDs}}</li>
+        {{#each this.questions}}
+        <li>Question: {{this.questionText}}</li>
+         {{/each}}
+        <li>Teacher ID: {{this.teacherID}}</li>
+        <br>
+        {{/each}}
+    </ul>
+</table>
+{{/if}}
