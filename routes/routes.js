@@ -1,4 +1,5 @@
 'use strict';
+//TODO: CHECK ALL console.log() and see which ones to delete
 require('dotenv').config();
 const express = require('express'),
     router = express.Router(),
@@ -63,9 +64,11 @@ const convertToUPMEmail = (emailInput) => {
     emailInput = emailInput + "@alumnos.upm.es";
     return emailInput;
 };
+
 const isStudent = (session) => {
     return session.userType === "student" ? true : false;
-}
+};
+
 const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests
     if (!req.session.user) {
         return res.redirect('/');
@@ -84,6 +87,7 @@ const redirectIntruders = (req, res, next) => { //redirects both students and no
     }
     next();
 };
+
 async function loadAllActivities(req, res) { //returns an object with ALL activities
     return await new Promise((resolve, reject) => {
         studentPool.query("SELECT * FROM activities;", (err, results, fields) => {
@@ -106,7 +110,7 @@ async function loadAllActivities(req, res) { //returns an object with ALL activi
             }
         });
     });
-}
+};
 async function loadCompletedStudentActivities(req, res) { //returns an object with data of activities COMPLETED by the user
     const user = res.locals.user;
     return await new Promise((resolve, reject) => {
@@ -133,17 +137,31 @@ async function loadOwnActivities(req, res) {//returns an object with data of act
         });
     });
 };
-const generateNewActivityID = function () {
-    return "A" + Math.random().toString().slice(2, 11); //A + 9 random digits
+
+const generateNewID = function (prefix, numberOfDigits) {
+    return prefix + Math.random().toString().slice(2, 2 + (numberOfDigits < 17 ? numberOfDigits : 16));//erases the 0. from Math.random()
 };
 function isValidActivityID(id, activities) {
-    console.log("\nEntering isValidActivityID", id);
+    console.log("\nEntering isValidActivityID", id); //TODO: Delete
     console.log(activities);
     Object.values(activities).forEach((element, index, resultsArray) => {
         if (element.activityID === id) return false;
     });
     return true;
-}
+};
+function isValidQuestionID(id) { //easier to ask DB than to load them all
+    console.log("\nEntering isValidQuestionID", id); //TODO: delete
+    return new Promise((resolve, reject) => {
+        studentPool.query("SELECT * FROM questions WHERE questionID = ?;", id, (err, results, fields) => {
+            if (err) {
+                console.log("WARNING: Error ocurred during DB Query\n", err);
+                reject("Error during DB Query. Please contact an administrator");
+            } else {
+                resolve(results.length == 0 ? true : false);
+            }
+        });
+    })
+};
 
 //SIGNUPS
 function signUpStudent(req, res) {
@@ -158,8 +176,6 @@ function signUpStudent(req, res) {
     return new Promise((resolve, reject) => {
         loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
-                console.log("consumed from IP: " + storedIP);
-                console.log(rateLimiterRes);
                 studentPool.query("INSERT INTO students (studentID, email, password, name, surname, teacherID, includeInRankings) VALUES (?, ?, ?, ?, ?, ?,?);",
                     [studentID, email, password, name, surname, teacherID, includeInRankings === "on" ? true : false], (err, results, fields) => {
                         if (err) {
@@ -189,8 +205,6 @@ function signUpTeacher(req, res) {
     return new Promise((resolve, reject) => {
         loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force break-ins
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
-                console.log("consumed from IP: " + storedIP);
-                console.log(rateLimiterRes);
                 teacherPool.query("INSERT INTO teachers (teacherID, email, password, name, surname) VALUES (?, ?, ?, ?, ?)",
                     [teacherID, email, password, name, surname], (err, results, fields) => {
                         if (err) {
@@ -219,8 +233,6 @@ function checkStudentLogin(req, res) {
     return new Promise((resolve, reject) => {
         loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force break-ins
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
-                console.log("consumed from IP: " + storedIP);
-                console.log(rateLimiterRes);
                 studentPool.query("SELECT * FROM students WHERE email = ?;", email, (err, results, fields) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
@@ -251,8 +263,6 @@ function checkTeacherLogin(req, res) {
     return new Promise((resolve, reject) => {
         loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
-                console.log("consumed from IP: " + storedIP);
-                console.log(rateLimiterRes);
                 studentPool.query("SELECT * FROM teachers WHERE email = ?", email, (err, results, fields) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
@@ -378,20 +388,63 @@ router.get('/activity:id/done', redirectIfNotLoggedIn, async (req, res, next) =>
 
 router.get('/create-activity', redirectIntruders, async (req, res, next) => {
     res.render('teacher/createActivity', {
-        layout:'NavBarLayoutT'
+        layout: 'NavBarLayoutT'
     });
 }).post('/create-activity', redirectIntruders, async (req, res, next) => {
-    //Generates pseudo-random ID (aXXXXXXXX), checks if it already exists. If it does, generates a new one. If it doesn't, inserts into DB
-    const newActivity = {};
-    do {
-        newActivity.id = generateNewActivityID();
-    } while (!isValidActivityID(newActivity.id, req.session.activities));
-    console.log(req.body);//TODO: insert questions, answers, numberOfAttempts, penalisation, etc... into newActivity and that into DB
+    do {//Generates pseudo-random ID (aXXXXXXXX), checks if it already exists. If it does, generates a new one. If it doesn't, inserts into DB
+        req.body.id = generateNewID("A", 9);
+    } while (!isValidActivityID(req.body.id, req.session.activities));
+    console.log("The body of the new activity is now: ");
+    console.log(req.body);
+    //we start by inserting questions into DB under the new activityID:
+    let questionsInserted = await new Promise(async (resolve, reject) => { //parse questions and insert them into DB, resolving with the string of the generated questionIDs 
+        let generatedQuestionIDs = {ids:""}; //figure out how to make this work
+        for (let i = 1; i <= req.body.number_of_questions; i++) { //question by question
+            let generatedQuestionID = "",
+                isValid = false;
+            do { //generate unique questionID for each
+                generatedQuestionID = generateNewID("Q", 9);
+                isValid = await isValidQuestionID(generatedQuestionID);
+            } while (!isValid);
+            //TODO: parsing choices of current question into one string
 
-    await new Promise((resolve,reject)=>{
-        resolve("we entering for now");
+            teacherPool.query("INSERT INTO questions (activityID, questionID, questionText, questionAnswer, questionType, questionChoices) VALUES (?, ?, ?, ?, ?, ?)",
+                [req.body.id, generatedQuestionID, req.body["question_text_" + i], req.body["is_answer_" + i], req.body["question_type_" + i],""],
+                (err, results, fields) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        generatedQuestionIDs.ids += (generatedQuestionID + ",");
+                    }
+                });
+        }
+        resolve(generatedQuestionIDs.ids);
     });
-    res.redirect(`/activity-created/${newActivity.id}`);
+    console.log("questionsInserted: ", questionsInserted);
+    req.body.questionIDs = questionsInserted;
+
+    //once questions are inserted, we can insert the new activity
+    let succesfullyInserted = await new Promise((resolve, reject) => {
+        teacherPool.query("INSERT INTO activities (activityID, teacherID, title, videoLink, numberOfAttempts, penalisationPerAttempt, questionIDs, numberOfQuestions, category, tags)"
+            + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [req.body.id, req.session.user.teacherID, req.body.title, req.body.video_link, , , req.body.questionIDs, req.body.number_of_questions, req.body.category, req.body.tags],
+            (err, results, fields) => {
+                if (err) {
+                    console.log("WARNING: Error ocurred during DB Query\n", err);
+                    reject("Error during DB Query. Please contact an administrator");
+                } else {
+                    console.log("Successfully inserted activity");
+                    resolve();
+                }
+            });
+    });
+    succesfullyInserted.then(() => {
+        res.redirect(`/activity-created/${newActivity.id}`);
+    }).catch(() => {
+        res.redirect('/dashboard');
+    })
+
 })
 //Registration and Login
 router.get('/student-sign-up', (req, res, next) => {

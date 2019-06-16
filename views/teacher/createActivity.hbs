@@ -17,11 +17,11 @@
     <div id="questions_container">
         <div id="question_1">
             <br>
-            <h3 for="title_1">Question 1: </h3>
-            <textarea rows="2" cols="40" name="title_1" id="title_1" placeholder="Write the question here"></textarea>
+            <h3 for="question_text_1">Question 1: </h3>
+            <textarea rows="2" cols="40" name="question_text_1" id="question_text_1" placeholder="Write the question here"></textarea>
             <br>
             Type
-            <select name="questionType_1" id="questionType_1" onchange="changeQuestionType(this)">
+            <select name="question_type_1" id="question_type_1" onchange="changeQuestionType(this)">
                 <option value="Test">Test</option>
                 <option value="Text">Text</option>
             </select>
@@ -36,7 +36,7 @@
             <div id="choices_1">
                 <div>
                     <label for="choice_1">1)</label>
-                    <input type="text" name="choice1" id="choice_1">
+                    <input type="text" name="choice_1" id="choice_1">
                 </div>
                 <div>
                     <label for="choice_2">2)</label>
@@ -55,11 +55,11 @@
         </div>
         <div id="question_2">
             <br>
-            <h3 for="title_2">Question 2: </h3><br>
-            <textarea rows="2" cols="40" name="title_2" id="title_2" placeholder="Write the question here"></textarea>
+            <h3 for="question_text_2">Question 2: </h3><br>
+            <textarea rows="2" cols="40" name="question_text_2" id="question_text_2" placeholder="Write the question here"></textarea>
             <br>
             Type
-            <select name="questionType_2" id="questionType_2" onchange="changeQuestionType(this)">
+            <select name="question_type_2" id="question_type_2" onchange="changeQuestionType(this)">
                 <option value="Test">Test</option>
                 <option value="Text">Text</option>
             </select>
@@ -74,30 +74,30 @@
             <div id="choices_2">
                 <div>
                     <label for="choice_5">1)</label>
-                    <input type="text" name="choice1" id="choice_5">
+                    <input type="text" name="choice_5" id="choice_5">
                 </div>
                 <div>
                     <label for="choice_6">2)</label>
-                    <input type="text" name="choice_2" id="choice_6">
+                    <input type="text" name="choice_6" id="choice_6">
                 </div>
                 <div>
                     <label for="choice_7">3)</label>
-                    <input type="text" name="choice_3" id="choice_7">
+                    <input type="text" name="choice_7" id="choice_7">
                 </div>
                 <div>
                     <label for="choice_8">4)</label>
-                    <input type="text" name="choice_4" id="choice_8">
+                    <input type="text" name="choice_8" id="choice_8">
                 </div>
                 <br>
             </div>
         </div>
         <div id="question_3">
             <br>
-            <h3 for="title_3">Question 3: </h3><br>
-            <textarea rows="2" cols="40" name="title_3" id="title_3" placeholder="Write the question here"></textarea>
+            <h3 for="question_text_3">Question 3: </h3><br>
+            <textarea rows="2" cols="40" name="question_text_3" id="question_text_3" placeholder="Write the question here"></textarea>
             <br>
             Type
-            <select name="questionType_3" id="questionType_3" onchange="changeQuestionType(this)">
+            <select name="question_type_3" id="question_type_3" onchange="changeQuestionType(this)">
                 <option value="Test">Test</option>
                 <option value="Text">Text</option>
             </select>
@@ -131,11 +131,11 @@
         </div>
         <div id="question_4">
             <br>
-            <h3 for="title_4">Question 4: </h3><br>
-            <textarea rows="2" cols="40" name="title_4" id="title_4" placeholder="Write the question here"></textarea>
+            <h3 for="question_text_4">Question 4: </h3><br>
+            <textarea rows="2" cols="40" name="question_text_4" id="question_text_4" placeholder="Write the question here"></textarea>
             <br>
             Type
-            <select name="questionType_4" id="questionType_4" onchange="changeQuestionType(this)">
+            <select name="question_type_4" id="question_type_4" onchange="changeQuestionType(this)">
                 <option value="Test">Test</option>
                 <option value="Text">Text</option>
             </select>
@@ -169,11 +169,11 @@
         </div>
         <div id="question_5">
             <br>
-            <h3 for="title_5">Question 5: </h3><br>
-            <textarea rows="2" cols="40" name="title_5" id="title_5" placeholder="Write the question here"></textarea>
+            <h3 for="question_text_5">Question 5: </h3><br>
+            <textarea rows="2" cols="40" name="question_text_5" id="question_text_5" placeholder="Write the question here"></textarea>
             <br>
             Type
-            <select name="questionType_5" id="questionType_5" onchange="changeQuestionType(this)">
+            <select name="question_type_5" id="question_type_5" onchange="changeQuestionType(this)">
                 <option value="Test">Test</option>
                 <option value="Text">Text</option>
             </select>
@@ -209,7 +209,7 @@
 
     <div>
         <label for="category">Category</label>
-        <select id="category">
+        <select name="category" id="category">
             <option>Technology</option>
             <option>Education</option>
             <option>Lifestyle</option>
@@ -221,9 +221,9 @@
         <input type="text" name="tags" id="tags">
     </div>
     <button type="submit">Create activity</button><br><br>
+</form>
 
-
-    <div id="readroot" style="display: none">
+    {{!-- <div id="readroot" style="display: none">
         <input type="button" value="Remove question"
             onclick="this.parentNode.parentNode.removeChild(this.parentNode);" /> <br>
         <input name="cd" value="title" />
@@ -236,13 +236,10 @@
         Radio buttons included to test them in Explorer: <br>
         <input type="radio" name="something" value="test1" />Test 1<br>
         <input type="radio" name="something" value="test2" />Test 2
-    </div>
+    </div> --}}
     {{!-- 
     <form id="canDeleteThis" method="post" action="/create_activityawdaw">
         <span id="writeroot"></span>
         <input type="button" onclick="moreFields()" value="Give me more fields!" />
         <input type="submit" value="Send form" />
     </form> --}}
-
-
-</form>
