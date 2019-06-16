@@ -110,7 +110,7 @@ async function loadAllActivities(req, res) { //returns an object with ALL activi
 async function loadCompletedStudentActivities(req, res) { //returns an object with data of activities COMPLETED by the user
     const user = res.locals.user;
     return await new Promise((resolve, reject) => {
-        studentPool.query("SELECT activityID, grade, pointsAwarded, completedOn FROM students_activities WHERE studentID = ?;", user.studentID, (err, results, fields) => {
+        studentPool.query("SELECT * FROM students_activities WHERE studentID = ?;", user.studentID, (err, results, fields) => {
             if (err) {
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
@@ -132,6 +132,17 @@ async function loadOwnActivities(req, res) {//returns an object with data of act
             }
         });
     });
+};
+const generateNewActivityID = function () {
+    return "A" + Math.random().toString().slice(2, 11); //A + 9 random digits
+};
+function isValidActivityID(id, activities) {
+    console.log("\nEntering isValidActivityID", id);
+    console.log(activities);
+    Object.values(activities).forEach((element, index, resultsArray) => {
+        if (element.activityID === id) return false;
+    });
+    return true;
 }
 
 //SIGNUPS
@@ -313,13 +324,13 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
         });
     } else {//if teacher or admin
         if (!req.session.ownActivities) { //retrieve activities created by this teacher
-            req.session.ownActivities = await loadOwnActivities(req, res);
+            req.session.ownActivities = await loadOwnActivities(req, res); //TODO: MARK THE ACTIVITIES WHOSE TEACHERID == USER.TEACHERID, no need to retrieve
         }
         res.render('teacher/dashboard', {
             title: 'Teacher Home Page',
             layout: 'NavBarLayoutT',
             activities: req.session.activities,
-            ownActivities: ownActivities
+            ownActivities: req.session.ownActivities
         });
     }
 });
@@ -366,9 +377,21 @@ router.get('/activity:id/done', redirectIfNotLoggedIn, async (req, res, next) =>
 });
 
 router.get('/create-activity', redirectIntruders, async (req, res, next) => {
-    //render the Activity creation form and insert into DB
+    res.render('teacher/createActivity', {
+        layout:'NavBarLayoutT'
+    });
 }).post('/create-activity', redirectIntruders, async (req, res, next) => {
-    //Generate pseudo-random ID (aXXXXXXXX), check if it already exists. If it does, generate a new one. If it doesn't, insert into DB
+    //Generates pseudo-random ID (aXXXXXXXX), checks if it already exists. If it does, generates a new one. If it doesn't, inserts into DB
+    const newActivity = {};
+    do {
+        newActivity.id = generateNewActivityID();
+    } while (!isValidActivityID(newActivity.id, req.session.activities));
+    console.log(req.body);//TODO: insert questions, answers, numberOfAttempts, penalisation, etc... into newActivity and that into DB
+
+    await new Promise((resolve,reject)=>{
+        resolve("we entering for now");
+    });
+    res.redirect(`/activity-created/${newActivity.id}`);
 })
 //Registration and Login
 router.get('/student-sign-up', (req, res, next) => {
