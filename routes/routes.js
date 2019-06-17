@@ -406,10 +406,18 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
                 generatedQuestionID = generateNewID("Q", 9);
                 isValid = await isValidQuestionID(generatedQuestionID);
             } while (!isValid);
-            //TODO: parsing choices of current question into one string
+            //Parsing choices of current question into one string
+            let choices = { choicesString: "" }; //so the changes remain outside the scope of the for loop
+            if (req.body["question_type_" + i] === "test") {
+                for (let j = (i - 1) * 4 + 1; j <= (i - 1) * 4 + 4; j++) { //assuming 4 choices per question
+                    choices.choicesString += (req.body["choice_" + j] + ",");
+                }
+                choices.choicesString = choices.choicesString.substring(0, choices.choicesString.length - 1) //take out the final comma
+            }
+            console.log("\nParsed Choices: ", choices.choicesString);
 
             teacherPool.query("INSERT INTO questions (activityID, questionID, questionText, questionAnswer, questionType, questionChoices) VALUES (?, ?, ?, ?, ?, ?)",
-                [req.body.id, generatedQuestionID, req.body["question_text_" + i], req.body["is_answer_" + i], req.body["question_type_" + i],""],
+                [req.body.id, generatedQuestionID, req.body["question_text_" + i], req.body["is_answer_" + i], req.body["question_type_" + i], choices.choicesString],
                 (err, results, fields) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
