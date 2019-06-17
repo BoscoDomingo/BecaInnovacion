@@ -85,17 +85,23 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = !INPROD ? err : {}; //res.locals.error = req.app.get('env') === 'development' ? err : {};
-    res.status(err.status || 500);
+app.use(function (err, req, res, next) {//TODO: make a better looking error page for production, and keep the current one for dev
+    if(!INPROD){
+        // set locals, only providing error in development
+        res.locals.message = err.message;
+        res.locals.error = !INPROD ? err : {}; //res.locals.error = req.app.get('env') === 'development' ? err : {};
+        res.status(err.status || 500);
 
-    // render the error page
-    res.render('error');
+        // render the error page
+        res.render('error');
 
     //redirect to main page
     //res.redirect('/');
+    }else{
+        // render the error page
+        res.render('errorProd');
+    }
+    
 });
 
 //response headers
