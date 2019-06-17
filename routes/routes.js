@@ -142,15 +142,12 @@ const generateNewID = function (prefix, numberOfDigits) {
     return prefix + Math.random().toString().slice(2, 2 + (numberOfDigits < 17 ? numberOfDigits : 16));//erases the 0. from Math.random()
 };
 function isValidActivityID(id, activities) {
-    console.log("\nEntering isValidActivityID", id); //TODO: Delete
-    console.log(activities);
     Object.values(activities).forEach((element, index, resultsArray) => {
         if (element.activityID === id) return false;
     });
     return true;
 };
 function isValidQuestionID(id) { //easier to ask DB than to load them all
-    console.log("\nEntering isValidQuestionID", id); //TODO: delete
     return new Promise((resolve, reject) => {
         studentPool.query("SELECT * FROM questions WHERE questionID = ?;", id, (err, results, fields) => {
             if (err) {
@@ -394,49 +391,65 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
     do {//Generates pseudo-random ID (aXXXXXXXX), checks if it already exists. If it does, generates a new one. If it doesn't, inserts into DB
         req.body.id = generateNewID("A", 9);
     } while (!isValidActivityID(req.body.id, req.session.activities));
-    console.log("The body of the new activity is now: ");
-    console.log(req.body);
+
     //we start by inserting questions into DB under the new activityID:
-    let questionsInserted = await new Promise(async (resolve, reject) => { //parse questions and insert them into DB, resolving with the string of the generated questionIDs 
-        let generatedQuestionIDs = {ids:""}; //figure out how to make this work
+    let questionsInserted = new Promise(async (resolve, reject) => { //parse questions and insert them into DB, resolving with the string of the generated questionIDs 
+        let generatedQuestionIDs = { ids: "" };
         for (let i = 1; i <= req.body.number_of_questions; i++) { //question by question
-            let generatedQuestionID = "",
+            let generatedQuestionID = { id: "" },
                 isValid = false;
             do { //generate unique questionID for each
-                generatedQuestionID = generateNewID("Q", 9);
-                isValid = await isValidQuestionID(generatedQuestionID);
+                generatedQuestionID.id = generateNewID("Q", 9);
+                try {
+                    isValid = await isValidQuestionID(generatedQuestionID.id);
+                } catch (error) {
+                    throw new Error(error);
+                }
             } while (!isValid);
-            //Parsing choices of current question into one string
+            //Parse choices of current question into one string
             let choices = { choicesString: "" }; //so the changes remain outside the scope of the for loop
             if (req.body["question_type_" + i] === "test") {
                 for (let j = (i - 1) * 4 + 1; j <= (i - 1) * 4 + 4; j++) { //assuming 4 choices per question
-                    choices.choicesString += (req.body["choice_" + j] + ",");
+                    choices.choicesString += (req.body["choice_" + j] + "--");
                 }
-                choices.choicesString = choices.choicesString.substring(0, choices.choicesString.length - 1) //take out the final comma
+                choices.choicesString = choices.choicesString.substring(0, choices.choicesString.length - 2) //take out the final 2 characters
             }
-            console.log("\nParsed Choices: ", choices.choicesString);
 
-            teacherPool.query("INSERT INTO questions (activityID, questionID, questionText, questionAnswer, questionType, questionChoices) VALUES (?, ?, ?, ?, ?, ?)",
-                [req.body.id, generatedQuestionID, req.body["question_text_" + i], req.body["is_answer_" + i], req.body["question_type_" + i], choices.choicesString],
-                (err, results, fields) => {
-                    if (err) {
-                        console.log("WARNING: Error ocurred during DB Query\n", err);
-                        reject("Error during DB Query. Please contact an administrator");
-                    } else {
-                        generatedQuestionIDs.ids += (generatedQuestionID + ",");
-                    }
+            try {
+                await new Promise((resolve, reject) => {
+                    teacherPool.query("INSERT INTO questions (activityID, questionID, questionText, questionAnswer, questionType, questionChoices) VALUES (?, ?, ?, ?, ?, ?)",
+                        [req.body.id, generatedQuestionID.id, req.body["question_text_" + i], req.body["is_answer_" + i], req.body["question_type_" + i], choices.choicesString],
+                        (err, results, fields) => {
+                            if (err) {
+                                console.log("WARNING: Error ocurred during DB Query\n", err);
+                                reject("Error during DB Query. Please contact an administrator");
+                            } else {
+                                generatedQuestionIDs.ids += (generatedQuestionID.id + ", ");
+                                resolve();
+                            }
+                        });
                 });
+            } catch (error) {
+                throw new Error(error);
+            }
         }
+        generatedQuestionIDs.ids = generatedQuestionIDs.ids.substring(0, generatedQuestionIDs.ids.length - 2) //take out the final 2 characters
+        console.log(generatedQuestionIDs);
         resolve(generatedQuestionIDs.ids);
     });
-    console.log("questionsInserted: ", questionsInserted);
-    req.body.questionIDs = questionsInserted;
+    try {
+        req.body.questionIDs = await questionsInserted;
+    } catch (error) {
+        throw new Error(error);
+    }
 
     //once questions are inserted, we can insert the new activity
-    let succesfullyInserted = await new Promise((resolve, reject) => {
+    let succesfullyInserted = new Promise((resolve, reject) => {
+        let numberOfAttempts = req.body.number_of_attempts ? req.body.number_of_attempts : 3,
+            penalisationPerAttempt = req.body.penalisation_per_attempt ? req.body.penalisation_per_attempt : 0;
         teacherPool.query("INSERT INTO activities (activityID, teacherID, title, videoLink, numberOfAttempts, penalisationPerAttempt, questionIDs, numberOfQuestions, category, tags)"
             + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [req.body.id, req.session.user.teacherID, req.body.title, req.body.video_link, , , req.body.questionIDs, req.body.number_of_questions, req.body.category, req.body.tags],
+            [req.body.id, req.session.user.teacherID, req.body.title, req.body.video_link, numberOfAttempts, penalisationPerAttempt, req.body.questionIDs, req.body.number_of_questions, req.body.category, req.body.tags],
             (err, results, fields) => {
                 if (err) {
                     console.log("WARNING: Error ocurred during DB Query\n", err);
@@ -448,8 +461,9 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
             });
     });
     succesfullyInserted.then(() => {
-        res.redirect(`/activity-created/${newActivity.id}`);
-    }).catch(() => {
+        res.redirect(`/activity-created/${req.body.id}`);
+    }).catch((error) => {
+        console.log("Error when inserting new activity" + error);
         res.redirect('/dashboard');
     })
 
