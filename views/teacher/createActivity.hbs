@@ -24,9 +24,9 @@
             <br>
             <h3 for="question_text_1">Question 1: </h3>
             <textarea rows="2" cols="40" name="question_text_1" id="question_text_1"
-                placeholder=" Write the question here"></textarea>
+                placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_1" id="question_type_1" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -39,7 +39,7 @@
                 <input type="radio" name="is_answer_1" value="3" required>3
                 <input type="radio" name="is_answer_1" value="4" required>4
             </div>
-            <div id="choices_1">
+            <div id="choices_1" class="choice-number">
                 <div>
                     <label for="choice_1">1)</label>
                     <input type="text" name="choice_1" id="choice_1">
@@ -65,7 +65,7 @@
             <textarea rows="2" cols="40" name="question_text_2" id="question_text_2"
                 placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_2" id="question_type_2" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -78,7 +78,7 @@
                 <input type="radio" name="is_answer_2" value="3" required>3
                 <input type="radio" name="is_answer_2" value="4" required>4
             </div>
-            <div id="choices_2">
+            <div id="choices_2" class="choice-number">
                 <div>
                     <label for="choice_5">1)</label>
                     <input type="text" name="choice_5" id="choice_5">
@@ -104,7 +104,7 @@
             <textarea rows="2" cols="40" name="question_text_3" id="question_text_3"
                 placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_3" id="question_type_3" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -117,7 +117,7 @@
                 <input type="radio" name="is_answer_3" value="3" required>3
                 <input type="radio" name="is_answer_3" value="4" required>4
             </div>
-            <div id="choices_3">
+            <div id="choices_3" class="choice-number">
                 <div>
                     <label for="choice_9">1)</label>
                     <input type="text" name="choice_9" id="choice_9">
@@ -143,7 +143,7 @@
             <textarea rows="2" cols="40" name="question_text_4" id="question_text_4"
                 placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_4" id="question_type_4" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -156,7 +156,7 @@
                 <input type="radio" name="is_answer_4" value="3" required>3
                 <input type="radio" name="is_answer_4" value="4" required>4
             </div>
-            <div id="choices_4">
+            <div id="choices_4" class="choice-number">
                 <div>
                     <label for="choice_13">1)</label>
                     <input type="text" name="choice_13" id="choice_13">
@@ -182,7 +182,7 @@
             <textarea rows="2" cols="40" name="question_text_5" id="question_text_5"
                 placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_5" id="question_type_5" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -195,7 +195,7 @@
                 <input type="radio" name="is_answer_5" value="3" required>3
                 <input type="radio" name="is_answer_5" value="4" required>4
             </div>
-            <div id="choices_5">
+            <div id="choices_5" class="choice-number">
                 <div>
                     <label for="choice_17">1)</label>
                     <input type="text" name="choice_17" id="choice_17">
@@ -218,7 +218,7 @@
     </div>
 
     <div>
-        <label for="category">Category</label>
+        <label for="category"><h3>Category:</h3></label>
         <select name="category" id="category">
             <option>Technology</option>
             <option>Education</option>
