@@ -5,6 +5,15 @@
     padding: 3rem 2rem;
 }
 
+.btn-link {
+    float: right;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+}
+
 
 /* Style the navbar */
 

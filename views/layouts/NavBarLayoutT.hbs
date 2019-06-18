@@ -4,7 +4,7 @@
 <head>
     <title>{{title}}</title>
     <link rel='stylesheet' href='stylesheets/style.css' />
-    <link rel='stylesheet' href='stylesheets/main.css' />
+    <link rel='stylesheet' href='stylesheets/nav.css' />
     <script src="javascripts/main.js"></script>
     <meta http-equiv="cache-control" content="max-age=0" />
     <meta http-equiv="cache-control" content="no-cache" />
@@ -13,17 +13,17 @@
 </head>
 
 <body>
-    <section>
-        <ul>
-            <li><a href="/dashboard">Home</a></li>
-            <li><a href="/teacher-profile">Profile</a></li>
-            <li><a href="/teacher-help">Help</a></li>
-            <li>
-                <form action="/logout" method="POST">
-                    <button class="btn-link" type="submit">Logout</button>
-                </form>
-            </li>
-        </ul>
+    <section class="topnav">
+
+        <a href="/dashboard">Home</a></li>
+        <a href="/teacher-profile">Profile</a></li>
+        <a href="/teacher-help">Help</a></li>
+
+        <form action="/logout" method="POST">
+            <button class="btn-link" type="submit">Logout</button>
+        </form>
+
+
     </section>
 
     {{{body}}}

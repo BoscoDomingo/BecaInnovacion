@@ -19,12 +19,17 @@ img {
     margin: 2ex auto 2ex auto;
 }
 
+.studentemail {
+    width: 69% !important;
+    align-self: flex-start;
+}
+
 .input100 {
     font-family: Poppins-Regular;
     color: #333333;
     line-height: 1.2;
     font-size: 18px;
-    display: block;
+    display: inline-block;
     width: 100%;
     background: transparent;
     height: 60px;

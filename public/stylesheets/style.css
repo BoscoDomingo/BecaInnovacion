@@ -45,62 +45,66 @@ h1.title {
 }
 
 .student-form {
-  padding: 2rem;
+    padding: 2rem;
     background: #ffffff;
 }
 
 .student-form label {
-  display: block;
+    display: block;
 }
+
 .student-form .appendEmail {
-  display: inline-block;
-  text-align: right;
+    display: inline-block;
+    text-align: right;
 }
+
 .student-form .emailInput {
-  width: 50%;
+    width: 50%;
 }
 
 .student-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
     border-radius: 3px;
     border: 1px solid #ccc;
     background-color: #afdbff21;
 }
 
 .student-form .passwordError {
-  color: red;
-  display: none;
+    color: red;
+    display: none;
 }
 
 .teacher-form {
-  padding: 2rem;
-  background: #f4f4f4;
+    padding: 2rem;
+    background: #f4f4f4;
 }
 
 .teacher-form label {
-  display: block;
+    display: block;
 }
+
 .teacher-form .appendEmail {
-  display: inline-block;
-  text-align: right;
+    display: inline-block;
+    text-align: right;
 }
+
 .teacher-form .emailInput {
-  width: 50%;
+    width: 50%;
 }
 
 .teacher-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 .teacher-form .passwordError {
-  color: red;
-  display: none;
+    color: red;
+    display: none;
 }
 
 .bg-dark {
