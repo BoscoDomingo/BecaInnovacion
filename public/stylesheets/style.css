@@ -44,67 +44,63 @@ h1.title {
     margin-top: 5rem;
 }
 
-#student-form {
-    padding: 2rem;
+.student-form {
+  padding: 2rem;
     background: #ffffff;
 }
 
-#student-form label {
-    display: block;
+.student-form label {
+  display: block;
+}
+.student-form .appendEmail {
+  display: inline-block;
+  text-align: right;
+}
+.student-form .emailInput {
+  width: 50%;
 }
 
-#student-form .appendEmail {
-    display: inline-block;
-    text-align: right;
-}
-
-#student-form .emailInput {
-    width: 50%;
-}
-
-#student-form input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
+.student-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
     border-radius: 3px;
     border: 1px solid #ccc;
     background-color: #afdbff21;
 }
 
-#student-form .passwordError {
-    color: red;
-    display: none;
+.student-form .passwordError {
+  color: red;
+  display: none;
 }
 
-#teacher-form {
-    padding: 2rem;
-    background: #f4f4f4;
+.teacher-form {
+  padding: 2rem;
+  background: #f4f4f4;
 }
 
-#teacher-form label {
-    display: block;
+.teacher-form label {
+  display: block;
+}
+.teacher-form .appendEmail {
+  display: inline-block;
+  text-align: right;
+}
+.teacher-form .emailInput {
+  width: 50%;
 }
 
-#teacher-form .appendEmail {
-    display: inline-block;
-    text-align: right;
+.teacher-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
-#teacher-form .emailInput {
-    width: 50%;
-}
-
-#teacher-form input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-#teacher-form .passwordError {
-    color: red;
-    display: none;
+.teacher-form .passwordError {
+  color: red;
+  display: none;
 }
 
 .bg-dark {

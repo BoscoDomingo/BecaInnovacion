@@ -5,6 +5,9 @@
   "scripts": {
     "start": "nodemon ./bin/www --delay 1500ms"
   },
+  "repository": {
+      "url": "https://github.com/BoscoDomingo/BecaInnovacion"
+  },
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~4.1.1",

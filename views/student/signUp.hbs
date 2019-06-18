@@ -26,7 +26,7 @@
     {{/if}}
 
     <section class="container">
-        <form id="student-form" action="/student-sign-up" method="POST">
+        <form id="sign-up-form" class="student-form" action="/student-sign-up" method="POST">
             <h1 class="title">Student Sign Up</h1>
             <div>
                 <label for="name">Name</label>
@@ -59,7 +59,10 @@
                 <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" required>
                 <p class="passwordError" id="validatePasswords"></p>
             </div>
-
+            <div>
+                <label for="includeInRankings">Want to be included in rankings?</label>
+                <input type="checkbox" id="includeInRankings" name="includeInRankings" required>
+            </div>
             <button type="submit" class="btn">Sign Up</button>
         </form>
     </section>

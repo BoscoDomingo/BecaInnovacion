@@ -51,7 +51,7 @@ app.use(session({
 
 //Limiting number of requests per IP
 /* Would require a new rateLimiterByRequest = new MySQLRateLimiter({...})) here, as well as new env variables such as MAX_REQUESTS and MAX_REQUEST_RESET_TIME
-It would overlap with the login one, which would have to be changed to a user-based block. Might be too much of a hassle for something that may never be needed
+It would overlap with the login one, which would have to be changed to a user-based/email block. Might be too much of a hassle for something that may never be needed
 sources: https://github.com/animir/node-rate-limiter-flexible/wiki/Overall-example
         https://github.com/animir/node-rate-limiter-flexible/wiki/API-methods
 */
@@ -73,6 +73,7 @@ sources: https://github.com/animir/node-rate-limiter-flexible/wiki/Overall-examp
 app.use((req, res, next) => {
     if (req.session.user) {
         res.locals.user = req.session.user;
+        res.locals.userType = req.session.userType;
     }
     next();
 });
@@ -84,17 +85,23 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = !INPROD ? err : {}; //res.locals.error = req.app.get('env') === 'development' ? err : {};
-    res.status(err.status || 500);
+app.use(function (err, req, res, next) {//TODO: make a better looking error page for production, and keep the current one for dev
+    if(!INPROD){
+        // set locals, only providing error in development
+        res.locals.message = err.message;
+        res.locals.error = !INPROD ? err : {}; //res.locals.error = req.app.get('env') === 'development' ? err : {};
+        res.status(err.status || 500);
 
-    // render the error page
-    res.render('error');
+        // render the error page
+        res.render('error');
 
     //redirect to main page
     //res.redirect('/');
+    }else{
+        // render the error page
+        res.render('errorProd');
+    }
+    
 });
 
 //response headers
