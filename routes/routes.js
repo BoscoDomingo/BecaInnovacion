@@ -64,15 +64,41 @@ const convertToUPMEmail = (emailInput) => {
     emailInput = emailInput + "@alumnos.upm.es";
     return emailInput;
 };
-const arrayToObject = (array, keyField) =>
+const arrayOfObjectsToObject = (array, keyField) =>//[{ activityID: "A1", questions: 5 }, { activityID: "A2", questions: 3 }] => {{ activityID: "A1", questions: 5 }, { activityID: "A2", questions: 3 }};
     array.reduce((obj, item) => {
         obj[item[keyField]] = item
         return obj
     }, {})
+//source: https://medium.com/dailyjs/rewriting-javascript-converting-an-array-of-objects-to-an-object-ec579cafbfc7
+const renameKeys = (newKeys, obj) => //renames an object's keys based on another object with the new names
+    Object.keys(obj).reduce((acc, key) => ({ ...acc, ...{ [newKeys[key] || key]: obj[key] } }), {}); //source: https://www.freecodecamp.org/news/30-seconds-of-code-rename-many-object-keys-in-javascript-268f279c7bfa/
 
 const isStudent = (session) => {
     return session.userType === "student" ? true : false;
 };
+const getYTVideoID = (url) => {//source: https://stackoverflow.com/a/27728417/9022642
+    if (url.match(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/))
+        return url.match(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/)[1];
+};
+const parseQuestionChoices = (choices) => { //choices: 'Answer1--Answer2--Answer3--Answer4'
+    let choicesArr = choices.split('--'), //[Answer1, Answer2, Answer3, Answer4]
+        choicesObj = {}, i;
+    for (i = 0; i < choicesArr.length; i++) {
+        choicesObj[i + 1] = choicesArr[i];
+    }
+    return choicesObj; //{1:'Answer1', 2:'Answer2', 3:'Answer3', 4:'Answer4'}
+};
+const parseTags = (tags) => { //tags: 'Tag1 ,Tag2,Tag3 , Tag4'
+    console.log(`Result of parseTags : ${tags.trim().split(/,\w+/)}`)
+    return tags.trim().split(","); //[Tag1, Tag2, Tag3, Tag4]
+};
+const makeObject1Indexed = (object) => { //gives an object with numbered keys, starting at one: {1 : ..., 2 : ..., 3:...}
+    let newKeys = {};
+    for (let i = 0; i < Object.keys(object).length; i++) {
+        newKeys[i] = `${i + 1}`;
+    }
+    return renameKeys(newKeys, object);
+}
 
 const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests
     if (!req.session.user) {
@@ -108,7 +134,10 @@ async function getActivity(activityID) { //returns an object with the desired Ac
                                 console.log("WARNING: Error ocurred during DB Query\n", err);
                                 reject("Error during DB Query. Please contact an administrator");
                             } else {
-                                parsedActivity.questions = Object.assign({}, questions);
+                                parsedActivity.activityLink = `/activity/${activityID}`; //so students can do it
+                                parsedActivity.summaryLink = `/activity-summary/${activityID}`; //so teachers can view it
+                                parsedActivity.questions = makeObject1Indexed(Object.assign({}, questions)); //adding the questions
+                                parsedActivity.tags = parseTags(parsedActivity.tags)
                                 resolve();
                             }
                         });
@@ -131,14 +160,18 @@ async function getAllActivities() { //returns an object with ALL activities with
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
             } else {
-                let parsedActivities = arrayToObject(results, "activityID"); // Turn results into an Object of Objects from Array of Objects
+                let parsedActivities = arrayOfObjectsToObject(results, "activityID"); // Turn results into an Object of Objects from Array of Objects
                 Object.values(parsedActivities).forEach((element, index, resultsArray) => { //for each activity
                     studentPool.query("SELECT * FROM questions WHERE activityID = ?;", element.activityID, (err, questions, fields) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
                             reject("Error during DB Query. Please contact an administrator");
                         } else {
-                            resolve(resultsArray[index].questions = Object.assign({}, questions)); //adding the questions to each activity
+                            resultsArray[index].activityLink = `/activity/${element.activityID}`; //so students can do it
+                            resultsArray[index].summaryLink = `/activity-summary/${element.activityID}`; //so teachers can view it
+                            resultsArray[index].tags = parseTags(resultsArray[index].tags);
+                            resultsArray[index].questions = makeObject1Indexed(Object.assign({}, questions));//adding the questions to each activity
+                            resolve(); 
                         }
                     });
                 });
@@ -147,26 +180,26 @@ async function getAllActivities() { //returns an object with ALL activities with
         });
     });
 };
-async function getCompletedActivities(studentID) { //returns an object with data of activities COMPLETED by the user without questions
+async function getCompletedActivities(studentID) { //returns an object with data of activities COMPLETED by the user without questions or links
     return await new Promise((resolve, reject) => {
         studentPool.query("SELECT * FROM students_activities WHERE studentID = ?;", studentID, (err, results, fields) => {
             if (err) {
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
             } else if (results.length > 0) {
-                resolve(arrayToObject(results, "activityID"));
+                resolve(arrayOfObjectsToObject(results, "activityID"));
             } else resolve({});
         });
     });
 };
-async function getOwnActivities(teacherID) {//returns an object with data of activities CREATED by the user without questions
+async function getOwnActivities(teacherID) {//returns an object with data of activities CREATED by the user without questions or links
     return await new Promise((resolve, reject) => {
         studentPool.query("SELECT * FROM activities WHERE teacherID = ?;", teacherID, (err, results, fields) => {
             if (err) {
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
             } else {
-                resolve(arrayToObject(results, "activityID"));
+                resolve(arrayOfObjectsToObject(results, "activityID"));
             }
         });
     });
@@ -353,7 +386,6 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
         } catch (error) {
             throw new Error(error);
         }
-
     }
     //TODO: delete
     console.log("Current session's activities: ");
@@ -391,34 +423,68 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
             ownActivities: req.session.ownActivities
         });
     }
+}).post('/dashboard/refresh-activities', async (req, res, next) => {
+    try {
+        req.session.activities = await getAllActivities();
+        if (isStudent(req.session)) {
+            req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID);
+        } else {
+            req.session.ownActivities = await getOwnActivities(res.locals.user.teacherID);
+        }
+    } catch (error) {
+        throw new Error(error);
+    }
+    res.redirect('/dashboard');
+});
+router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
+    if (res.locals.userType === "student") {
+        //retrieve only students who want to be seen in ranking
+        //TODO:
+    } else {
+        //retrieve all students
+        //TODO:
+    }
+    res.render('ranking', {
+        ranking: {} //TODO:fill this with the studentIDs and their points
+    });
 });
 
 //Activities
-router.get('/activity/:id', redirectIfNotLoggedIn, async (req, res, next) => {
-    console.log(req.params.id);
-    console.log(req.session.activities);
-    console.log(res.locals.user);
-    const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id;
-    if (req.session.activities[id]) {
+router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
+    const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id,
+        activity = req.session.activities[id];
+    //console.log(req.session.activities[id]);
+    console.log(req.session.activities[id].questions);
+    Object.values(activity.questions).forEach((question, index, arr) => {
+        if (typeof question.questionChoices === 'string') {
+            arr[index].questionChoices = parseQuestionChoices(question.questionChoices);
+            console.log(arr[index].questionChoices);
+        }
+    });
+
+    if (activity) {
         res.render('student/activity', {
             layout: 'NavBarLayoutS',
             activityID: id,
-            questions: req.session.activities[req.params.id].questions,
+            videoLink: `https://www.youtube.com/embed/${getYTVideoID(activity.videoLink)}`,
+            questions: activity.questions,
         });
     } else {
         res.redirect('/dashboard', 404);
     }
 }).post('/activity/:id', redirectIfNotLoggedIn, async (req, res, next) => {
-    //TODO: We check the answers and insert or update into student_activities
-    res.redirect(req.baseUrl + '/done');//TODO: check in docs if this is the way: `/activity${res.locals.activity.id}/done`;
+    //TODO: We check the answers and insert or update into student_activities, updating completedActivities too
+
+    res.redirect(`/activity/${req.params.id}/done`);
 });
 
 router.get('/activity:id/done', redirectIfNotLoggedIn, async (req, res, next) => {
+    const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id;
     //Once the activity is done, show the results
-    res.render('student/results', {
+    res.render('student/activityResults', {
         layout: 'NavBarLayoutS',
-        grade: 0,//TODO: use the response
-        points: 0//TODO: award the correct points (grade*multiplier)
+        grade: req.session.completedActivities[id].grade,//TODO: use the response
+        points: req.session.completedActivities[id].points//TODO: award the correct points (grade*multiplier)
     });
 });
 
@@ -522,7 +588,7 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
             console.log("\nNew activities\n")
             console.log(activities)
             req.session.activities = activities;//we refresh the session activities
-        }).catch(err => { 
+        }).catch(err => {
             console.log("Error when fetching new activity" + err);
             res.redirect('/dashboard');
         });
@@ -546,19 +612,6 @@ router.get('/activity-summary/:id', redirectIntruders, async (req, res, next) =>
         console.log("Error fetching chosen activity: ", req.params.id, error);
         res.redirect('/dashboard');
     }
-});
-
-router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
-    if (res.locals.userType === "student") {
-        //retrieve only students who want to be seen in ranking
-        //TODO:
-    } else {
-        //retrieve all students
-        //TODO:
-    }
-    res.render('ranking', {
-        ranking: {} //TODO:fill this with the studentIDs and their points
-    });
 });
 
 //Registration and Login

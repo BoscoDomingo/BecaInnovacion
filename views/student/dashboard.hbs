@@ -1,16 +1,18 @@
 <h1>Welcome to the Student Section</h1>
+<form action="dashboard/refresh-activities" method="post">
+    <button type="submit">Refresh Activities!</button></form>
 {{# if activities}}
 <table>
     <ul>
         {{#each activities}}
-        <li>Activity ID: {{this.activityID}}</li>
+        <li>
+            <h2>{{this.title}}</h2>
+        </li>
+        <li>Activity ID: <a href={{this.activityLink}}>{{this.activityID}}</a></li>
         <li>Created by: {{this.teacherID}}</li>
         <li>Video: <a href="{{this.videoLink}}">Link</a></li>
-        <li>Question IDs: {{this.questionIDs}}</li>
-        {{#each this.questions}}
-        <li>Question Text: {{this.questionText}}</li>
-<li>Choices: {{this.questionChoices}}</li><br>       
-         {{/each}}
+        <li>Category: {{this.category}}</li>
+        <li>Tags: {{this.tags}}</li>
         <br>
         {{/each}}
     </ul>
