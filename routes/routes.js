@@ -88,9 +88,12 @@ const parseQuestionChoices = (choices) => { //choices: 'Answer1--Answer2--Answer
     }
     return choicesObj; //{1:'Answer1', 2:'Answer2', 3:'Answer3', 4:'Answer4'}
 };
-const parseTags = (tags) => { //tags: 'Tag1 ,Tag2,Tag3 , Tag4'
-    console.log(`Result of parseTags : ${tags.trim().split(/,\w+/)}`)
-    return tags.trim().split(","); //[Tag1, Tag2, Tag3, Tag4]
+const parseTags = (tags) => { //tags: 'Tag1 ,Tag2,Tag3 , Tag4, '
+    tags = tags.trim().split(",");
+    if (tags[tags.length - 1].length === 0) {
+        tags.pop();
+    }
+    return tags; //[Tag1, Tag2, Tag3, Tag4]
 };
 const makeObject1Indexed = (object) => { //gives an object with numbered keys, starting at one: {1 : ..., 2 : ..., 3:...}
     let newKeys = {};
@@ -171,7 +174,7 @@ async function getAllActivities() { //returns an object with ALL activities with
                             resultsArray[index].summaryLink = `/activity-summary/${element.activityID}`; //so teachers can view it
                             resultsArray[index].tags = parseTags(resultsArray[index].tags);
                             resultsArray[index].questions = makeObject1Indexed(Object.assign({}, questions));//adding the questions to each activity
-                            resolve(); 
+                            resolve();
                         }
                     });
                 });
