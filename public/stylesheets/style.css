@@ -1,17 +1,19 @@
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.6;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
 }
+
 
 /* ul {
   list-style: bullet;
 } */
+
 
 /* ul li {
   padding: 5px;
@@ -20,146 +22,134 @@ body {
 } */
 
 header {
-  background: #f4f4f4;
-  padding: 1rem;
-  text-align: center;
+    background: #ffffff;
+    padding: 1rem;
+    text-align: center;
+}
+
+h1.title {
+    color: #0078dc;
+    text-align: center;
+    /* padding: 10px 10px 5px 10px; */
+    font-weight: bold;
 }
 
 .container {
-  margin: auto;
-  width: 500px;
-  overflow: auto;
-  padding: 3rem 2rem;
+    margin: auto;
+    max-width: 500px;
+    overflow: auto;
+    background: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
+    margin-top: 5rem;
 }
 
 .student-form {
-  padding: 2rem;
-  background: #f4f4f4;
+    padding: 2rem;
+    background: #ffffff;
 }
 
 .student-form label {
-  display: block;
+    display: block;
 }
+
 .student-form .appendEmail {
-  display: inline-block;
-  text-align: right;
+    display: inline-block;
+    text-align: right;
 }
+
 .student-form .emailInput {
-  width: 50%;
+    width: 50%;
 }
 
 .student-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    background-color: #afdbff21;
 }
 
 .student-form .passwordError {
-  color: red;
-  display: none;
+    color: red;
+    display: none;
 }
 
 .teacher-form {
-  padding: 2rem;
-  background: #f4f4f4;
+    padding: 2rem;
+    background: #f4f4f4;
 }
 
 .teacher-form label {
-  display: block;
+    display: block;
 }
+
 .teacher-form .appendEmail {
-  display: inline-block;
-  text-align: right;
+    display: inline-block;
+    text-align: right;
 }
+
 .teacher-form .emailInput {
-  width: 50%;
+    width: 50%;
 }
 
 .teacher-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 .teacher-form .passwordError {
-  color: red;
-  display: none;
-}
-
-.btn {
-  display: block;
-  width: 100%;
-  padding: 10px 15px;
-  border: 0;
-  background: #333;
-  color: #fff;
-  border-radius: 5px;
-  margin: 5px 0;
-}
-
-.btn:hover {
-  background: #444;
-}
-
-.btn-link {
-    border: none;
-    outline: none;
-    background: none;
-    cursor: pointer;
-    color: #0000EE;
-    padding: 0;
-    text-decoration: underline;
-    font-family: inherit;
-    font-size: inherit;
+    color: red;
+    display: none;
 }
 
 .bg-dark {
-  background: #333;
-  color: #fff;
+    background: #333;
+    color: #fff;
 }
 
 .error {
-  background: orangered;
-  color: #fff;
-  padding: 5px;
-  margin: 5px;
+    background: orangered;
+    color: #fff;
+    padding: 5px;
+    margin: 5px;
 }
 
 .text1 {
-  text-align: center;
-  font-size: 50px;
+    text-align: center;
+    font-size: 50px;
 }
 
 .text2 {
-  font-size: 30px;
-  margin-left: 30px;
+    font-size: 30px;
+    margin-left: 30px;
 }
 
 .text3 {
-  font-size: 40px;
-  margin-left: 30px;
+    font-size: 40px;
+    margin-left: 30px;
 }
 
 .text4 {
-  font-size: 30px;
-  margin-left: 45px;
+    font-size: 30px;
+    margin-left: 45px;
 }
 
 .text5 {
-  font-size: 20px;
-  font-weight: bold;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .text6 {
-  font-size: 15px;
-  text-align: center;
+    font-size: 15px;
+    text-align: center;
 }
 
 .text7 {
-  margin-left: 10px;
-  color: red;
+    margin-left: 10px;
+    color: red;
 }

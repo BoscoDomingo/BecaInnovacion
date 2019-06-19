@@ -1,5 +1,10 @@
+<head>
+    <link rel='stylesheet' href='stylesheets/activity.css' />
+    <link rel='stylesheet' href='stylesheets/index.css' />
+</head>
 <script type="text/javascript" src="javascripts/createActivity.js"></script>
-<form id="activity_form" class="activity_form" action="/create-activity" method="post">
+<form id="activity_form" class="activity_form container student-form" action="/create-activity" method="post">
+    <h1 class="title">Create Activity</h1>
     <div>
         <label for="title">Title:</label>
         <input type="text" name="title" id="title" required>
@@ -11,16 +16,17 @@
     <div>
         <label for="number_of_questions">Number of questions:</label>
         <input type="number" name="number_of_questions" id="number_of_questions" onkeyup="changeNumberOfQuestions()"
-            required value="5">
+            required value="5" min="1" max="10">
     </div>
 
     <div id="questions_container">
         <div id="question_1">
             <br>
             <h3 for="question_text_1">Question 1: </h3>
-            <textarea rows="2" cols="40" name="question_text_1" id="question_text_1" placeholder="Write the question here"></textarea>
+            <textarea rows="2" cols="40" name="question_text_1" id="question_text_1"
+                placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_1" id="question_type_1" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -33,7 +39,7 @@
                 <input type="radio" name="is_answer_1" value="3" required>3
                 <input type="radio" name="is_answer_1" value="4" required>4
             </div>
-            <div id="choices_1">
+            <div id="choices_1" class="choice-number">
                 <div>
                     <label for="choice_1">1)</label>
                     <input type="text" name="choice_1" id="choice_1">
@@ -56,9 +62,10 @@
         <div id="question_2">
             <br>
             <h3 for="question_text_2">Question 2: </h3><br>
-            <textarea rows="2" cols="40" name="question_text_2" id="question_text_2" placeholder="Write the question here"></textarea>
+            <textarea rows="2" cols="40" name="question_text_2" id="question_text_2"
+                placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_2" id="question_type_2" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -71,7 +78,7 @@
                 <input type="radio" name="is_answer_2" value="3" required>3
                 <input type="radio" name="is_answer_2" value="4" required>4
             </div>
-            <div id="choices_2">
+            <div id="choices_2" class="choice-number">
                 <div>
                     <label for="choice_5">1)</label>
                     <input type="text" name="choice_5" id="choice_5">
@@ -94,9 +101,10 @@
         <div id="question_3">
             <br>
             <h3 for="question_text_3">Question 3: </h3><br>
-            <textarea rows="2" cols="40" name="question_text_3" id="question_text_3" placeholder="Write the question here"></textarea>
+            <textarea rows="2" cols="40" name="question_text_3" id="question_text_3"
+                placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_3" id="question_type_3" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -109,7 +117,7 @@
                 <input type="radio" name="is_answer_3" value="3" required>3
                 <input type="radio" name="is_answer_3" value="4" required>4
             </div>
-            <div id="choices_3">
+            <div id="choices_3" class="choice-number">
                 <div>
                     <label for="choice_9">1)</label>
                     <input type="text" name="choice_9" id="choice_9">
@@ -132,9 +140,10 @@
         <div id="question_4">
             <br>
             <h3 for="question_text_4">Question 4: </h3><br>
-            <textarea rows="2" cols="40" name="question_text_4" id="question_text_4" placeholder="Write the question here"></textarea>
+            <textarea rows="2" cols="40" name="question_text_4" id="question_text_4"
+                placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_4" id="question_type_4" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -147,7 +156,7 @@
                 <input type="radio" name="is_answer_4" value="3" required>3
                 <input type="radio" name="is_answer_4" value="4" required>4
             </div>
-            <div id="choices_4">
+            <div id="choices_4" class="choice-number">
                 <div>
                     <label for="choice_13">1)</label>
                     <input type="text" name="choice_13" id="choice_13">
@@ -170,9 +179,10 @@
         <div id="question_5">
             <br>
             <h3 for="question_text_5">Question 5: </h3><br>
-            <textarea rows="2" cols="40" name="question_text_5" id="question_text_5" placeholder="Write the question here"></textarea>
+            <textarea rows="2" cols="40" name="question_text_5" id="question_text_5"
+                placeholder="Write the question here"></textarea>
             <br>
-            Type
+            Type:
             <select name="question_type_5" id="question_type_5" onchange="changeQuestionType(this)">
                 <option value="test">Test</option>
                 <option value="text">Text</option>
@@ -185,7 +195,7 @@
                 <input type="radio" name="is_answer_5" value="3" required>3
                 <input type="radio" name="is_answer_5" value="4" required>4
             </div>
-            <div id="choices_5">
+            <div id="choices_5" class="choice-number">
                 <div>
                     <label for="choice_17">1)</label>
                     <input type="text" name="choice_17" id="choice_17">
@@ -208,7 +218,7 @@
     </div>
 
     <div>
-        <label for="category">Category</label>
+        <label for="category"><h3>Category:</h3></label>
         <select name="category" id="category">
             <option>Technology</option>
             <option>Education</option>
@@ -220,10 +230,10 @@
         <label for="tags">Tags, separated by commas:</label>
         <input type="text" name="tags" id="tags">
     </div>
-    <button type="submit">Create activity</button><br><br>
+    <button type="submit" class="btn">Create activity</button><br><br>
 </form>
 
-    {{!-- <div id="readroot" style="display: none">
+{{!-- <div id="readroot" style="display: none">
         <input type="button" value="Remove question"
             onclick="this.parentNode.parentNode.removeChild(this.parentNode);" /> <br>
         <input name="cd" value="title" />
@@ -237,7 +247,7 @@
         <input type="radio" name="something" value="test1" />Test 1<br>
         <input type="radio" name="something" value="test2" />Test 2
     </div> --}}
-    {{!-- 
+{{!-- 
     <form id="canDeleteThis" method="post" action="/create_activityawdaw">
         <span id="writeroot"></span>
         <input type="button" onclick="moreFields()" value="Give me more fields!" />

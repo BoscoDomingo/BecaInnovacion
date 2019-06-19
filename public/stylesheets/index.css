@@ -6,9 +6,14 @@
 
 h1 {
     color: #0078dc;
-    display: inline;
     text-align: center;
-    background: rgba(255, 255, 255, 80%);
+    font-weight: 400;
+    text-decoration: none;
+}
+
+h4 {
+    padding: auto 3px 3px 3px;
+    font-weight: normal;
 }
 
 body {
@@ -18,127 +23,61 @@ body {
     /* background-color: white !important; */
 }
 
-.wrap-login100 {
-    text-align: center;
-    width: 960px;
-    background: rgba(255, 255, 255, 90%);
+.wrap-login {
+    /* display: flex; */
+    max-width: 600px;
+    padding-left: auto;
+    padding-right: auto;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    background: #fff;
     border-radius: 10px;
-    position: absolute;
-    left: 25%;
-    top: 25%;
-    padding: 177px 130px 33px 95px;
-}
-
-a.button1 {
-    display: inline-block;
-    padding: 0.35em 1.2em;
-    border: 0.1em solid #FFFFFF;
-    background: #0078dc;
-    margin: 0 0.3em 0.3em 0;
-    border-radius: 0.12em;
-    box-sizing: border-box;
-    text-decoration: none;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 300;
-    color: #FFFFFF;
+    position: relative;
+    margin: 5ex auto 2ex auto;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
     text-align: center;
-    transition: all 0.2s;
-    border-radius: 10px;
 }
 
-a.button1:hover {
-    color: #000000;
-    background-color: #FFFFFF;
-}
-
-@media all and (max-width:30em) {
-    a.button1 {
-        display: block;
-        margin: 0.4em auto;
-    }
-}
-
-.container {
-    margin: auto;
-    width: 500px;
-    overflow: auto;
-    padding: 3rem 2rem;
-}
-
-
-/* Style the navbar */
-
-.topnav {
-    overflow: hidden;
-    background-color: #0078dc;
-}
-
-
-/* Navbar links */
-
-.topnav a {
-    float: left;
-    display: block;
-    color: black;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    font-size: 17px;
-}
-
-
-/* Navbar links on mouse-over */
-
-.topnav a:hover {
-    background-color: #86c9ff;
-    color: black;
-}
-
-
-/* Active/current link */
-
-.topnav a.active {
-    background-color: #86c9ff;
-    color: white;
-}
-
-
-/* Style the input container */
-
-.topnav .login-container {
-    float: right;
-}
-
-
-/* Style the input field inside the navbar */
-
-.topnav input[type=text] {
-    padding: 6px;
-    margin-top: 8px;
-    font-size: 17px;
+button {
     border: none;
-    width: 150px;
-    /* adjust as needed (as long as it doesn't break the topnav) */
+    cursor: pointer;
 }
 
+.btn {
+    display: block;
+    width: 100%;
+    padding: 15px 15px;
+    border: 0;
+    background: #0078dc;
+    color: #fff;
+    border-radius: 5px;
+    margin: 2rem auto 0px auto;
+    transition: 0.2s;
+    text-decoration: none;
+}
 
-/* Add responsiveness - On small screens, display the navbar vertically instead of horizontally */
+.btn:hover {
+    color: #000000;
+    background-color: #0079dc3a;
+}
 
-@media screen and (max-width: 600px) {
-    .topnav .login-container {
-        float: none;
-    }
-    .topnav a,
-    .topnav input[type=text],
-    .topnav .login-container button {
-        float: none;
-        display: block;
-        text-align: left;
-        width: 100%;
-        margin: 0;
-        padding: 14px;
-    }
-    .topnav input[type=text] {
-        border: 1px solid #ccc;
-    }
+.btn-link {
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    color: #0000EE;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 2%;
+    max-width: 20%;
+    max-height: 20%;
 }
