@@ -426,7 +426,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
             ownActivities: req.session.ownActivities
         });
     }
-}).post('/dashboard/refresh-activities', async (req, res, next) => {
+}).get('/dashboard/refresh-activities', async (req, res, next) => {
     try {
         req.session.activities = await getAllActivities();
         if (isStudent(req.session)) {
