@@ -4,12 +4,13 @@
     <ul>
         {{#each activities}}
         <li>Activity ID: {{this.activityID}}</li>
-        <li>Video: <a href="{{this.videoLink}}"></a></li>
+        <li>Created by: {{this.teacherID}}</li>
+        <li>Video: <a href="{{this.videoLink}}">Link</a></li>
         <li>Question IDs: {{this.questionIDs}}</li>
         {{#each this.questions}}
-        <li>Question: {{this.questionText}}</li>
+        <li>Question Text: {{this.questionText}}</li>
+<li>Choices: {{this.questionChoices}}</li><br>       
          {{/each}}
-        <li>Teacher ID: {{this.teacherID}}</li>
         <br>
         {{/each}}
     </ul>
