@@ -1,1 +1,19 @@
+<script src="/javascripts/activity.js"></script>
 <h1>Inside {{activityID}}</h1>
+
+<div id="videoPlayer">
+    <iframe width="1030" height="580" src={{videoLink}} frameborder="0"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+<form method="post">
+    {{#each questions as |question|}}
+    <section>
+        <h1>{{@key}}) {{this.questionText}}</h1>
+        {{#each this.questionChoices as |choice|}}
+        <input type="radio" name={{question.questionID}} value={{@key}}>{{this}} <br>
+        {{/each}}
+    </section>
+    {{/each}}
+    <button type="submit">Finish</button>
+</form>
