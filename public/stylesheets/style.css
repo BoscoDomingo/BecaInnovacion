@@ -50,7 +50,7 @@ h1.title {
 }
 
 .student-form label {
-    display: block;
+    display: inline;
 }
 
 .student-form .appendEmail {
@@ -60,6 +60,7 @@ h1.title {
 
 .student-form .emailInput {
     width: 50%;
+    display: block;
 }
 
 .student-form input {
@@ -87,7 +88,6 @@ h1.title {
 
 .teacher-form .appendEmail {
     display: inline-block;
-    text-align: right;
 }
 
 .teacher-form .emailInput {

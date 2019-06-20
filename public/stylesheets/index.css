@@ -66,9 +66,9 @@ button {
     outline: none;
     background: none;
     cursor: pointer;
-    color: #0000EE;
-    padding: 0;
-    text-decoration: underline;
+    color: white;
+    padding: 14px 16px;
+    text-decoration: none;
     font-family: inherit;
     font-size: inherit;
 }
