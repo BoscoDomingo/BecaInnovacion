@@ -1,7 +1,7 @@
 'use strict'
 let questionCounter = 5;
 //TODO: Order:
-/*  1st: Basic form, 5 test questions
+/*  1st: Basic form, 5 test questions - DONE
     2nd: Allow to change number of questions => implement changeNumberOfQuestions() 
     3rd: allow different question types => implement changeQuestionType()*/
 
@@ -25,14 +25,8 @@ function changeNumberOfQuestions() {
 
 }
 
-function changeQuestionType(question) {
-    const questionID = question.id.substring(13);
-    console.log("Changing question with id: " + questionID);
-    //TODO: allow for test and text questions
-}
 
 let counter = 0;
-
 function moreFields() {
     counter++;
     let newFields = document.getElementById("readroot").cloneNode(true);
@@ -49,6 +43,13 @@ function moreFields() {
 }
 window.onload = moreFields;
 
-document.getElementById("activity-form").addEventListener("onsubmit", () => {
 
+function changeQuestionType(question) {
+    const questionID = question.id.substring(13);
+    console.log("Changing question with id: " + questionID);
+    //TODO: allow for test and text questions
+}
+
+document.getElementById("activity-form").addEventListener("onsubmit", () => {
+    //TODO: Validate form
 })
