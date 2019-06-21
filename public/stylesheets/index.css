@@ -25,7 +25,7 @@ body {
 
 .wrap-login {
     /* display: flex; */
-    max-width: 600px;
+    max-width: 700px;
     padding-left: auto;
     padding-right: auto;
     padding-top: 30px;
@@ -66,9 +66,9 @@ button {
     outline: none;
     background: none;
     cursor: pointer;
-    color: #0000EE;
-    padding: 0;
-    text-decoration: underline;
+    color: white;
+    padding: 14px 16px;
+    text-decoration: none;
     font-family: inherit;
     font-size: inherit;
 }

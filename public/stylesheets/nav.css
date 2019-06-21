@@ -1,8 +1,16 @@
 .container {
     margin: auto;
-    width: 500px;
+    margin-bottom: 3rem;
     overflow: auto;
-    padding: 3rem 2rem;
+    padding: 3rem 4rem;
+}
+
+.acontainer {
+    width: 900px !important;
+}
+
+h3 button {
+    color: white;
 }
 
 .btn-link {
@@ -27,6 +35,16 @@ button {
 
 .topnav a {
     float: left;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+
+.topnav .logout {
+    float: right;
     display: block;
     color: white;
     text-align: center;

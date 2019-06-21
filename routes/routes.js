@@ -372,7 +372,7 @@ router.get('/contact', (req, res, next) => {
         title: 'Contact us'
     });
 });
-router.post('/logout', redirectIfNotLoggedIn, (req, res, next) => {
+router.get('/logout', redirectIfNotLoggedIn, (req, res, next) => {
     req.session.destroy((err) => {
         if (err) {
             res.locals.error = err;
