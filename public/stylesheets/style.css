@@ -40,7 +40,8 @@ h1.title {
     background: #ffffff;
     border-radius: 5px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
-    margin-top: 5rem;
+    margin-top: 5%;
+    margin-bottom: 5%;
     width: 600px;
 }
 
@@ -93,7 +94,7 @@ h1.title {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     /* grid-template-columns: 1fr 1fr 1fr 1fr 1fr; */
     grid-gap: 1rem 5rem;
-    margin: 0rem 5% 0 5%;
+    margin: 0rem 5% 5% 5%;
 }
 
 .activity-grid>div {
@@ -107,11 +108,29 @@ h1.title {
 .activity-container {
     overflow: auto;
     margin-top: 5rem;
+    transition: 0.2s;
+}
+
+.activity-container:hover {
+    transform: scale(1.10);
+    cursor: pointer;
+}
+
+.activity-container:active {
+    background-color: #0079dc3d;
+}
+
+a.fill-div {
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-decoration: none;
 }
 
 .student-form {
     padding: 2rem;
     background: #ffffff;
+    margin-bottom: 10%;
 }
 
 .student-form label {
