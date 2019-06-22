@@ -38,7 +38,7 @@ button {
     text-decoration: none;
     font-size: 17px;
 }
-.topnav .logout {
+.topnav .right-button {
     float: right;
     display: block;
     color: white;
