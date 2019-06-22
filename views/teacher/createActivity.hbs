@@ -14,9 +14,13 @@
         <input type="text" name="video_link" id="video_link" required placeholder="https://www.youtube.com/watch?v=">
     </div>
     <div>
-        <label for="number_of_questions">Number of questions:</label>
+        <label for="number_of_questions">Number of questions (Leave on 5! for now):</label>
         <input type="number" name="number_of_questions" id="number_of_questions" onkeyup="changeNumberOfQuestions()"
             required value="5" min="1" max="10">
+    </div>
+    <div>
+        <label for="points_multiplier">Points multiplier (grade obtained * this number = points awarded to student):</label>
+        <input type="number" name="points_multiplier" id="points_multiplier" required value="10" min="1">
     </div>
 
     <div id="questions_container">
