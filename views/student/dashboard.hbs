@@ -1,6 +1,6 @@
 <h1>Welcome to the Student Section</h1>
 
-    <a href="dashboard/refresh-activities">Refresh Activities!</a>
+<a href="dashboard/refresh-activities">Refresh Activities!</a>
 {{# if activities}}
 <table>
     <ul>
@@ -8,9 +8,8 @@
         <li>
             <h2>{{this.title}}</h2>
         </li>
-        <li>Activity ID: <a href={{this.activityLink}}>{{this.activityID}}</a></li>
+        <li>Activity ID: {{this.activityID}} <a href={{this.activityLink}}>Go to activity!</a></li>
         <li>Created by: {{this.teacherID}}</li>
-        <li>Video: <a href="{{this.videoLink}}">Link</a></li>
         <li>Category: {{this.category}}</li>
         <li>Tags: {{this.tags}}</li>
         <br>
