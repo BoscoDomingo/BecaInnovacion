@@ -5,6 +5,10 @@
     padding: 3rem 2rem;
 }
 
+h3 button {
+    color: white;
+}
+
 .btn-link {
     float: right;
 }
