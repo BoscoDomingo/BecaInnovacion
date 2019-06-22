@@ -441,8 +441,6 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     //TODO: delete
     console.log("Current session's activities: ");
     console.log(req.session.activities);
-    // console.log("First activity's questions: ");
-    // console.log(Object.values(req.session.activities)[0].questions);
 
     if (isStudent(req.session)) {
         if (!req.session.completedActivities) {//if student, we retrieve completed activities from DB
@@ -452,12 +450,17 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
                 throw new Error(error);
             }
         }
-        console.log(req.session.completedActivities);
-        res.render('student/dashboard', {
-            title: 'Home Page',
-            layout: 'NavBarLayoutS',
-            activities: req.session.activities,
-            completedActivities: req.session.completedActivities
+        console.log(req.session.completedActivities); //TODO: delete
+        req.session.save((err) => {
+            if (err) {
+                console.log(err);
+                res.redirect('/');
+            } else res.render('student/dashboard', {
+                title: 'Home Page',
+                layout: 'NavBarLayoutS',
+                activities: req.session.activities,
+                completedActivities: req.session.completedActivities
+            });
         });
     } else {//if teacher or admin
         if (!req.session.ownActivities) { //retrieve activities created by this teacher
@@ -467,11 +470,17 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
                 throw new Error(error);
             }
         }
-        res.render('teacher/dashboard', {
-            title: 'Teacher Home Page',
-            layout: 'NavBarLayoutT',
-            activities: req.session.activities,
-            ownActivities: req.session.ownActivities
+        req.session.save((err) => {
+            if (err) {
+                console.log(err);
+                res.redirect('/');
+            } else
+                res.render('teacher/dashboard', {
+                    title: 'Teacher Home Page',
+                    layout: 'NavBarLayoutT',
+                    activities: req.session.activities,
+                    ownActivities: req.session.ownActivities
+                });
         });
     }
 }).get('/dashboard/refresh-activities', async (req, res, next) => {
@@ -482,10 +491,15 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
         } else {
             req.session.ownActivities = await getOwnActivities(res.locals.user.teacherID);
         }
+        req.session.save((err) => {
+            if (err) {
+                console.log(err);
+                res.redirect('/');
+            } else res.redirect('/dashboard');
+        });
     } catch (error) {
         throw new Error(error);
     }
-    res.redirect('/dashboard');
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
     if (res.locals.userType === "student") {
