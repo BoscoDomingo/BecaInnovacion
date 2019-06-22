@@ -1,0 +1,43 @@
+h1.title {
+    color: #0078dc;
+    text-align: center;
+    padding: 10px 10px 5px 10px;
+    font-weight: bold;
+}
+
+img {
+    padding-bottom: 50px;
+}
+
+.wrap-input {
+    width: 100%;
+    position: relative;
+    background-color: #f7f7f7;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    border-color: #0079dca2;
+    margin: 2ex auto 2ex auto;
+}
+
+.studentemail {
+    width: 69% !important;
+    align-self: flex-start;
+}
+
+.input100 {
+    font-family: Poppins-Regular;
+    color: #333333;
+    line-height: 1.2;
+    font-size: 18px;
+    display: inline-block;
+    width: 100%;
+    background: transparent;
+    height: 60px;
+    padding: 0 20px;
+    transition: all 0.2s;
+    font-family: "Segoe UI", "Open Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.input100:focus {
+    background-color: #0079dc0c;
+}

@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="stylesheets/index.css">
     <link rel="stylesheet" href="stylesheets/style.css">
-    <link rel="stylesheet" href="stylesheets/main.css">
     <script type="text/javascript" src="javascripts/signUpStudent.js"></script>
     <title>{{title}}</title>
 </head>
@@ -26,7 +26,8 @@
     {{/if}}
 
     <section class="container">
-        <form id="student-form" action="/student-sign-up" method="POST">
+        <form id="sign-up-form" class="student-form" action="/student-sign-up" method="POST">
+            <h1 class="title">Student Sign Up</h1>
             <div>
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name" required>
@@ -58,8 +59,11 @@
                 <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" required>
                 <p class="passwordError" id="validatePasswords"></p>
             </div>
-
-            <button type="submit">Sign Up</button>
+            <div>
+                <label for="includeInRankings">Want to be included in rankings?</label>
+                <input type="checkbox" id="includeInRankings" name="includeInRankings">
+            </div>
+            <button type="submit" class="btn">Sign Up</button>
         </form>
     </section>
 </body>

@@ -1,0 +1,56 @@
+body {
+    background-color: rgba(95, 167, 255, 0.199);
+    background-image: none !important;
+}
+
+.activity_form {
+    background-color: white;
+    padding: 1rem 3rem;
+    margin: 5rem auto;
+}
+
+h3 {
+    /* margin-bottom: 0.5rem; */
+    color: #0078dc;
+}
+
+textarea {
+    margin: 1rem auto 0px auto;
+    border-radius: 2px;
+    background-color: #afdbff21;
+    width: 100%;
+    height: 5rem;
+    padding: 0.5rem 0.5rem;
+}
+
+input[type=radio] {
+    width: auto !important;
+    display: inline;
+    margin: 1rem 0.5rem 1rem 1.5rem;
+}
+
+input[type=text] {
+    margin-top: 0.5rem;
+}
+
+select {
+    margin: 1rem 0.5rem;
+    background-color: #afdbff21;
+    border-radius: 2px;
+}
+
+.container {
+    max-width: 690px !important;
+    width: 690px;
+}
+
+.choice-number input {
+    width: 95%;
+    float: right;
+}
+
+.choice-number label {
+    display: inline-block;
+    line-height: 3.3rem;
+    margin-top: -1px;
+}
