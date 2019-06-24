@@ -5,15 +5,15 @@
 <table>
     <ul class="activity-grid">
         {{#each activities}}
-        <div  class="activity-container">
-        <li>
-            <h2>{{this.title}}</h2>
-        </li>
-        <li>Activity ID: {{this.activityID}} <a href={{this.activityLink}}>Go to activity!</a></li>
-        <li>Created by: {{this.teacherID}}</li>
-        <li>Category: {{this.category}}</li>
-        <li>Tags: {{this.tags}}</li>
-        <br>
+        <div class="activity-container" onclick="location.href='{{this.activityLink}}';">
+            <li>
+                <h2>{{this.title}}</h2>
+            </li>
+            <li>Activity ID: {{this.activityID}} <a href={{this.activityLink}}>Go to activity!</a></li>
+            <li>Created by: {{this.teacherID}}</li>
+            <li>Category: {{this.category}}</li>
+            <li>Tags: {{this.tags}}</li>
+            <br>
         </div>
         {{/each}}
     </ul>
