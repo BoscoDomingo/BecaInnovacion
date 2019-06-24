@@ -1,2 +1,38 @@
 <h1 class="title">Welcome to the Teacher Section</h1>
-<a href="/create-activity"  class="btn2 btn3">Create activity</a>
+<a href="/create-activity" class="btn2 btn3">Create activity</a>
+<a href="dashboard/refresh-activities" class="btn2 btn3">Refresh Activities!</a>
+
+{{# if activities}}
+<h1>All activities:</h1>
+<table id="activities_table">
+    <ul class="activity-grid">
+        {{#each activities}}
+        <div class="activity-container" onclick="location.href='{{this.activityLink}}';">
+            <h2>{{this.title}}</h2>
+            <li>Activity ID: {{this.activityID}}</li>
+            <li>Created by: {{this.teacherID}}</li>
+            <li>Category: {{this.category}}</li>
+            <li>Tags: {{this.tags}}</li>
+            <br>
+        </div>
+        {{/each}}
+    </ul>
+</table>
+{{/if}}
+{{# if ownActivities}}
+<h1>Your activities:</h1>
+<table id="own_activities_table">
+    <ul class="activity-grid">
+        {{#each ownActivities}}
+        <div class="activity-container" onclick="location.href='{{this.activityLink}}';">
+            <h2>{{this.title}}</h2>
+            <li>Activity ID: {{this.activityID}}</li>
+            <li>Created by: {{this.teacherID}}</li>
+            <li>Category: {{this.category}}</li>
+            <li>Tags: {{this.tags}}</li>
+            <br>
+        </div>
+        {{/each}}
+    </ul>
+</table>
+{{/if}}

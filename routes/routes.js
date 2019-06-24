@@ -557,8 +557,12 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
 
 //Activities
 router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
-    const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id,
-        activity = req.session.activities[id];
+    const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id;
+    if (!isStudent(req.session)) { //redirect teachers and admins to activity-summary
+        return res.redirect(`/activity-summary/${id}`);
+    }
+
+    const activity = req.session.activities[id];
     if (req.session.completedActivities[id] && req.session.completedActivities[id].numberOfAttempts >= activity.numberOfAttempts) {
         res.redirect(`/activity/${id}/done`);
     }
