@@ -9,8 +9,8 @@
     <input type="text" id="searchbar" onkeyup="searchByID()" placeholder="Search by ID">
     <table class="rankingTable" id="ranking_table">
         <tr>
-            <th>Student ID</th>
-            <th>Points</th>
+            <th onclick="sortTable(0)">Student ID</th>
+            <th onclick="sortTable(1)">Points</th>
         </tr>
         {{#each students as |student|}}
         <tr>
