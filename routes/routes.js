@@ -71,7 +71,8 @@ const arrayOfObjectsToObject = (array, keyField) =>//[{ activityID: "A1", questi
     }, {})
 //source: https://medium.com/dailyjs/rewriting-javascript-converting-an-array-of-objects-to-an-object-ec579cafbfc7
 const renameKeys = (newKeys, obj) => //renames an object's keys based on another object with the new names
-    Object.keys(obj).reduce((acc, key) => ({ ...acc, ...{ [newKeys[key] || key]: obj[key] } }), {}); //source: https://www.freecodecamp.org/news/30-seconds-of-code-rename-many-object-keys-in-javascript-268f279c7bfa/
+    Object.keys(obj).reduce((acc, key) => ({ ...acc, ...{ [newKeys[key] || key]: obj[key] } }), {});
+//source: https://www.freecodecamp.org/news/30-seconds-of-code-rename-many-object-keys-in-javascript-268f279c7bfa/
 
 const isStudent = (session) => {
     return session.userType === "student" ? true : false;
@@ -214,16 +215,20 @@ async function insertOrUpdateTable(tableName, args, action) {
     switch (tableName) {
         case "student_activities": {
             if (action === "insert") {
-                teacherPool.query("INSERT INTO students_activities (studentID, activityID, grade, pointsAwarded) VALUES(?,?,?,?);",
-                    args, (err, res) => {
-                        if (err) {
-                            console.log("WARNING: Error ocurred during DB Query\n", err);
-                            Promise.reject("Error during DB Query. Please contact an administrator");
-                        } else {
-                            console.log("Successfully inserted student_activity");
-                            Promise.resolve(res);
-                        }
-                    })
+                teacherPool.query("INSERT INTO students_activities (studentID, activityID, grade, pointsAwarded) VALUES(?,?,?,?);", args, (err, res) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        Promise.reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        console.log("Successfully inserted student_activity");
+                        teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[5], args[0]], (err, result) => {
+                            if (err) {
+                                console.log("WARNING: Error ocurred during DB Query\n", err);
+                                Promise.reject("Error during DB Query. Please contact an administrator");
+                            } else Promise.resolve(res);
+                        });
+                    }
+                })
             } else if (action === "update") {
                 teacherPool.query(`UPDATE students_activities SET grade = ${args[2]}, pointsAwarded = ${args[3]}, numberOfAttempts = ${args[4]} `
                     + `WHERE studentID = '${args[0]}' AND activityID = '${args[1]}';`, (err, res) => {
@@ -232,7 +237,12 @@ async function insertOrUpdateTable(tableName, args, action) {
                             Promise.reject("Error during DB Query. Please contact an administrator");
                         } else {
                             console.log("Successfully updated student_activity");
-                            Promise.resolve(res);
+                            teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[5], args[0]], (err, result) => {
+                                if (err) {
+                                    console.log("WARNING: Error ocurred during DB Query\n", err);
+                                    Promise.reject("Error during DB Query. Please contact an administrator");
+                                } else Promise.resolve(res);
+                            });
                         }
                     })
             }
@@ -571,6 +581,7 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
 }).post('/activity/:id', redirectIfNotLoggedIn, async (req, res, next) => {
     const currActivity = req.session.activities[req.params.id];
     let correctAnswers = 0,
+        oldPoints = 0,
         DBAction = "update",
         doneActivity = req.session.completedActivities[currActivity.activityID];
 
@@ -584,6 +595,8 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
             completedOn: new Date(), //only for the purpose of having the date here, DB doesn't need it
             numberOfAttempts: 0
         };
+    } else {
+        oldPoints = doneActivity.pointsAwarded;
     }
 
     Object.values(currActivity.questions).forEach(element => {//calculating the grade
@@ -599,9 +612,11 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
         req.session.betterActivityResult = false;
     }
     doneActivity.numberOfAttempts = doneActivity.numberOfAttempts + 1; //attempts done always go up
+    let pointsForUpdate = doneActivity.pointsAwarded - oldPoints;
 
     try {
-        await insertOrUpdateTable("student_activities", [doneActivity.studentID, doneActivity.activityID, doneActivity.grade, doneActivity.pointsAwarded, doneActivity.numberOfAttempts], DBAction);
+        await insertOrUpdateTable("student_activities",
+            [doneActivity.studentID, doneActivity.activityID, doneActivity.grade, doneActivity.pointsAwarded, doneActivity.numberOfAttempts, pointsForUpdate], DBAction);
         console.log(`${DBAction} correct.\ndoneActivity:`)
         console.log(doneActivity);
     } catch (error) {
@@ -623,6 +638,7 @@ router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
     const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id,
         complActivity = req.session.completedActivities[id],
         currActivity = req.session.activities[id];
+    //TODO: Delete
     console.log("\n y en /done tenemos req.session.completedActivities:");
     console.log(req.session.completedActivities);
     //Once the activity is done, show the results
