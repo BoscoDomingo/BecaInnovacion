@@ -1,8 +1,12 @@
 .container {
     margin: auto;
-    width: 500px;
+    margin-bottom: 3rem;
     overflow: auto;
-    padding: 3rem 2rem;
+    padding: 3rem 4rem;
+}
+
+.acontainer {
+    width: 900px !important;
 }
 
 h3 button {

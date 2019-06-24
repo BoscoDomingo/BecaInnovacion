@@ -12,6 +12,9 @@
 </head>
 
 <body>
+    <header>
+        <h1>Welcome to EFAPC's interactive platform</h1>
+    </header>
     {{# if signUpSuccess}}
     <h1 class="text1" style="color: red">Sign Up Successful!</h1>
     {{/if}}
@@ -19,7 +22,7 @@
     <section>
         <ul>
             {{#each errors}}
-            <li>{{this.msg}}</li>
+            <li><h1 class="error">{{this.msg}}</h1></li>
             {{/each}}
         </ul>
     </section>
@@ -31,11 +34,13 @@
             <section class="container">
                 <form id="login-form" class="student-form" action="/student-login" method="POST">
                     <div>
-                        <input type="text" id="email" name="email" placeholder="user" class="wrap-input input100 studentemail" required>
+                        <input type="text" id="email" name="email" placeholder="user"
+                            class="wrap-input input100 studentemail" required>
                         <label for="email" class="appendEmail">@alumnos.upm.es</label>
                     </div>
                     <div>
-                        <input type="password" id="password" placeholder="password" name="password" class="wrap-input input100" required>
+                        <input type="password" id="password" placeholder="password" name="password"
+                            class="wrap-input input100" required>
                     </div>
                     <button type="submit" class="btn">Submit</button>
                 </form>
@@ -46,4 +51,5 @@
     </div>
 </body>
 <script> </script> {{!-- Avoids initial transition bug  --}}
+
 </html>

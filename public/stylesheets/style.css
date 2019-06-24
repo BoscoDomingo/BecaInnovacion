@@ -27,7 +27,28 @@ header {
     text-align: center;
 }
 
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    background-color: #0079dc31;
+}
+
+th,
+td {
+    padding: 0.25rem;
+    text-align: left;
+    border: 1px solid #ccc;
+}
+
+tbody tr:nth-child(even) {
+    background: #eee;
+}
+
 h1.title {
+    margin: 2% 0px;
     color: #0078dc;
     text-align: center;
     /* padding: 10px 10px 5px 10px; */
@@ -35,26 +56,109 @@ h1.title {
 }
 
 th {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .container {
     margin: auto;
-    max-width: 500px;
     overflow: auto;
     background: #ffffff;
     border-radius: 5px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
-    margin-top: 5rem;
+    margin-top: 2%;
+    margin-bottom: 5%;
+    width: 600px;
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    padding-top: 50px;
+    height: 0;
+    overflow: hidden;
+    border-radius: 3px;
+    margin: 1.5rem 0 2.5rem 0;
+}
+
+.video-container iframe,
+.video-container object,
+.video-container embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.answer-container {
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: #afdbffa2;
+    border-radius: 1px;
+    border-color: #0079dc31;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.answer-container h1 {
+    color: #0079dc;
+    margin-bottom: 1rem;
+}
+
+.answer-container input {
+    margin: 0.5rem 0.5rem 0.5rem 1.5rem;
+}
+
+.answer-container p {
+    display: inline;
+    margin-left: 0.5rem;
+}
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 1rem 5rem;
+    margin: 0rem 10% 0px 10%;
+}
+
+.activity-grid>div {
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 1px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
+    width: 15rem;
+}
+
+.activity-container {
+    overflow: auto;
+    margin-top: 4rem;
+    transition: 0.2s;
+}
+
+.activity-container:hover {
+    transform: scale(1.10);
+    cursor: pointer;
+}
+
+.activity-container:active {
+    background-color: #0079dc3d;
+}
+
+a.fill-div {
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-decoration: none;
 }
 
 .student-form {
     padding: 2rem;
     background: #ffffff;
+    margin-bottom: 10%;
 }
 
 .student-form label {
-    display: inline;
+    display: block;
 }
 
 .student-form .appendEmail {
@@ -64,13 +168,22 @@ th {
 
 .student-form .emailInput {
     width: 50%;
-    display: block;
+    display: inline-block;
 }
 
 .student-form input {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    background-color: #afdbff21;
+}
+
+.ranking-form {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 1.5rem;
     border-radius: 3px;
     border: 1px solid #ccc;
     background-color: #afdbff21;
@@ -156,4 +269,33 @@ th {
 .text7 {
     margin-left: 10px;
     color: red;
+}
+
+.btn2 {
+    display: block;
+    width: 100%;
+    padding: 15px 15px;
+    border: 0;
+    background: #0078dc;
+    color: #fff;
+    border-radius: 5px;
+    margin: 2rem auto 0px auto;
+    transition: 0.2s;
+    text-decoration: none;
+}
+
+.btn2:hover {
+    color: #000000;
+    background-color: #0079dc3a;
+}
+
+.btn3 {
+    text-align: center;
+    max-width: 10rem;
+}
+
+.inline {
+    width: 4% !important;
+    margin-right: 0.5rem;
+    margin-top: 1.5rem;
 }

@@ -9,6 +9,12 @@ img {
     padding-bottom: 50px;
 }
 
+header {
+    background: #ffffff;
+    padding: 1rem;
+    text-align: center;
+}
+
 .wrap-input {
     width: 100%;
     position: relative;
@@ -20,7 +26,7 @@ img {
 }
 
 .studentemail {
-    width: 69% !important;
+    width: 76% !important;
     align-self: flex-start;
 }
 
@@ -40,4 +46,13 @@ img {
 
 .input100:focus {
     background-color: #0079dc0c;
+}
+
+.error {
+    color: red !important;
+    size: bold !important;
+    text-align: center;
+    width: 100%;
+    margin-top: 1rem;
+    background-color: white;
 }
