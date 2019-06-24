@@ -502,16 +502,47 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     }
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
-    if (res.locals.userType === "student") {
-        //retrieve only students who want to be seen in ranking
-        //TODO:
-    } else {
-        //retrieve all students
-        //TODO:
+    let students = {},
+        error;
+    try {
+        if (isStudent(req.session)) {
+            students = await new Promise((resolve, reject) => {
+                studentPool.query('SELECT studentID, totalPoints FROM students WHERE includeInRankings = 1 OR studentID = ? ORDER BY totalPoints DESC;', res.locals.user.studentID,
+                    (err, res) => {
+                        if (err) {
+                            console.log("WARNING: Error ocurred during DB Query\n", err);
+                            reject("Error during DB Query. Please contact an administrator");
+                        } else {
+                            resolve(arrayOfObjectsToObject(res, "studentID"));
+                        }
+                    });
+            });
+            res.render('ranking', {
+                students: students,
+                error: error,
+                layout: 'NavBarLayoutS'
+            });
+        } else {
+            students = await new Promise((resolve, reject) => {
+                teacherPool.query('SELECT studentID, totalPoints FROM students ORDER BY totalPoints DESC;', (err, res) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        resolve(arrayOfObjectsToObject(res, "studentID"));
+                    }
+                });
+            });
+            res.render('ranking', {
+                students: students,
+                error: error,
+                layout: 'NavBarLayoutT'
+            });
+        }
+    } catch (err) {
+        error = err;
     }
-    res.render('ranking', {
-        ranking: {} //TODO:fill this with the studentIDs and their points
-    });
+    console.log(error ? error : students);
 });
 
 //Activities
@@ -747,7 +778,7 @@ router.get('/student-sign-up', (req, res, next) => {
 }).post('/student-sign-up', (req, res, next) => {
     req.body.email = convertToUPMEmail(req.body.email);
     req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
-    req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx);
+    // req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx); //TODO: uncomment
     let errors = req.validationErrors();
     if (errors) {
         console.log("There are errors on sign up: ", errors);

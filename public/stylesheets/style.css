@@ -34,6 +34,10 @@ h1.title {
     font-weight: bold;
 }
 
+th {
+  cursor: pointer;
+}
+
 .container {
     margin: auto;
     max-width: 500px;
