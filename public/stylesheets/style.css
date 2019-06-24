@@ -27,7 +27,28 @@ header {
     text-align: center;
 }
 
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    background-color: #0079dc31;
+}
+
+th,
+td {
+    padding: 0.25rem;
+    text-align: left;
+    border: 1px solid #ccc;
+}
+
+tbody tr:nth-child(even) {
+    background: #eee;
+}
+
 h1.title {
+    margin: 2% 0px;
     color: #0078dc;
     text-align: center;
     /* padding: 10px 10px 5px 10px; */
@@ -35,7 +56,7 @@ h1.title {
 }
 
 th {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .container {
@@ -44,7 +65,7 @@ th {
     background: #ffffff;
     border-radius: 5px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
-    margin-top: 5%;
+    margin-top: 2%;
     margin-bottom: 5%;
     width: 600px;
 }
@@ -96,9 +117,8 @@ th {
 .activity-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    /* grid-template-columns: 1fr 1fr 1fr 1fr 1fr; */
     grid-gap: 1rem 5rem;
-    margin: 0rem 5% 5% 5%;
+    margin: 0rem 10% 0px 10%;
 }
 
 .activity-grid>div {
@@ -111,7 +131,7 @@ th {
 
 .activity-container {
     overflow: auto;
-    margin-top: 5rem;
+    margin-top: 4rem;
     transition: 0.2s;
 }
 
@@ -155,6 +175,15 @@ a.fill-div {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    background-color: #afdbff21;
+}
+
+.ranking-form {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 1.5rem;
     border-radius: 3px;
     border: 1px solid #ccc;
     background-color: #afdbff21;
@@ -258,4 +287,15 @@ a.fill-div {
 .btn2:hover {
     color: #000000;
     background-color: #0079dc3a;
+}
+
+.btn3 {
+    text-align: center;
+    max-width: 10rem;
+}
+
+.inline {
+    width: 4% !important;
+    margin-right: 0.5rem;
+    margin-top: 1.5rem;
 }
