@@ -134,7 +134,7 @@ a.fill-div {
 }
 
 .student-form label {
-    display: inline;
+    display: block;
 }
 
 .student-form .appendEmail {
@@ -144,7 +144,7 @@ a.fill-div {
 
 .student-form .emailInput {
     width: 50%;
-    display: block;
+    display: inline-block;
 }
 
 .student-form input {
