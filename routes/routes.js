@@ -502,16 +502,46 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     }
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
-    if (res.locals.userType === "student") {
-        //retrieve only students who want to be seen in ranking
-        //TODO:
-    } else {
-        //retrieve all students
-        //TODO:
+    let students = {},
+        error;
+    try {
+        if (isStudent(req.session)) {
+            students = await new Promise((resolve, reject) => {
+                studentPool.query('SELECT studentID, totalPoints FROM students WHERE includeInRankings=1 ORDER BY totalPoints DESC;', (err, res) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        resolve(arrayOfObjectsToObject(res, "studentID"));
+                    }
+                });
+            });
+            res.render('ranking', {
+                students: students,
+                error: error,
+                layout: 'NavBarLayoutS'
+            });
+        } else {
+            students = await new Promise((resolve, reject) => {
+                teacherPool.query('SELECT studentID, totalPoints FROM students ORDER BY totalPoints DESC;', (err, res) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        resolve(arrayOfObjectsToObject(res, "studentID"));
+                    }
+                });
+            });
+            res.render('ranking', {
+                students: students,
+                error: error,
+                layout: 'NavBarLayoutT'
+            });
+        }
+    } catch (err) {
+        error = err;
     }
-    res.render('ranking', {
-        ranking: {} //TODO:fill this with the studentIDs and their points
-    });
+    console.log(error ? error : students);
 });
 
 //Activities

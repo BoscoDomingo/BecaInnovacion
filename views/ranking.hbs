@@ -1,0 +1,23 @@
+<h1>This is the ranking</h1>
+<script type="text/javascript" src="javascripts/ranking.js"></script>
+<div id="ranking">
+    {{#if error}}
+    <h2 class="error" id="error">
+        There was an error contacting DB. Please try again. If problem persists, contact an administrator
+    </h2>
+    {{else}}
+    <input type="text" id="searchbar" onkeyup="searchByID()" placeholder="Search by ID">
+    <table class="rankingTable" id="ranking_table">
+        <tr>
+            <th>Student ID</th>
+            <th>Points</th>
+        </tr>
+        {{#each students as |student|}}
+        <tr>
+            <td>{{this.studentID}}</td>
+            <td>{{this.totalPoints}}</td>
+        </tr>
+        {{/each}}
+    </table>
+    {{/if}}
+</div>
