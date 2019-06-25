@@ -1,35 +1,50 @@
-<h1 class="title">Welcome to the Student Section</h1>
+<head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+    <script type="text/javascript" src="javascripts/dashboard.js"></script>
+</head>
 
+<h1 class="title">Welcome to the Student Section</h1>
 <a href="dashboard/refresh-activities" class="btn2 btn3">Refresh Activities!</a>
-{{# if activities}}
-<table>
-    <ul class="activity-grid">
+
+<div id="activity_list">
+    <h1>Activity list:</h1>
+    {{#if activities}}
+    <input class="search" placeholder="Search..."/>
+    <span class="sort" data-sort="id">Sort by ID</span>
+    <span class="sort" data-sort="title">Sort by Title</span>
+    <span class="sort" data-sort="author">Sort by Author</span>
+    <span class="sort" data-sort="category">Sort by Category</span>
+    <ul class="list">
         {{#each activities}}
-        <div class="activity-container" onclick="location.href='{{this.activityLink}}';">
-            <h2>{{this.title}}</h2>
-            <li>Activity ID: {{this.activityID}}</li>
-            <li>Created by: {{this.teacherID}}</li>
-            <li>Category: {{this.category}}</li>
-            <li>Tags: {{this.tags}}</li>
-            <br>
-        </div>
+        <li onclick="location.href='{{this.activityLink}}';">
+            <h2 class="title">{{this.title}}</h2>
+            Activity ID:<h4 class="id">{{this.activityID}}</h4>
+            Created by:<h4 class="author">{{this.teacherID}}</h4>
+            Category:<h4 class="category">{{this.category}}</h4>
+            Tags:<h4 class="tags">{{this.tags}}</h4>
+        </li>
         {{/each}}
     </ul>
-</table>
-{{/if}}
-{{# if completedActivities}}
-<table>
-    <ul class="activity-grid">
+    {{/if}}
+</div>
+<div id="completed_activity_list">
+    <h1>Completed activities:</h1>
+    {{#if completedActivities}}
+    <input class="search" placeholder="Search..." />
+    <span class="sort" data-sort="id">Sort by ID</span>
+    <span class="sort" data-sort="title">Sort by Title</span>
+    <span class="sort" data-sort="author">Sort by Author</span>
+    <span class="sort" data-sort="category">Sort by Category</span>
+    <ul class="list">
         {{#each completedActivities}}
-        <div class="activity-container" onclick="location.href='{{this.activityLink}}';">
-            <h2>{{this.title}}</h2>
-            <li>Activity ID: {{this.activityID}}</li>
-            <li>Created by: {{this.teacherID}}</li>
-            <li>Category: {{this.category}}</li>
-            <li>Tags: {{this.tags}}</li>
-            <br>
-        </div>
+        <li onclick="location.href='{{this.activityLink}}';">
+            <h2 class="title">{{this.title}}</h2>
+            <h4 class="id">Activity ID: {{this.activityID}}</h4>
+            <h4 class="author">Created by: {{this.teacherID}}</h4>
+            <h4 class="category">Category: {{this.category}}</h4>
+            <h4 class="tags">Tags: {{this.tags}}</h4>
+        </li>
         {{/each}}
     </ul>
-</table>
-{{/if}}
+    {{/if}}
+</div>
