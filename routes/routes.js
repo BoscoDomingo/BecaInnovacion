@@ -130,7 +130,6 @@ async function getActivity(activityID) { //returns an object with the desired Ac
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
             } else if (results.length > 0) {
-                let parsedActivity = results[0];
                 try {
                     await new Promise((resolve, reject) => {
                         studentPool.query("SELECT * FROM questions WHERE activityID = ?;", activityID, (err, questions, fields) => {
@@ -138,10 +137,10 @@ async function getActivity(activityID) { //returns an object with the desired Ac
                                 console.log("WARNING: Error ocurred during DB Query\n", err);
                                 reject("Error during DB Query. Please contact an administrator");
                             } else {
-                                parsedActivity.activityLink = `/activity/${activityID}`; //so students can do it
-                                parsedActivity.summaryLink = `/activity-summary/${activityID}`; //so teachers can view it
-                                parsedActivity.questions = makeObject1Indexed(Object.assign({}, questions)); //adding the questions
-                                parsedActivity.tags = parseTags(parsedActivity.tags)
+                                results[0].activityLink = `/activity/${activityID}`; //so students can do it
+                                results[0].summaryLink = `/activity-summary/${activityID}`; //so teachers can view it
+                                results[0].questions = makeObject1Indexed(Object.assign({}, questions)); //adding the questions
+                                results[0].tags = parseTags(results[0].tags)
                                 resolve();
                             }
                         });
@@ -149,7 +148,7 @@ async function getActivity(activityID) { //returns an object with the desired Ac
                 } catch (error) {
                     reject(error)
                 }
-                resolve(parsedActivity);
+                resolve(results[0]);
             } else {
                 reject("Error during DB Query. No activity found");
             }
@@ -157,36 +156,35 @@ async function getActivity(activityID) { //returns an object with the desired Ac
     });
 };
 async function getAllActivities() { //returns an object with ALL activities with questions
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         studentPool.query("SELECT * FROM activities;", async (err, results, fields) => {
             if (err) {
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
             } else {
-                let parsedActivities = arrayOfObjectsToObject(results, "activityID"); // Turn results into an Object of Objects from Array of Objects
-                await new Promise((resolve, reject) => {
-                    Object.values(parsedActivities).forEach(async (element, index, resultsArray) => { //for each activity. resultsArray[index] = current activity
-                        studentPool.query("SELECT * FROM questions WHERE activityID = ?;", element.activityID, (err, questions, fields) => {
+                let queryPromisesArray = [];
+                for (let index in results) {
+                    queryPromisesArray[index] = new Promise((resolve, reject) => { //waiting for 1 activity
+                        studentPool.query("SELECT * FROM questions WHERE activityID = ?;", results[index].activityID, (err, questions, fields) => {
                             if (err || questions.length === 0) {
                                 console.log("WARNING: Error ocurred during DB Query\n", err);
                                 reject("Error during DB Query. Please contact an administrator");
                             } else {
-                                console.log("Found questions in getAllActivities", index);
-                                resultsArray[index].activityLink = `/activity/${element.activityID}`; //so students can do it
-                                resultsArray[index].summaryLink = `/activity-summary/${element.activityID}`; //so teachers can view it
-                                resultsArray[index].tags = parseTags(resultsArray[index].tags);
-                                resultsArray[index].questions = makeObject1Indexed(Object.assign({}, questions));//adding the questions to each activity
+                                results[index].activityLink = `/activity/${results[index].activityID}`; //so students can do it
+                                results[index].summaryLink = `/activity-summary/${results[index].activityID}`; //so teachers can view it
+                                results[index].tags = parseTags(results[index].tags);
+                                results[index].questions = makeObject1Indexed(Object.assign({}, questions));//adding the questions to each activity
+                                resolve();
                             }
                         });
                     });
-                    resolve();
-                });
-                resolve(parsedActivities);
+                }
+                Promise.all(queryPromisesArray).then(() => { resolve(arrayOfObjectsToObject(results, "activityID")) });//we wait untill ALL activities have been processed
             }
         });
     });
 };
-async function getCompletedActivities(studentID) { //returns an object with data of activities COMPLETED by the user without questions or links
+async function getCompletedActivities(studentID) { //returns an object with data of activities COMPLETED by the user
     return await new Promise((resolve, reject) => {
         studentPool.query("SELECT * FROM students_activities WHERE studentID = ?;", studentID, (err, results, fields) => {
             if (err) {
@@ -198,17 +196,8 @@ async function getCompletedActivities(studentID) { //returns an object with data
         });
     });
 };
-async function getOwnActivities(teacherID) {//returns an object with data of activities CREATED by the user without questions or links
-    return await new Promise((resolve, reject) => {
-        studentPool.query("SELECT * FROM activities WHERE teacherID = ?;", teacherID, (err, results, fields) => {
-            if (err) {
-                console.log("WARNING: Error ocurred during DB Query\n", err);
-                reject("Error during DB Query. Please contact an administrator");
-            } else {
-                resolve(arrayOfObjectsToObject(results, "activityID"));
-            }
-        });
-    });
+function getOwnActivities(activities, teacherID) {//returns an object with data of activities CREATED by the user
+    return arrayOfObjectsToObject(Object.values(activities).filter((activity => { return activity.teacherID === teacherID })), "activityID");
 };
 
 async function insertOrUpdateTable(tableName, args, action) {
@@ -453,7 +442,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     console.log(req.session.activities);
 
     if (isStudent(req.session)) {
-        if (!req.session.completedActivities) {//if student, we retrieve completed activities from DB
+        if (!req.session.completedActivities) {//retrieve completed activities from DB
             try {
                 req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID);
             } catch (error) {
@@ -475,7 +464,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     } else {//if teacher or admin
         if (!req.session.ownActivities) { //retrieve activities created by this teacher
             try {
-                req.session.ownActivities = await getOwnActivities(res.locals.user.teacherID); //TODO: MARK THE ACTIVITIES WHOSE TEACHERID == USER.TEACHERID INSTEAD, and avoid retrieving from DB
+                req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
             } catch (error) {
                 throw new Error(error);
             }
@@ -493,23 +482,27 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
                 });
         });
     }
-}).get('/dashboard/refresh-activities', async (req, res, next) => {
+}).get('/dashboard/refresh-activities', redirectIfNotLoggedIn, async (req, res, next) => {
     try {//TODO: Max of 1 attempt per 30s using rate-limiter
         req.session.activities = await getAllActivities();
+        console.log("Retrieved activities when refreshing");
+        console.log(req.session.activities);
         if (isStudent(req.session)) {
             req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID);
+            console.log("Retrieved completedActivities when refreshing");
         } else {
-            req.session.ownActivities = await getOwnActivities(res.locals.user.teacherID);
+            req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
+            console.log("Retrieved ownActivities when refreshing");
         }
-        req.session.save((err) => {
-            if (err) {
-                console.log(err);
-                res.redirect('/');
-            } else res.redirect('/dashboard');
-        });
     } catch (error) {
         throw new Error(error);
     }
+    req.session.save((err) => {
+        if (err) {
+            console.log(err);
+            res.redirect('/');
+        } else res.redirect('/dashboard');
+    });
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
     let students = {},
