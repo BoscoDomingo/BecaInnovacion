@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     var activityList = new List('activity_list', listOptions);
+    /* to search a specific column, use activityList.search(document.getElementByID('activity_search', [column1, column2]));
+    and implement a function that searches on keyup, for example. Source: https://listjs.com/api/#search */
     if (completedActivityListContainer) {
         var completedActivityList = new List(completedActivityListContainer, listOptions);
     } else if (ownActivityListContainer) {
