@@ -184,13 +184,19 @@ async function getAllActivities() { //returns an object with ALL activities with
         });
     });
 };
-async function getCompletedActivities(studentID) { //returns an object with data of activities COMPLETED by the user
-    return await new Promise((resolve, reject) => {
+async function getCompletedActivities(studentID, activities) { //returns an object with data of activities COMPLETED by the user
+    return new Promise((resolve, reject) => {
         studentPool.query("SELECT * FROM students_activities WHERE studentID = ?;", studentID, (err, results, fields) => {
             if (err) {
                 console.log("WARNING: Error ocurred during DB Query\n", err);
                 reject("Error during DB Query. Please contact an administrator");
             } else if (results.length > 0) {
+                results.forEach((element, index, array) => { //parsing the completedActivities so they can be shown
+                    array[index].title = activities[element.activityID].title;
+                    array[index].activityLink = activities[element.activityID].activityLink;
+                    array[index].category = activities[element.activityID].category;
+                    array[index].tags = activities[element.activityID].tags;
+                });
                 resolve(arrayOfObjectsToObject(results, "activityID"));
             } else resolve({});
         });
@@ -438,18 +444,18 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
         }
     }
     //TODO: delete
-    console.log("Current session's activities: ");
-    console.log(req.session.activities);
+    // console.log("Current session's activities: ");
+    // console.log(req.session.activities);
 
     if (isStudent(req.session)) {
         if (!req.session.completedActivities) {//retrieve completed activities from DB
             try {
-                req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID);
+                req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
             } catch (error) {
                 throw new Error(error);
             }
         }
-        console.log(req.session.completedActivities); //TODO: delete
+        // console.log(req.session.completedActivities); //TODO: delete
         req.session.save((err) => {
             if (err) {
                 console.log(err);
@@ -488,7 +494,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
         console.log("Retrieved activities when refreshing");
         console.log(req.session.activities);
         if (isStudent(req.session)) {
-            req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID);
+            req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
             console.log("Retrieved completedActivities when refreshing");
         } else {
             req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
