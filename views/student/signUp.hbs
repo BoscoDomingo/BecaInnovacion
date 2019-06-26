@@ -13,6 +13,7 @@
 
 <body>
     <header>
+        <a class="back btn" href="/">Go Back</a>
         <h1>Welcome to EFAPC's interactive platform</h1>
     </header>
     {{# if errors}}
@@ -45,6 +46,10 @@
                 <input type="text" id="teacherID" name="teacherID" required>
             </div>
             <div>
+                <label for="groupID">Group</label>
+                <input type="text" id="groupID" name="groupID" required>
+            </div>
+            <div>
                 <label for="email">Academic Email</label>
                 <input type="text" id="email" name="email" class="emailInput" required>
                 <label for="email" class="appendEmail">@alumnos.upm.es</label>
@@ -60,9 +65,9 @@
                 <p class="passwordError" id="validatePasswords"></p>
             </div>
             <div>
-                <input type="checkbox" id="includeInRankings" name="includeInRankings" class="inline">
-                <label for="includeInRankings" style="display: inline !important;">Want to be included in
+                <label for="includeInRankings" style="display: inline !important;" >Want to be included in
                     rankings?</label>
+                <input type="checkbox" id="includeInRankings" name="includeInRankings" class="inline" checked>
             </div>
             <button type="submit" class="btn">Sign Up</button>
         </form>

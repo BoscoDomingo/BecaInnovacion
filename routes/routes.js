@@ -52,8 +52,6 @@ const express = require('express'),
 
 const studentEmailRegExp = /^[\w.!#$%&’*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸç]+(@alumnos.upm.es)$/, //accepted email characters
     passwordRegEx = /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\W\w\S]{8,}$/; //Has 1 uppercase, 1 lowercase, 1 number
-// /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\w.!#$%&’*+/=?^_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅå ÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/
-// alternative passwordRegEx
 
 //HELPERS
 const convertToUPMEmail = (emailInput) => {
@@ -105,7 +103,7 @@ const makeObject1Indexed = (object) => { //gives an object with numbered keys, s
 };
 
 const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests
-    if (!req.session.user) {
+    if (!req.session.user || req.session.user.isDeleted === 1) {
         return res.redirect('/');
     }
     next();
@@ -291,13 +289,15 @@ function signUpStudent(req, res) {
         surname = req.body.surname,
         studentID = req.body.studentID,
         teacherID = req.body.studentID,
+        groupID = req.body.groupID,
         includeInRankings = req.body.includeInRankings,
         storedIP = (loginRateLimiter.getKey(req.ip));
+    //TODO: use process.env.ALLOWED_GROUP_NAMES or something of the sort to validate the group name
     return new Promise((resolve, reject) => {
         loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
-                studentPool.query("INSERT INTO students (studentID, email, password, name, surname, teacherID, includeInRankings) VALUES (?, ?, ?, ?, ?, ?,?);",
-                    [studentID, email, password, name, surname, teacherID, includeInRankings === "on" ? true : false], (err, results, fields) => {
+                studentPool.query("INSERT INTO students (studentID, email, password, name, surname, teacherID, includeInRankings, groupID) VALUES (?,?,?,?,?,?,?,?);",
+                    [studentID, email, password, name, surname, teacherID, includeInRankings, groupID], (err, results, fields) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
                             reject("Error during DB Query. Please contact an administrator");
@@ -360,6 +360,9 @@ function checkStudentLogin(req, res) {
                     } else if (results.length <= 0 || results[0].password !== password) {
                         console.log("Login failed");
                         reject("Wrong username or password. Please try again");
+                    } else if (results[0].isDeleted === 1) {
+                        console.log("Student is deleted");
+                        reject("This account has been deleted. Please contact an administrator to restore your account");
                     } else {
                         console.log("Login successful");
                         delete results[0].password;
@@ -516,8 +519,8 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
     try {
         if (isStudent(req.session)) {
             students = await new Promise((resolve, reject) => {
-                studentPool.query('SELECT studentID, totalPoints FROM students WHERE includeInRankings = 1 OR studentID = ? ORDER BY totalPoints DESC;', res.locals.user.studentID,
-                    (err, res) => {
+                studentPool.query('SELECT studentID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;',
+                    res.locals.user.studentID, (err, res) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
                             reject("Error during DB Query. Please contact an administrator");
@@ -806,42 +809,43 @@ router.get('/student-sign-up', (req, res, next) => {
         req.session.save((err) => {
             if (err) {
                 res.locals.error = err;
-                return res.redirect('/');
+                res.redirect('/');
             }
-            return res.redirect('back');
+            res.redirect('back');
         });
+    } else {//info is correct, we insert into DB
+        req.body.includeInRankings = req.body.includeInRankings === "on" ? true : false;
+        req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64'); //hashing the password
+        req.body.confirmPassword = crypto.createHash('sha256').update(req.body.confirmPassword).digest('base64');
+        signUpStudent(req, res)
+            .then(() => {
+                console.log("Inserted successfully\n");
+                req.session.signUpSuccess = true;
+                req.session.errors = null;
+                req.session.save((err) => {
+                    if (err) {
+                        res.locals.error = err;
+                        return res.redirect('/');
+                    }
+                    return res.redirect('/student-login');
+                });
+            }).catch((error) => {
+                console.log("There are errors on DB access (student sign up)\n");
+                req.session.errors = {
+                    1: {
+                        msg: error
+                    }
+                };
+                req.session.signUpSuccess = false;
+                req.session.save((err) => {
+                    if (err) {
+                        res.locals.error = err;
+                        return res.redirect('/');
+                    }
+                    return res.redirect('back');
+                });
+            });
     }
-    //if info is correct, we insert into DB
-    req.body.includeInRankings = req.body.includeInRankings === true ? 1 : 0; //because MySQL doesn't accept boolean values
-    req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64'); //hashing the password
-    signUpStudent(req, res)
-        .then(() => {
-            console.log("Inserted successfully\n");
-            req.session.signUpSuccess = true;
-            req.session.errors = null;
-            req.session.save((err) => {
-                if (err) {
-                    res.locals.error = err;
-                    return res.redirect('/');
-                }
-                return res.redirect('/student-login');
-            });
-        }).catch((error) => {
-            console.log("There are errors on DB access (student sign up)\n");
-            req.session.errors = {
-                1: {
-                    msg: error
-                }
-            };
-            req.session.signUpSuccess = false;
-            req.session.save((err) => {
-                if (err) {
-                    res.locals.error = err;
-                    return res.redirect('/');
-                }
-                return res.redirect('back');
-            });
-        });
 });
 
 router.get('/student-login', redirectIfLoggedIn, (req, res, next) => {
@@ -862,40 +866,40 @@ router.get('/student-login', redirectIfLoggedIn, (req, res, next) => {
         req.session.save((err) => {
             if (err) {
                 res.locals.error = err;
-                return res.redirect('/');
+                res.redirect('/');
             }
             res.redirect('back');
         });
+    } else {    //There's no errors, we check DB
+        req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64'); //hashing the password
+        checkStudentLogin(req, res)
+            .then((response) => {
+                req.session.errors = null;
+                req.session.user = JSON.parse(JSON.stringify(response));
+                req.session.userType = "student";
+                req.session.save((err) => {
+                    if (err) {
+                        res.locals.error = err;
+                        return res.redirect('/');
+                    }
+                    return res.redirect('/dashboard');
+                });
+            }).catch((error) => {
+                console.log("There are errors on DB access (student log in)");
+                req.session.errors = {
+                    1: {
+                        msg: error
+                    }
+                };
+                req.session.save((err) => {
+                    if (err) {
+                        res.locals.error = err;
+                        return res.redirect('/');
+                    }
+                    return res.redirect('back');
+                });
+            });
     }
-    //if there's no errors, we check DB
-    req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64'); //hashing the password
-    checkStudentLogin(req, res)
-        .then((response) => {
-            req.session.errors = null;
-            req.session.user = JSON.parse(JSON.stringify(response));
-            req.session.userType = "student";
-            req.session.save((err) => {
-                if (err) {
-                    res.locals.error = err;
-                    return res.redirect('/');
-                }
-                return res.redirect('/dashboard');
-            });
-        }).catch((error) => {
-            console.log("There are errors on DB access (student log in)");
-            req.session.errors = {
-                1: {
-                    msg: error
-                }
-            };
-            req.session.save((err) => {
-                if (err) {
-                    res.locals.error = err;
-                    return res.redirect('/');
-                }
-                return res.redirect('back');
-            });
-        })
 });
 
 router.get('/teacher-sign-up', (req, res, next) => {
@@ -917,41 +921,42 @@ router.get('/teacher-sign-up', (req, res, next) => {
         req.session.save((err) => {
             if (err) {
                 res.locals.error = err;
-                return res.redirect('/');
+                res.redirect('/');
             }
-            return res.redirect('back');
+            res.redirect('back');
         });
+    } else {//info is correct, we insert into DB
+        req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
+        req.body.confirmPassword = crypto.createHash('sha256').update(req.body.confirmPassword).digest('base64');
+        signUpTeacher(req, res)
+            .then(() => {
+                console.log("Inserted successfully\n");
+                req.session.signUpSuccess = true;
+                req.session.errors = null;
+                req.session.save((err) => {
+                    if (err) {
+                        res.locals.error = err;
+                        return res.redirect('/');
+                    }
+                    return res.redirect('/teacher-login');
+                });
+            }).catch((error) => {
+                console.log("There are errors on DB access (teacher sign up)\n");
+                req.session.errors = {
+                    1: {
+                        msg: error
+                    }
+                };
+                req.session.signUpSuccess = false;
+                req.session.save((err) => {
+                    if (err) {
+                        res.locals.error = err;
+                        return res.redirect('/');
+                    }
+                    return res.redirect('back');
+                });
+            });
     }
-    //if info is correct, we insert into DB
-    req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
-    signUpTeacher(req, res)
-        .then(() => {
-            console.log("Inserted successfully\n");
-            req.session.signUpSuccess = true;
-            req.session.errors = null;
-            req.session.save((err) => {
-                if (err) {
-                    res.locals.error = err;
-                    return res.redirect('/');
-                }
-                return res.redirect('/teacher-login');
-            });
-        }).catch((error) => {
-            console.log("There are errors on DB access (teacher sign up)\n");
-            req.session.errors = {
-                1: {
-                    msg: error
-                }
-            };
-            req.session.signUpSuccess = false;
-            req.session.save((err) => {
-                if (err) {
-                    res.locals.error = err;
-                    return res.redirect('/');
-                }
-                return res.redirect('back');
-            });
-        });
 });
 
 router.get('/teacher-login', redirectIfLoggedIn, (req, res, next) => {
@@ -971,40 +976,40 @@ router.get('/teacher-login', redirectIfLoggedIn, (req, res, next) => {
         req.session.save((err) => {
             if (err) {
                 res.locals.error = err;
-                return res.redirect('/');
+                res.redirect('/');
             }
-            return res.redirect('back');
+            res.redirect('back');
         });
+    } else {//There's no errors, we check DB
+        req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
+        checkTeacherLogin(req, res)
+            .then((response) => {
+                req.session.errors = null;
+                req.session.user = JSON.parse(JSON.stringify(response));
+                req.session.userType = "teacher";
+                req.session.save((err) => {
+                    if (err) {
+                        res.locals.error = err;
+                        return res.redirect('/');
+                    }
+                    return res.redirect('/dashboard');
+                });
+            }).catch((error) => {
+                console.log("There are errors on DB access (teacher log in)");
+                req.session.errors = {
+                    1: {
+                        msg: error
+                    }
+                };
+                req.session.save((err) => {
+                    if (err) {
+                        res.locals.error = err;
+                        return res.redirect('/');
+                    }
+                    return res.redirect('back');
+                });
+            });
     }
-    //if there's no errors, we check DB
-    req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
-    checkTeacherLogin(req, res)
-        .then((response) => {
-            req.session.errors = null;
-            req.session.user = JSON.parse(JSON.stringify(response));
-            req.session.userType = "teacher";
-            req.session.save((err) => {
-                if (err) {
-                    res.locals.error = err;
-                    return res.redirect('/');
-                }
-                return res.redirect('/dashboard');
-            });
-        }).catch((error) => {
-            console.log("There are errors on DB access (teacher log in)");
-            req.session.errors = {
-                1: {
-                    msg: error
-                }
-            };
-            req.session.save((err) => {
-                if (err) {
-                    res.locals.error = err;
-                    return res.redirect('/');
-                }
-                return res.redirect('back');
-            });
-        })
 });
 
 //Help and profile
