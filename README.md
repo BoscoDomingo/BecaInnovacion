@@ -1,4 +1,4 @@
-#BecaInnovacion2#
+BecaInnovacion2
 
 Terminal (in project folder):
 npm install => to install all dependencies
