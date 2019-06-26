@@ -516,7 +516,7 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
     try {
         if (isStudent(req.session)) {
             students = await new Promise((resolve, reject) => {
-                studentPool.query('SELECT studentID, totalPoints FROM students WHERE includeInRankings = 1 OR studentID = ? ORDER BY totalPoints DESC;', res.locals.user.studentID,
+                studentPool.query('SELECT studentID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;', res.locals.user.studentID,
                     (err, res) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
