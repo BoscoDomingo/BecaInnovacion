@@ -103,7 +103,7 @@ const makeObject1Indexed = (object) => { //gives an object with numbered keys, s
 };
 
 const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests
-    if (!req.session.user) {
+    if (!req.session.user || req.session.user.isDeleted === 1) {
         return res.redirect('/');
     }
     next();
