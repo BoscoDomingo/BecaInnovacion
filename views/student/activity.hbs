@@ -11,7 +11,7 @@
     <section class="answer-container">
         <h1>{{@key}}) {{this.questionText}}</h1>
         {{#each this.questionChoices as |choice|}}
-        <input type="radio" name={{question.questionID}} value={{@key}}><p>{{this}}</p> <br>
+        <input type="radio" name={{question.questionID}} value={{@key}} required><p>{{this}}</p> <br>
         {{/each}}
     </section>
     {{/each}}

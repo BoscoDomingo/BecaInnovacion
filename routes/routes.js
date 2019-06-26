@@ -291,13 +291,15 @@ function signUpStudent(req, res) {
         surname = req.body.surname,
         studentID = req.body.studentID,
         teacherID = req.body.studentID,
+        groupID = req.body.groupID,
         includeInRankings = req.body.includeInRankings,
         storedIP = (loginRateLimiter.getKey(req.ip));
+        //TODO: use process.env.ALLOWED_GROUP_NAMES or something of the sort to validate the group name
     return new Promise((resolve, reject) => {
         loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
             .then((rateLimiterRes) => {// Allowed, consumed 1 point
-                studentPool.query("INSERT INTO students (studentID, email, password, name, surname, teacherID, includeInRankings) VALUES (?, ?, ?, ?, ?, ?,?);",
-                    [studentID, email, password, name, surname, teacherID, includeInRankings === "on" ? true : false], (err, results, fields) => {
+                studentPool.query("INSERT INTO students (studentID, email, password, name, surname, teacherID, includeInRankings, groupID) VALUES (?,?,?,?,?,?,?,?);",
+                    [studentID, email, password, name, surname, teacherID, includeInRankings, groupID], (err, results, fields) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
                             reject("Error during DB Query. Please contact an administrator");
@@ -360,6 +362,9 @@ function checkStudentLogin(req, res) {
                     } else if (results.length <= 0 || results[0].password !== password) {
                         console.log("Login failed");
                         reject("Wrong username or password. Please try again");
+                    } else if (results[0].isDeleted === 1) {
+                        console.log("Student is deleted");
+                        reject("This account has been deleted. Please contact an administrator to restore your account");
                     } else {
                         console.log("Login successful");
                         delete results[0].password;
@@ -516,8 +521,8 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
     try {
         if (isStudent(req.session)) {
             students = await new Promise((resolve, reject) => {
-                studentPool.query('SELECT studentID, totalPoints FROM students WHERE includeInRankings = 1 OR studentID = ? ORDER BY totalPoints DESC;', res.locals.user.studentID,
-                    (err, res) => {
+                studentPool.query('SELECT studentID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;',
+                    res.locals.user.studentID, (err, res) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
                             reject("Error during DB Query. Please contact an administrator");
@@ -812,8 +817,9 @@ router.get('/student-sign-up', (req, res, next) => {
         });
     }
     //if info is correct, we insert into DB
-    req.body.includeInRankings = req.body.includeInRankings === true ? 1 : 0; //because MySQL doesn't accept boolean values
+    req.body.includeInRankings = req.body.includeInRankings === "on" ? true : false;
     req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64'); //hashing the password
+    req.body.confirmPassword = crypto.createHash('sha256').update(req.body.confirmPassword).digest('base64');
     signUpStudent(req, res)
         .then(() => {
             console.log("Inserted successfully\n");
