@@ -1,4 +1,4 @@
-BecaInnovacion2
+#BecaInnovacion2#
 
 Terminal (in project folder):
 npm install => to install all dependencies
@@ -18,3 +18,6 @@ db_pass_T = "ab123"
 db_port = '3306'
 db_name = 'test-db'
 db_host = 'localhost'
+
+Other:
+Alternative RegEx for the email: /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\w.!#$%&’*+/=?^_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅå ÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/
