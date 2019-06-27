@@ -1,6 +1,6 @@
 'use strict'
 let questionCounter = 5;
-//TODO: Order:
+//TODO: Stages:
 /*  1st: Basic form, 5 test questions - DONE
     2nd: Allow to change number of questions => implement changeNumberOfQuestions() 
     3rd: allow different question types => implement changeQuestionType()*/

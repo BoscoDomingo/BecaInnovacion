@@ -102,7 +102,7 @@ const makeObject1Indexed = (object) => { //gives an object with numbered keys, s
     return renameKeys(newKeys, object);
 };
 
-const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests
+const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests or deleted accounts
     if (!req.session.user || req.session.user.isDeleted === 1) {
         return res.redirect('/');
     }
@@ -409,6 +409,36 @@ function checkTeacherLogin(req, res) {
             });
     });
 }
+function checkAdminLogin(req, res) {
+    const email = req.body.email,
+        password = req.body.password,
+        storedIP = (loginRateLimiter.getKey(req.ip));
+    return new Promise((resolve, reject) => {
+        loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
+            .then((rateLimiterRes) => {// Allowed, consumed 1 point
+                studentPool.query("SELECT * FROM admins WHERE email = ?", email, (err, results, fields) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else if (results.length <= 0 || results[0].password !== password) {
+                        console.log("Login failed");
+                        reject("Wrong username or password. Please try again");
+                    } else {
+                        console.log("Login successful");
+                        delete results[0].password;
+                        loginRateLimiter.delete(req.ip); //successful login, we delete attempts
+                        resolve(results[0]);
+                    }
+                });
+            }).catch((rej) => {// Blocked, no points left
+                console.log("Not allowed from IP: " + storedIP);
+                console.log(rej);
+                const retrySecs = Math.round(rej.msBeforeNext / 1000) || 1;
+                res.set('Retry-After', String(retrySecs));
+                return res.status(429).send('Too Many Requests');
+            });
+    });
+}
 
 //ROUTES
 
@@ -441,24 +471,19 @@ router.get('/logout', redirectIfNotLoggedIn, (req, res, next) => {
 router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     if (!req.session.activities) {
         try {
-            req.session.activities = await getAllActivities();// req.session.activities[1] is the way to access them
+            req.session.activities = await getAllActivities();
         } catch (error) {
             throw new Error(error);
         }
     }
-    //TODO: delete
-    // console.log("Current session's activities: ");
-    // console.log(req.session.activities);
-
     if (isStudent(req.session)) {
-        if (!req.session.completedActivities) {//retrieve completed activities from DB
+        if (!req.session.completedActivities) {
             try {
                 req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
             } catch (error) {
                 throw new Error(error);
             }
         }
-        // console.log(req.session.completedActivities); //TODO: delete
         req.session.save((err) => {
             if (err) {
                 console.log(err);
@@ -471,7 +496,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
             });
         });
     } else {//if teacher or admin
-        if (!req.session.ownActivities) { //retrieve activities created by this teacher
+        if (!req.session.ownActivities && req.session.userType === "teacher") { //retrieve activities created by this teacher
             try {
                 req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
             } catch (error) {
@@ -482,13 +507,20 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
             if (err) {
                 console.log(err);
                 res.redirect('/');
-            } else
+            } else if (req.session.userType === "teacher") {
                 res.render('teacher/dashboard', {
                     title: 'Teacher Home Page',
                     layout: 'NavBarLayoutT',
                     activities: req.session.activities,
                     ownActivities: req.session.ownActivities
                 });
+            } else {
+                res.render('admin/dashboard', {
+                    title: 'Admin Home Page',
+                    layout: 'NavBarLayoutA',
+                    activities: req.session.activities,
+                });
+            }
         });
     }
 }).get('/dashboard/refresh-activities', redirectIfNotLoggedIn, async (req, res, next) => {
@@ -872,33 +904,28 @@ router.get('/student-login', redirectIfLoggedIn, (req, res, next) => {
         });
     } else {    //There's no errors, we check DB
         req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64'); //hashing the password
-        checkStudentLogin(req, res)
-            .then((response) => {
-                req.session.errors = null;
-                req.session.user = JSON.parse(JSON.stringify(response));
-                req.session.userType = "student";
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('/dashboard');
-                });
-            }).catch((error) => {
-                console.log("There are errors on DB access (student log in)");
-                req.session.errors = {
-                    1: {
-                        msg: error
-                    }
-                };
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('back');
-                });
+        checkStudentLogin(req, res).then((response) => {
+            req.session.errors = null;
+            req.session.user = JSON.parse(JSON.stringify(response));
+            req.session.userType = "student";
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/dashboard');
             });
+        }).catch((error) => {
+            console.log("There are errors on DB access (student log in)");
+            req.session.errors = { 1: { msg: error } };
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
+        });
     }
 });
 
@@ -982,33 +1009,77 @@ router.get('/teacher-login', redirectIfLoggedIn, (req, res, next) => {
         });
     } else {//There's no errors, we check DB
         req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
-        checkTeacherLogin(req, res)
-            .then((response) => {
-                req.session.errors = null;
-                req.session.user = JSON.parse(JSON.stringify(response));
-                req.session.userType = "teacher";
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('/dashboard');
-                });
-            }).catch((error) => {
-                console.log("There are errors on DB access (teacher log in)");
-                req.session.errors = {
-                    1: {
-                        msg: error
-                    }
-                };
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('back');
-                });
+        checkTeacherLogin(req, res).then((response) => {
+            req.session.errors = null;
+            req.session.user = JSON.parse(JSON.stringify(response));
+            req.session.userType = "teacher";
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/dashboard');
             });
+        }).catch((error) => {
+            console.log("There are errors on DB access (teacher log in)");
+            req.session.errors = { 1: { msg: error } };
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
+        });
+    }
+});
+
+router.get('/admin-login', redirectIfLoggedIn, (req, res, next) => {
+    res.render('admin/login', {
+        title: 'Admin Login',
+        success: req.session.success,
+        errors: req.session.errors
+    });
+    req.session.errors = null;
+    req.session.success = null;
+}).post('/admin-login', (req, res, next) => {
+    req.check('email', 'Invalid email address').isEmail();
+    let errors = req.validationErrors();
+    if (errors) {
+        console.log("There are errors on log in: ", errors);
+        req.session.errors = errors;
+        req.session.save((err) => {
+            if (err) {
+                res.locals.error = err;
+                res.redirect('/');
+            }
+            res.redirect('back');
+        });
+    } else {//There's no errors, we check DB
+        req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
+        console.log(req.body.password)
+        checkAdminLogin(req, res).then((response) => {
+            req.session.errors = null;
+            req.session.user = JSON.parse(JSON.stringify(response));
+            req.session.userType = "admin";
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/dashboard');
+            });
+        }).catch((error) => {
+            console.log("There are errors on DB access (admin log in)");
+            req.session.errors = { 1: { msg: error } };
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
+        });
     }
 });
 

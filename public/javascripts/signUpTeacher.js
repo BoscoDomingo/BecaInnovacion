@@ -27,3 +27,15 @@ function checkConfirm() {
         validator.style.display = "inline";
     }
 }
+
+function showPasswords() {
+    var x = document.getElementById("password"),
+        y = document.getElementById("confirmPassword");
+    if (x.type === "password") {
+        x.type = "text";
+        y.type = "text";
+    } else {
+        x.type = "password";
+        y.type = "password";
+    }
+}

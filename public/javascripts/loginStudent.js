@@ -1,14 +1,13 @@
 'use strict';
-/* document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById('btiniciar').addEventListener('click', function () {
-        let nombre = document.getElementById('txtusuario').value,
-            pwd = document.getElementById('txtpass').value;
+function showPassword() {
+    var x = document.getElementById("password");
+    if (x.type === "password") {
+        x.type = "text";
+    } else {
+        x.type = "password";
+    }
+}
 
-        if (nombre.length > 0 && pwd.length > 0) {
-            document.getElementById('forminicio').submit();
-        } else {
-            alert('Please fill in all the required fields');
-        }
-    });
+document.addEventListener("DOMContentLoaded", () => {
+
 });
- */

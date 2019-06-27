@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="stylesheets/index.css">
     <link rel="stylesheet" href="stylesheets/login.css">
     <link rel="stylesheet" href="stylesheets/nav.css">
+    <script type="text/javascript" src="javascripts/loginStudent.js" defer></script>
     <title>{{title}}</title>
 </head>
 
@@ -22,7 +23,9 @@
     <section>
         <ul>
             {{#each errors}}
-            <li><h1 class="error">{{this.msg}}</h1></li>
+            <li>
+                <h1 class="error">{{this.msg}}</h1>
+            </li>
             {{/each}}
         </ul>
     </section>
@@ -41,6 +44,9 @@
                     <div>
                         <input type="password" id="password" placeholder="password" name="password"
                             class="wrap-input input100" required>
+                    </div>
+                    <div>
+                        <input type="checkbox" onclick="showPassword()">Show Password
                     </div>
                     <button type="submit" class="btn">Submit</button>
                 </form>
