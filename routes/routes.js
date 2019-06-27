@@ -120,6 +120,12 @@ const redirectIntruders = (req, res, next) => { //redirects both students and no
     }
     next();
 };
+const redirectNonAdmins = (req, res, next) => {
+    if (!req.session.userType || req.session.userType !== "admin") {
+        return res.redirect('/');
+    }
+    next();
+}
 
 async function getActivity(activityID) { //returns an object with the desired Activity
     return new Promise((resolve, reject) => {
@@ -1082,6 +1088,13 @@ router.get('/admin-login', redirectIfLoggedIn, (req, res, next) => {
         });
     }
 });
+
+router.get('/admin/tools', redirectNonAdmins, (req, res, next) => {
+    res.render('admin/tools', {
+        title: 'Admin Tools',
+        layout: 'NavBarLayoutA'
+    })
+})
 
 //Help and profile
 router.get('/help', redirectIfNotLoggedIn, (req, res, next) => {
