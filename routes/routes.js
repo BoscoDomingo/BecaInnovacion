@@ -552,8 +552,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     });
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
-    let students = {},
-        error;
+    let students = {}, error;
     try {
         if (isStudent(req.session)) {
             students = await new Promise((resolve, reject) => {
@@ -629,7 +628,7 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
         DBAction = "update",
         doneActivity = req.session.completedActivities[currActivity.activityID];
 
-    if (!doneActivity) {
+    if (!doneActivity) { //first attempt
         DBAction = "insert";
         doneActivity = {
             studentID: req.session.user.studentID,
@@ -643,20 +642,21 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
         oldPoints = doneActivity.pointsAwarded;
     }
 
-    Object.values(currActivity.questions).forEach(element => {//calculating the grade
+    Object.values(currActivity.questions).forEach(element => {//calculating the number of correct answers
         correctAnswers = req.body[element.questionID] === element.questionAnswer.toString() ? correctAnswers + 1 : correctAnswers;
     });
-
-    if (doneActivity.grade < correctAnswers) { //we only update if results are strictly better or insert if it's first attempt
+    let newGrade = correctAnswers / currActivity.numberOfQuestions;
+    if (doneActivity.grade < newGrade) { //we only update if results are strictly better or insert if it's first attempt
         req.session.betterActivityResult = true;
-        doneActivity.grade = correctAnswers;
-        doneActivity.pointsAwarded = correctAnswers * currActivity.pointsMultiplier;
+        doneActivity.grade = newGrade;
+        doneActivity.pointsAwarded = newGrade * currActivity.pointsMultiplier;
         doneActivity.completedOn = new Date();
     } else {
         req.session.betterActivityResult = false;
     }
+
     doneActivity.numberOfAttempts = doneActivity.numberOfAttempts + 1; //attempts done always go up
-    let pointsForUpdate = doneActivity.pointsAwarded - oldPoints;
+    let pointsForUpdate = doneActivity.pointsAwarded - oldPoints; //calculate the points for DB
 
     try {
         await insertOrUpdateTable("student_activities",
@@ -667,15 +667,12 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
         console.log(`Error on ${DBAction}; activity results from student ${req.session.user.studentID} on activity ${currActivity.activityID}: ${err}`);
     }
     req.session.completedActivities[doneActivity.activityID] = doneActivity; //we update completedActivities
-    console.log("\nreq.session.completedActivities right before /done:");
-    console.log(req.session.completedActivities);
     req.session.save((err) => {
         if (err) {
             res.locals.error = err;
             res.redirect('/');
         } else res.redirect(`/activity/${req.params.id}/done`);
     });
-
 });
 
 router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
@@ -693,7 +690,8 @@ router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
         firstAttempt: complActivity.numberOfAttempts === 1,
         grade: complActivity.grade,
         points: complActivity.pointsAwarded,
-        numberOfQuestions: currActivity.numberOfQuestions
+        numberOfQuestions: currActivity.numberOfQuestions,
+        numberOfAttempts: currActivity.numberOfAttempts
     });
     req.betterActivityResult = null;
 });

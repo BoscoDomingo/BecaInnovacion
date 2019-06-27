@@ -21,3 +21,29 @@ db_host = 'localhost'
 
 Other:
 Alternative RegEx for the email: /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\w.!#$%&’*+/=?^_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅå ÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/
+
+TO ACCESS HANDLEBARS VARIABLES IN JAVASCRIPT:
+Can't use an external JS file, script must be written directly onto .hbs file. Examples:
+
+//in routes.js
+res.render('teacher/groups', {
+            encodedGroups: encodeURIComponent(JSON.stringify(groups)),
+            groups: groups,
+            layout: 'NavBarLayoutT'
+        });
+
+//in teacher/groups.hbs:
+<script>
+    let decodedJson = decodeURIComponent("{{{encodedGroups}}}"),
+        groups = JSON.parse(decodedJson);
+    console.log(groups);
+    Object.values(groups).forEach((element, index, array) => {
+        console.log(element);
+    });
+</script>
+
+{{#each groups as |group|}}
+    <script>
+        console.log("{{group.groupID}}")
+    </script>
+{{/each}}
