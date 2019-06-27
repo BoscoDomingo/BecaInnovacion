@@ -298,6 +298,12 @@ a.fill-div {
 .btn3 {
     text-align: center;
     max-width: 10rem;
+    display: inline-block;
+    margin: 0 1rem 0 1rem;
+}
+
+.btn-center {
+    text-align: center;
 }
 
 .inline {
@@ -374,16 +380,19 @@ a.fill-div {
 #activity_search {
     width: 29.75rem;
     background-color: white;
+    margin-right: 23rem;
 }
 
 #own_activity_search {
     width: 29.75rem;
     background-color: white;
+    margin-right: 23rem;
 }
 
 #completed_activity_search {
     width: 29.75rem;
     background-color: white;
+    margin-right: 23rem;
 }
 
 h3 {

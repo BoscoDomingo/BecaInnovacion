@@ -4,14 +4,15 @@
 </head>
 
 <h1 class="title">Welcome to the Teacher Section</h1>
-<a href="/create-activity" class="btn2 btn3">Create activity</a>
-<a href="dashboard/refresh-activities" class="btn2 btn3">Refresh Activities!</a>
+<div class="btn-center">
+    <a href="/create-activity" class="btn2 btn3">Create activity</a>
+    <a href="dashboard/refresh-activities" class="btn2 btn3">Refresh Activities!</a>
+</div>
 
 <div id="activity_list" class="lists">
     <h1 class="subtitle">All activities:</h1>
     {{#if activities}}
     <input id="activity_search" class="search searchbar" placeholder="Search..." />
-    <br>
     <span class="sort" data-sort="id">Sort by ID</span>
     <span class="sort" data-sort="title">Sort by Title</span>
     <span class="sort" data-sort="author">Sort by Author</span>
@@ -36,7 +37,6 @@
     <h1 class="subtitle">Your activities:</h1>
     {{#if ownActivities}}
     <input id="own_activity_search" class="search searchbar" placeholder="Search..." />
-    <br>
     <span class="sort" data-sort="id">Sort by ID</span>
     <span class="sort" data-sort="title">Sort by Title</span>
     <span class="sort" data-sort="author">Sort by Author</span>
