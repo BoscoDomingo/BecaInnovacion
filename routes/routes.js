@@ -214,13 +214,13 @@ async function insertOrUpdateTable(tableName, args, action) {
     switch (tableName) {
         case "student_activities": {
             if (action === "insert") {
-                teacherPool.query("INSERT INTO students_activities (studentID, activityID, grade, pointsAwarded) VALUES(?,?,?,?);", args, (err, res) => {
+                teacherPool.query("INSERT INTO students_activities (studentID, activityID, groupID, grade, pointsAwarded) VALUES(?,?,?,?,?);", args, (err, res) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
                         Promise.reject("Error during DB Query. Please contact an administrator");
                     } else {
                         console.log("Successfully inserted student_activity");
-                        teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[5], args[0]], (err, result) => {
+                        teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[6], args[0]], (err, result) => {
                             if (err) {
                                 console.log("WARNING: Error ocurred during DB Query\n", err);
                                 Promise.reject("Error during DB Query. Please contact an administrator");
@@ -229,14 +229,14 @@ async function insertOrUpdateTable(tableName, args, action) {
                     }
                 })
             } else if (action === "update") {
-                teacherPool.query(`UPDATE students_activities SET grade = ${args[2]}, pointsAwarded = ${args[3]}, numberOfAttempts = ${args[4]} `
+                teacherPool.query(`UPDATE students_activities SET grade = ${args[3]}, pointsAwarded = ${args[4]}, numberOfAttempts = ${args[5]} `
                     + `WHERE studentID = '${args[0]}' AND activityID = '${args[1]}';`, (err, res) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
                             Promise.reject("Error during DB Query. Please contact an administrator");
                         } else {
                             console.log("Successfully updated student_activity");
-                            teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[5], args[0]], (err, result) => {
+                            teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[6], args[0]], (err, result) => {
                                 if (err) {
                                     console.log("WARNING: Error ocurred during DB Query\n", err);
                                     Promise.reject("Error during DB Query. Please contact an administrator");
@@ -556,7 +556,7 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
     try {
         if (isStudent(req.session)) {
             students = await new Promise((resolve, reject) => {
-                studentPool.query('SELECT studentID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;',
+                studentPool.query('SELECT studentID, groupID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;',
                     res.locals.user.studentID, (err, res) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
@@ -573,7 +573,7 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
             });
         } else {
             students = await new Promise((resolve, reject) => {
-                teacherPool.query('SELECT studentID, totalPoints FROM students ORDER BY totalPoints DESC;', (err, res) => {
+                teacherPool.query('SELECT studentID, groupID, totalPoints FROM students ORDER BY totalPoints DESC;', (err, res) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
                         reject("Error during DB Query. Please contact an administrator");
@@ -593,7 +593,50 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
     }
     console.log(error ? error : students);
 });
-
+router.get('/group', redirectIfNotLoggedIn, async (req, res, next) => {//TODO: Implement viewing current group
+    let group = {}, error;
+    try {
+        group = await new Promise((resolve, reject) => {
+            studentPool.query('SELECT * FROM groupstable WHERE groupID = ?;', req.session.user.groupID, (err, results) => {
+                if (err) {
+                    console.log("WARNING: Error ocurred during DB Query\n", err);
+                    reject("Error during DB Query. Please contact an administrator");
+                } else {
+                    resolve(results[0]);
+                }
+            });
+        });
+        res.render('student/group', {
+            group: group,
+            layout: 'NavBarLayoutS'
+        });
+    } catch (err) {
+        error = err;
+    }
+    console.log(error ? error : group);
+});
+router.get('/groups', redirectIntruders, async (req, res, next) => {
+    let groups = {}, error;
+    try {
+        groups = await new Promise((resolve, reject) => {
+            teacherPool.query('SELECT * FROM groupstable;', (err, results) => {
+                if (err) {
+                    console.log("WARNING: Error ocurred during DB Query\n", err);
+                    reject("Error during DB Query. Please contact an administrator");
+                } else {
+                    resolve(arrayOfObjectsToObject(results, "groupID"));
+                }
+            });
+        });
+        res.render('teacher/groups', {
+            groups: groups,
+            layout: 'NavBarLayoutT'
+        });
+    } catch (err) {
+        error = err;
+    }
+    console.log(error ? error : groups);
+});
 //Activities
 router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
     const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id;
@@ -633,6 +676,7 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
         doneActivity = {
             studentID: req.session.user.studentID,
             activityID: currActivity.activityID,
+            groupID: req.session.user.groupID,
             grade: -1,
             pointsAwarded: 0,
             completedOn: new Date(), //only for the purpose of having the date here, DB doesn't need it
@@ -660,8 +704,8 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
 
     try {
         await insertOrUpdateTable("student_activities",
-            [doneActivity.studentID, doneActivity.activityID, doneActivity.grade, doneActivity.pointsAwarded, doneActivity.numberOfAttempts, pointsForUpdate], DBAction);
-        console.log(`${DBAction} correct.\ndoneActivity:`)
+            [doneActivity.studentID, doneActivity.activityID, doneActivity.groupID, doneActivity.grade, doneActivity.pointsAwarded, doneActivity.numberOfAttempts, pointsForUpdate], DBAction);
+        console.log(`${DBAction} correct.\ndoneActivity:`);
         console.log(doneActivity);
     } catch (error) {
         console.log(`Error on ${DBAction}; activity results from student ${req.session.user.studentID} on activity ${currActivity.activityID}: ${err}`);
@@ -688,7 +732,7 @@ router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
         betterActivityResult: req.session.betterActivityResult,
         attemptNumber: complActivity.numberOfAttempts,
         firstAttempt: complActivity.numberOfAttempts === 1,
-        grade: complActivity.grade,
+        grade: complActivity.grade*10,
         points: complActivity.pointsAwarded,
         numberOfQuestions: currActivity.numberOfQuestions,
         numberOfAttempts: currActivity.numberOfAttempts
