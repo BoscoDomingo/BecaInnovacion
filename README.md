@@ -1,12 +1,12 @@
-#BecaInnovacion2
+# BecaInnovacion2
 
-##Terminal (in project folder):
+## Terminal (in project folder):
 -`npm install` => to install all dependencies
 -`npm start` => Starts the server
 -`rs`=> Forces a restart once the server is up
 -ctrl + C => Stops the server
 
-##MySQL:
+## MySQL:
 create a database with 2 users, one for student and one for teacher access (give the privileges you see fit for each)
 Update the .env file. By default:
 
@@ -24,7 +24,7 @@ Turn on event_scheduler with on MySQL CLC or Workbench: `SET GLOBAL event_schedu
 And check with: `SHOW PROCESSLIST`
 Then execute: ` `
 
-##Other:
+## Other:
 Alternative RegEx for the email: `/^(?=._[A-ZÑÁÉÍÓÚÜ])(?=._[a-zñáéíóúü])(?=._\d)[\w.!#\$%&’_+/=?^\_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅåÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/`
 
 ###TO ACCESS HANDLEBARS VARIABLES IN JAVASCRIPT:
