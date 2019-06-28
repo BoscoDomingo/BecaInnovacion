@@ -1,4 +1,6 @@
-# BecaInnovacion2
+# Beca Innovación UPM - Proyecto PIE gamificación
+
+# Instructions
 
 ## Terminal (in project folder):
 - `npm install` => to install all dependencies
@@ -7,8 +9,9 @@
 - ctrl + C => Stops the server
 
 ## MySQL:
-create a database with 3 users, one for student and one for teacher access as well as a "session keeper" (give the privileges you see fit for each)
-Update the .env file. By default:
+Create a database with 3 users, 1 for student and 1 for teacher access as well as a "session keeper" (give the privileges you see fit for each)
+
+Update `/.env`. By default:
 
 ```
 db_user_S = "studentConnector"
@@ -26,11 +29,17 @@ db_host = 'localhost'
 
 - And check with: `SHOW PROCESSLIST`
 
-- Then execute: `groups_updater.sql` (open the file on MySQL Workbench and run it). Instructions available at https://dev.mysql.com/doc/refman/8.0/en/create-event.html & https://dev.mysql.com/doc/refman/8.0/en/alter-event.html
+- Then execute: `groups_updater.sql` (open the file on MySQL Workbench and run it). Documentation available at https://dev.mysql.com/doc/refman/8.0/en/create-event.html & https://dev.mysql.com/doc/refman/8.0/en/alter-event.html
 
 
-## Other:
-Alternative RegEx for the email:
+## Miscellaneous:
+
+### Project structure:
+
+Main file is `/app.js`, which contains all the server setup and different node modules used. The second most important (and the one developers will be working on the most) is the `/routes/routes.js` file, in which every single route is handled. If a route doesn't exist, it won't redirect unless implemented. All other routes require a callback function receiving`(req,res,next)` as parameters. The documentation for the aforementioned is available at https://expressjs.com/en/4x/api.html#express.
+
+
+Alternative RegEx for email validation:
 ```
 /^(?=._[A-ZÑÁÉÍÓÚÜ])(?=._[a-zñáéíóúü])(?=._\d)[\w.!#\$%&’_+/=?^\_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅåÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/
 ```
