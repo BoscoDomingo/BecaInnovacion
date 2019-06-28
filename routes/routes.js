@@ -530,16 +530,12 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
         });
     }
 }).get('/dashboard/refresh-activities', redirectIfNotLoggedIn, async (req, res, next) => {
-    try {//TODO: Max of 1 attempt per 30s using rate-limiter
+    try {//TODO: 1 attempt every 30s using rate-limiter
         req.session.activities = await getAllActivities();
-        console.log("Retrieved activities when refreshing");
-        console.log(req.session.activities);
         if (isStudent(req.session)) {
             req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
-            console.log("Retrieved completedActivities when refreshing");
         } else {
             req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
-            console.log("Retrieved ownActivities when refreshing");
         }
     } catch (error) {
         throw new Error(error);
@@ -576,7 +572,6 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
                     }
                 });
         })]).then((values) => {
-            console.log(values);
             res.render('rankings', {
                 title: 'Rankings',
                 students: values[0],
@@ -622,7 +617,7 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
         });
     }
 });
-router.get('/group', redirectIfNotLoggedIn, async (req, res, next) => {//TODO: Implement viewing current group
+router.get('/group', redirectIfNotLoggedIn, async (req, res, next) => {
     let group = {}, error;
     try {
         group = await new Promise((resolve, reject) => {
@@ -635,7 +630,9 @@ router.get('/group', redirectIfNotLoggedIn, async (req, res, next) => {//TODO: I
                 }
             });
         });
+        group.averageGrade *= 10;
         res.render('student/group', {
+            title: 'Your group',
             group: group,
             layout: 'NavBarLayoutS'
         });
@@ -653,6 +650,9 @@ router.get('/groups', redirectIntruders, async (req, res, next) => {
                     console.log("WARNING: Error ocurred during DB Query\n", err);
                     reject("Error during DB Query. Please contact an administrator");
                 } else {
+                    results.forEach((element, index, array) => {
+                        array[index].averageGrade = element.averageGrade * 10;
+                    })
                     resolve(arrayOfObjectsToObject(results, "groupID"));
                 }
             });
@@ -734,8 +734,6 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
     try {
         await insertOrUpdateTable("student_activities",
             [doneActivity.studentID, doneActivity.activityID, doneActivity.groupID, doneActivity.grade, doneActivity.pointsAwarded, doneActivity.numberOfAttempts, pointsForUpdate], DBAction);
-        console.log(`${DBAction} correct.\ndoneActivity:`);
-        console.log(doneActivity);
     } catch (error) {
         console.log(`Error on ${DBAction}; activity results from student ${req.session.user.studentID} on activity ${currActivity.activityID}: ${err}`);
     }
@@ -752,9 +750,6 @@ router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
     const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id,
         complActivity = req.session.completedActivities[id],
         currActivity = req.session.activities[id];
-    //TODO: Delete
-    console.log("\n y en /done tenemos req.session.completedActivities:");
-    console.log(req.session.completedActivities);
     //Once the activity is done, show the results
     res.render('student/activityResults', {
         layout: 'NavBarLayoutS',
@@ -870,8 +865,6 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
 
     activityInserted.then(() => {
         getAllActivities().then(activities => {
-            console.log("\nNew activities\n")
-            console.log(activities)
             req.session.activities = activities;//we refresh the session activities
         }).catch(err => {
             console.log("Error when fetching new activity" + err);
@@ -1134,7 +1127,6 @@ router.get('/admin-login', redirectIfLoggedIn, (req, res, next) => {
         });
     } else {//There's no errors, we check DB
         req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
-        console.log(req.body.password)
         checkAdminLogin(req, res).then((response) => {
             req.session.errors = null;
             req.session.user = JSON.parse(JSON.stringify(response));
