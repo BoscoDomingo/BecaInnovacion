@@ -1,10 +1,10 @@
 # BecaInnovacion2
 
 ## Terminal (in project folder):
--`npm install` => to install all dependencies
--`npm start` => Starts the server
--`rs`=> Forces a restart once the server is up
--ctrl + C => Stops the server
+- `npm install` => to install all dependencies
+- `npm start` => Starts the server
+- `rs`=> Forces a restart once the server is up
+- ctrl + C => Stops the server
 
 ## MySQL:
 create a database with 2 users, one for student and one for teacher access (give the privileges you see fit for each)
