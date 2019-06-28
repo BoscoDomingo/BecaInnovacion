@@ -552,27 +552,50 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     });
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
-    let students = {}, error;
-    try {
-        if (isStudent(req.session)) {
-            students = await new Promise((resolve, reject) => {
-                studentPool.query('SELECT studentID, groupID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;',
-                    res.locals.user.studentID, (err, res) => {
-                        if (err) {
-                            console.log("WARNING: Error ocurred during DB Query\n", err);
-                            reject("Error during DB Query. Please contact an administrator");
-                        } else {
-                            resolve(arrayOfObjectsToObject(res, "studentID"));
-                        }
-                    });
-            });
-            res.render('ranking', {
-                students: students,
-                error: error,
+    if (isStudent(req.session)) {
+        Promise.all([new Promise((resolve, reject) => {
+            //bringing all students
+            studentPool.query('SELECT studentID, groupID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;',
+                res.locals.user.studentID, (err, res) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        resolve(arrayOfObjectsToObject(res, "studentID"));
+                    }
+                });
+        }), new Promise((resolve, reject) => {
+            //bringing groupmates
+            studentPool.query('SELECT studentID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 AND groupID =? ORDER BY totalPoints DESC;',
+                [res.locals.user.studentID, res.locals.user.groupID], (err, res) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        resolve(arrayOfObjectsToObject(res, "studentID"));
+                    }
+                });
+        })]).then((values) => {
+            console.log(values);
+            res.render('rankings', {
+                title: 'Rankings',
+                students: values[0],
+                groupmates: values[1],
+                groupID: res.locals.user.groupID,
+                error: false,
                 layout: 'NavBarLayoutS'
             });
-        } else {
-            students = await new Promise((resolve, reject) => {
+        }).catch((err) => {
+            console.log(err);
+            res.render('rankings', {
+                title: 'Rankings',
+                error: true,
+                layout: 'NavBarLayoutS'
+            });
+        })
+    } else {
+        try {
+            var students = await new Promise((resolve, reject) => {
                 teacherPool.query('SELECT studentID, groupID, totalPoints FROM students ORDER BY totalPoints DESC;', (err, res) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
@@ -582,16 +605,22 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
                     }
                 });
             });
-            res.render('ranking', {
+        } catch (error) {
+            console.log(error);
+            res.render('rankings', {
+                title: 'Ranking',
                 students: students,
-                error: error,
+                error: true,
                 layout: 'NavBarLayoutT'
             });
         }
-    } catch (err) {
-        error = err;
+        res.render('rankings', {
+            title: 'Ranking',
+            students: students,
+            error: false,
+            layout: 'NavBarLayoutT'
+        });
     }
-    console.log(error ? error : students);
 });
 router.get('/group', redirectIfNotLoggedIn, async (req, res, next) => {//TODO: Implement viewing current group
     let group = {}, error;
@@ -732,7 +761,7 @@ router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
         betterActivityResult: req.session.betterActivityResult,
         attemptNumber: complActivity.numberOfAttempts,
         firstAttempt: complActivity.numberOfAttempts === 1,
-        grade: complActivity.grade*10,
+        grade: complActivity.grade * 10,
         points: complActivity.pointsAwarded,
         numberOfQuestions: currActivity.numberOfQuestions,
         numberOfAttempts: currActivity.numberOfAttempts
