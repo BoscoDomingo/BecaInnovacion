@@ -27,7 +27,8 @@ And check with: `SHOW PROCESSLIST`
 Then execute: ` `
 
 ## Other:
-Alternative RegEx for the email: ```
+Alternative RegEx for the email:
+```
 /^(?=._[A-ZÑÁÉÍÓÚÜ])(?=._[a-zñáéíóúü])(?=._\d)[\w.!#\$%&’_+/=?^\_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅåÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/
 ```
 
