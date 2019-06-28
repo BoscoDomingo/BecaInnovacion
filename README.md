@@ -21,13 +21,17 @@ db_host = 'localhost'
 ```
 
 Turn on event_scheduler with on MySQL CLC or Workbench: `SET GLOBAL event_scheduler = ON;`
+
 And check with: `SHOW PROCESSLIST`
+
 Then execute: ` `
 
 ## Other:
-Alternative RegEx for the email: `/^(?=._[A-ZÑÁÉÍÓÚÜ])(?=._[a-zñáéíóúü])(?=._\d)[\w.!#\$%&’_+/=?^\_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅåÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/`
+Alternative RegEx for the email: ```
+/^(?=._[A-ZÑÁÉÍÓÚÜ])(?=._[a-zñáéíóúü])(?=._\d)[\w.!#\$%&’_+/=?^\_`{|}~\-ÑñáéíóúüÁÉÍÓÚÜ:;ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸ¡¿çÇŒœßØøÅåÆæÞþÐð""'.,&#@:?!()$\\/]{8,}$/
+```
 
-###TO ACCESS HANDLEBARS VARIABLES IN JAVASCRIPT:
+### TO ACCESS HANDLEBARS VARIABLES IN JAVASCRIPT:
 Can't use an external JS file, script must be written directly onto .hbs file. Examples:
 
 ```
