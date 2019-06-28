@@ -20,11 +20,12 @@ db_name = 'test-db'
 db_host = 'localhost'
 ```
 
-Turn on event_scheduler with on MySQL CLC or Workbench: `SET GLOBAL event_scheduler = ON;`
+- Turn on event_scheduler with on MySQL CLC or Workbench: `SET GLOBAL event_scheduler = ON;`
 
-And check with: `SHOW PROCESSLIST`
+- And check with: `SHOW PROCESSLIST`
 
-Then execute: ` `
+- Then execute: `groups_updater.sql` (open the file on MySQL Workbench and run it). Instructions available at https://dev.mysql.com/doc/refman/8.0/en/create-event.html & https://dev.mysql.com/doc/refman/8.0/en/alter-event.html
+
 
 ## Other:
 Alternative RegEx for the email:

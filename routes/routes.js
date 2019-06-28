@@ -732,7 +732,7 @@ router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
         betterActivityResult: req.session.betterActivityResult,
         attemptNumber: complActivity.numberOfAttempts,
         firstAttempt: complActivity.numberOfAttempts === 1,
-        grade: complActivity.grade,
+        grade: complActivity.grade*10,
         points: complActivity.pointsAwarded,
         numberOfQuestions: currActivity.numberOfQuestions,
         numberOfAttempts: currActivity.numberOfAttempts
