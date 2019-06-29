@@ -12,7 +12,7 @@ const createError = require('http-errors'),
     MySQLStore = require('express-mysql-session')(session);
 
 const app = express(),
-    INPROD = process.env.NODE_ENV === "production";
+    INPROD = (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "PROD");
 
 // view engine setup
 app.engine('hbs', hbs.express4({ layoutsDir: __dirname + "/views/layouts", defaultLayout: null })); //defaultLayout: __dirname + '/views/layouts/layout.hbs'

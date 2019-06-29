@@ -1,0 +1,23 @@
+<h1 class="title">Your group ({{group.groupID}})</h1>
+<div id="table_container" class="container">
+    <table class="rankingTable" id="group_table">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Group ID</th>
+                <th onclick="sortTable(1)">Number of Students</th>
+                <th onclick="sortTable(2)">Average Grade</th>
+                <th onclick="sortTable(3)">Average Points</th>
+                <th onclick="sortTable(4)">Highest Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{group.groupID}}</td>
+                <td>{{group.numberOfStudents}}</td>
+                <td>{{group.averageGrade}}/10</td>
+                <td>{{group.averagePoints}}</td>
+                <td>{{group.highestPoints}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

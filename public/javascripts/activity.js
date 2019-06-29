@@ -1,4 +1,6 @@
-/* var tag = document.createElement('script');
+/*
+THIS IS THE SUPPOSED WAY TO IMPLEMENT YT VIDEO IF THE IFRAME FAILS
+var tag = document.createElement('script');
 
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -21,4 +23,5 @@ function onYouTubeIframeAPIReady() {
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady(event) {
     event.target.playVideo();
-} */
+}
+*/

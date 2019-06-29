@@ -1,0 +1,28 @@
+<script type="text/javascript" src="javascripts/groups.js"></script>
+
+<h1 class="title">Groups</h1>
+<div id="table_container" class="container">
+    <input type="text" id="searchbar" onkeyup="searchByID()" placeholder="Search by Group ID" class="searchbar">
+    <table class="rankingTable" id="group_table">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Group ID</th>
+                <th onclick="sortTable(1)">Number of Students</th>
+                <th onclick="sortTable(2)">Average Grade</th>
+                <th onclick="sortTable(3)">Average Points</th>
+                <th onclick="sortTable(4)">Highest Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each groups as |group|}}
+            <tr>
+                <td>{{this.groupID}}</td>
+                <td>{{this.numberOfStudents}}</td>
+                <td>{{this.averageGrade}}/10</td>
+                <td>{{this.averagePoints}}</td>
+                <td>{{this.highestPoints}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

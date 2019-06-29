@@ -1,6 +1,6 @@
 'use strict'
 let questionCounter = 5;
-//TODO: Order:
+//Planned Stages:
 /*  1st: Basic form, 5 test questions - DONE
     2nd: Allow to change number of questions => implement changeNumberOfQuestions() 
     3rd: allow different question types => implement changeQuestionType()*/
@@ -51,5 +51,5 @@ function changeQuestionType(question) {
 }
 
 document.getElementById("activity-form").addEventListener("onsubmit", () => {
-    //TODO: Validate form
+    //TODO: Possibly validate form
 })

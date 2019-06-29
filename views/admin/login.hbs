@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="stylesheets/index.css">
     <link rel="stylesheet" href="stylesheets/login.css">
     <link rel="stylesheet" href="stylesheets/nav.css">
-    <script type="text/javascript" src="javascripts/teacher/login.js" defer></script>
+    <script type="text/javascript" src="javascripts/admin/login.js" defer></script>
     <title>{{title}}</title>
 </head>
 
@@ -19,10 +19,10 @@
     <div id="contenedor">
         <div class="wrap-login">
             <img src="img/logoupm.png" class="center">
-            <h1 class="title">Teacher Login</h1>
+            <h1 class="title">Administrator Login</h1>
             <section class="container">
                 <div class="lgns">
-                    <form id="login-form" class="teacher-form" action="/teacher-login" method="POST">
+                    <form id="login-form" class="teacher-form" action="/admin-login" method="POST">
                         <input type="email" name="email" id="email" placeholder="user@upm.es"
                             class="emailInput wrap-input input100" required />
                         <input type="password" name="password" id="password" placeholder="Password"
@@ -34,8 +34,7 @@
                     </form>
                 </div>
             </section>
-            <h4>Don't have an account yet? <a href="teacher-sign-up">Sign Up!</a></h4>{{!-- TODO: delete --}}
-            <h4>Not a teacher? <a href="/">Go Back</a></h4>
+            <h4>Not an administrator? <a href="/">Go Back</a></h4>
         </div>
     </div>
 </body>

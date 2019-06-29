@@ -102,7 +102,7 @@ const makeObject1Indexed = (object) => { //gives an object with numbered keys, s
     return renameKeys(newKeys, object);
 };
 
-const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests
+const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests or deleted accounts
     if (!req.session.user || req.session.user.isDeleted === 1) {
         return res.redirect('/');
     }
@@ -120,6 +120,12 @@ const redirectIntruders = (req, res, next) => { //redirects both students and no
     }
     next();
 };
+const redirectNonAdmins = (req, res, next) => {
+    if (!req.session.userType || req.session.userType !== "admin") {
+        return res.redirect('/');
+    }
+    next();
+}
 
 async function getActivity(activityID) { //returns an object with the desired Activity
     return new Promise((resolve, reject) => {
@@ -208,13 +214,13 @@ async function insertOrUpdateTable(tableName, args, action) {
     switch (tableName) {
         case "student_activities": {
             if (action === "insert") {
-                teacherPool.query("INSERT INTO students_activities (studentID, activityID, grade, pointsAwarded) VALUES(?,?,?,?);", args, (err, res) => {
+                teacherPool.query("INSERT INTO students_activities (studentID, activityID, groupID, grade, pointsAwarded) VALUES(?,?,?,?,?);", args, (err, res) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
                         Promise.reject("Error during DB Query. Please contact an administrator");
                     } else {
                         console.log("Successfully inserted student_activity");
-                        teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[5], args[0]], (err, result) => {
+                        teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[6], args[0]], (err, result) => {
                             if (err) {
                                 console.log("WARNING: Error ocurred during DB Query\n", err);
                                 Promise.reject("Error during DB Query. Please contact an administrator");
@@ -223,14 +229,14 @@ async function insertOrUpdateTable(tableName, args, action) {
                     }
                 })
             } else if (action === "update") {
-                teacherPool.query(`UPDATE students_activities SET grade = ${args[2]}, pointsAwarded = ${args[3]}, numberOfAttempts = ${args[4]} `
+                teacherPool.query(`UPDATE students_activities SET grade = ${args[3]}, pointsAwarded = ${args[4]}, numberOfAttempts = ${args[5]} `
                     + `WHERE studentID = '${args[0]}' AND activityID = '${args[1]}';`, (err, res) => {
                         if (err) {
                             console.log("WARNING: Error ocurred during DB Query\n", err);
                             Promise.reject("Error during DB Query. Please contact an administrator");
                         } else {
                             console.log("Successfully updated student_activity");
-                            teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[5], args[0]], (err, result) => {
+                            teacherPool.query("UPDATE students SET totalPoints = totalPoints + ? WHERE studentID = ?;", [args[6], args[0]], (err, result) => {
                                 if (err) {
                                     console.log("WARNING: Error ocurred during DB Query\n", err);
                                     Promise.reject("Error during DB Query. Please contact an administrator");
@@ -409,6 +415,36 @@ function checkTeacherLogin(req, res) {
             });
     });
 }
+function checkAdminLogin(req, res) {
+    const email = req.body.email,
+        password = req.body.password,
+        storedIP = (loginRateLimiter.getKey(req.ip));
+    return new Promise((resolve, reject) => {
+        loginRateLimiter.consume(req.ip) //blocking attempts from same IP to avoid brute force
+            .then((rateLimiterRes) => {// Allowed, consumed 1 point
+                studentPool.query("SELECT * FROM admins WHERE email = ?", email, (err, results, fields) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else if (results.length <= 0 || results[0].password !== password) {
+                        console.log("Login failed");
+                        reject("Wrong username or password. Please try again");
+                    } else {
+                        console.log("Login successful");
+                        delete results[0].password;
+                        loginRateLimiter.delete(req.ip); //successful login, we delete attempts
+                        resolve(results[0]);
+                    }
+                });
+            }).catch((rej) => {// Blocked, no points left
+                console.log("Not allowed from IP: " + storedIP);
+                console.log(rej);
+                const retrySecs = Math.round(rej.msBeforeNext / 1000) || 1;
+                res.set('Retry-After', String(retrySecs));
+                return res.status(429).send('Too Many Requests');
+            });
+    });
+}
 
 //ROUTES
 
@@ -441,24 +477,19 @@ router.get('/logout', redirectIfNotLoggedIn, (req, res, next) => {
 router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     if (!req.session.activities) {
         try {
-            req.session.activities = await getAllActivities();// req.session.activities[1] is the way to access them
+            req.session.activities = await getAllActivities();
         } catch (error) {
             throw new Error(error);
         }
     }
-    //TODO: delete
-    // console.log("Current session's activities: ");
-    // console.log(req.session.activities);
-
     if (isStudent(req.session)) {
-        if (!req.session.completedActivities) {//retrieve completed activities from DB
+        if (!req.session.completedActivities) {
             try {
                 req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
             } catch (error) {
                 throw new Error(error);
             }
         }
-        // console.log(req.session.completedActivities); //TODO: delete
         req.session.save((err) => {
             if (err) {
                 console.log(err);
@@ -471,7 +502,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
             });
         });
     } else {//if teacher or admin
-        if (!req.session.ownActivities) { //retrieve activities created by this teacher
+        if (!req.session.ownActivities && req.session.userType === "teacher") { //retrieve activities created by this teacher
             try {
                 req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
             } catch (error) {
@@ -482,26 +513,29 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
             if (err) {
                 console.log(err);
                 res.redirect('/');
-            } else
+            } else if (req.session.userType === "teacher") {
                 res.render('teacher/dashboard', {
                     title: 'Teacher Home Page',
                     layout: 'NavBarLayoutT',
                     activities: req.session.activities,
                     ownActivities: req.session.ownActivities
                 });
+            } else {
+                res.render('admin/dashboard', {
+                    title: 'Admin Home Page',
+                    layout: 'NavBarLayoutA',
+                    activities: req.session.activities,
+                });
+            }
         });
     }
 }).get('/dashboard/refresh-activities', redirectIfNotLoggedIn, async (req, res, next) => {
-    try {//TODO: Max of 1 attempt per 30s using rate-limiter
+    try {//TODO: 1 attempt every 30s using rate-limiter
         req.session.activities = await getAllActivities();
-        console.log("Retrieved activities when refreshing");
-        console.log(req.session.activities);
         if (isStudent(req.session)) {
             req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
-            console.log("Retrieved completedActivities when refreshing");
         } else {
             req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
-            console.log("Retrieved ownActivities when refreshing");
         }
     } catch (error) {
         throw new Error(error);
@@ -514,29 +548,50 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
     });
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
-    let students = {},
-        error;
-    try {
-        if (isStudent(req.session)) {
-            students = await new Promise((resolve, reject) => {
-                studentPool.query('SELECT studentID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;',
-                    res.locals.user.studentID, (err, res) => {
-                        if (err) {
-                            console.log("WARNING: Error ocurred during DB Query\n", err);
-                            reject("Error during DB Query. Please contact an administrator");
-                        } else {
-                            resolve(arrayOfObjectsToObject(res, "studentID"));
-                        }
-                    });
-            });
-            res.render('ranking', {
-                students: students,
-                error: error,
+    if (isStudent(req.session)) {
+        Promise.all([new Promise((resolve, reject) => {
+            //bringing all students
+            studentPool.query('SELECT studentID, groupID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 ORDER BY totalPoints DESC;',
+                res.locals.user.studentID, (err, res) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        resolve(arrayOfObjectsToObject(res, "studentID"));
+                    }
+                });
+        }), new Promise((resolve, reject) => {
+            //bringing groupmates
+            studentPool.query('SELECT studentID, totalPoints FROM students WHERE (includeInRankings = 1 OR studentID = ?) AND isDeleted = 0 AND groupID =? ORDER BY totalPoints DESC;',
+                [res.locals.user.studentID, res.locals.user.groupID], (err, res) => {
+                    if (err) {
+                        console.log("WARNING: Error ocurred during DB Query\n", err);
+                        reject("Error during DB Query. Please contact an administrator");
+                    } else {
+                        resolve(arrayOfObjectsToObject(res, "studentID"));
+                    }
+                });
+        })]).then((values) => {
+            res.render('rankings', {
+                title: 'Rankings',
+                students: values[0],
+                groupmates: values[1],
+                groupID: res.locals.user.groupID,
+                error: false,
                 layout: 'NavBarLayoutS'
             });
-        } else {
-            students = await new Promise((resolve, reject) => {
-                teacherPool.query('SELECT studentID, totalPoints FROM students ORDER BY totalPoints DESC;', (err, res) => {
+        }).catch((err) => {
+            console.log(err);
+            res.render('rankings', {
+                title: 'Rankings',
+                error: true,
+                layout: 'NavBarLayoutS'
+            });
+        })
+    } else {
+        try {
+            var students = await new Promise((resolve, reject) => {
+                teacherPool.query('SELECT studentID, groupID, totalPoints FROM students ORDER BY totalPoints DESC;', (err, res) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
                         reject("Error during DB Query. Please contact an administrator");
@@ -545,18 +600,72 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
                     }
                 });
             });
-            res.render('ranking', {
+        } catch (error) {
+            console.log(error);
+            res.render('rankings', {
+                title: 'Ranking',
                 students: students,
-                error: error,
+                error: true,
                 layout: 'NavBarLayoutT'
             });
         }
+        res.render('rankings', {
+            title: 'Ranking',
+            students: students,
+            error: false,
+            layout: 'NavBarLayoutT'
+        });
+    }
+});
+router.get('/group', redirectIfNotLoggedIn, async (req, res, next) => {
+    let group = {}, error;
+    try {
+        group = await new Promise((resolve, reject) => {
+            studentPool.query('SELECT * FROM groupstable WHERE groupID = ?;', req.session.user.groupID, (err, results) => {
+                if (err) {
+                    console.log("WARNING: Error ocurred during DB Query\n", err);
+                    reject("Error during DB Query. Please contact an administrator");
+                } else {
+                    resolve(results[0]);
+                }
+            });
+        });
+        group.averageGrade *= 10;
+        res.render('student/group', {
+            title: 'Your group',
+            group: group,
+            layout: 'NavBarLayoutS'
+        });
     } catch (err) {
         error = err;
     }
-    console.log(error ? error : students);
+    console.log(error ? error : group);
 });
-
+router.get('/groups', redirectIntruders, async (req, res, next) => {
+    let groups = {}, error;
+    try {
+        groups = await new Promise((resolve, reject) => {
+            teacherPool.query('SELECT * FROM groupstable;', (err, results) => {
+                if (err) {
+                    console.log("WARNING: Error ocurred during DB Query\n", err);
+                    reject("Error during DB Query. Please contact an administrator");
+                } else {
+                    results.forEach((element, index, array) => {
+                        array[index].averageGrade = element.averageGrade * 10;
+                    })
+                    resolve(arrayOfObjectsToObject(results, "groupID"));
+                }
+            });
+        });
+        res.render('teacher/groups', {
+            groups: groups,
+            layout: 'NavBarLayoutT'
+        });
+    } catch (err) {
+        error = err;
+    }
+    console.log(error ? error : groups);
+});
 //Activities
 router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
     const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id;
@@ -591,11 +700,12 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
         DBAction = "update",
         doneActivity = req.session.completedActivities[currActivity.activityID];
 
-    if (!doneActivity) {
+    if (!doneActivity) { //first attempt
         DBAction = "insert";
         doneActivity = {
             studentID: req.session.user.studentID,
             activityID: currActivity.activityID,
+            groupID: req.session.user.groupID,
             grade: -1,
             pointsAwarded: 0,
             completedOn: new Date(), //only for the purpose of having the date here, DB doesn't need it
@@ -605,57 +715,51 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
         oldPoints = doneActivity.pointsAwarded;
     }
 
-    Object.values(currActivity.questions).forEach(element => {//calculating the grade
+    Object.values(currActivity.questions).forEach(element => {//calculating the number of correct answers
         correctAnswers = req.body[element.questionID] === element.questionAnswer.toString() ? correctAnswers + 1 : correctAnswers;
     });
-
-    if (doneActivity.grade < correctAnswers) { //we only update if results are strictly better or insert if it's first attempt
+    let newGrade = correctAnswers / currActivity.numberOfQuestions;
+    if (doneActivity.grade < newGrade) { //we only update if results are strictly better or insert if it's first attempt
         req.session.betterActivityResult = true;
-        doneActivity.grade = correctAnswers;
-        doneActivity.pointsAwarded = correctAnswers * currActivity.pointsMultiplier;
+        doneActivity.grade = newGrade;
+        doneActivity.pointsAwarded = newGrade * currActivity.pointsMultiplier;
         doneActivity.completedOn = new Date();
     } else {
         req.session.betterActivityResult = false;
     }
+
     doneActivity.numberOfAttempts = doneActivity.numberOfAttempts + 1; //attempts done always go up
-    let pointsForUpdate = doneActivity.pointsAwarded - oldPoints;
+    let pointsForUpdate = doneActivity.pointsAwarded - oldPoints; //calculate the points for DB
 
     try {
         await insertOrUpdateTable("student_activities",
-            [doneActivity.studentID, doneActivity.activityID, doneActivity.grade, doneActivity.pointsAwarded, doneActivity.numberOfAttempts, pointsForUpdate], DBAction);
-        console.log(`${DBAction} correct.\ndoneActivity:`)
-        console.log(doneActivity);
+            [doneActivity.studentID, doneActivity.activityID, doneActivity.groupID, doneActivity.grade, doneActivity.pointsAwarded, doneActivity.numberOfAttempts, pointsForUpdate], DBAction);
     } catch (error) {
         console.log(`Error on ${DBAction}; activity results from student ${req.session.user.studentID} on activity ${currActivity.activityID}: ${err}`);
     }
     req.session.completedActivities[doneActivity.activityID] = doneActivity; //we update completedActivities
-    console.log("\nreq.session.completedActivities right before /done:");
-    console.log(req.session.completedActivities);
     req.session.save((err) => {
         if (err) {
             res.locals.error = err;
             res.redirect('/');
         } else res.redirect(`/activity/${req.params.id}/done`);
     });
-
 });
 
 router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
     const id = typeof req.params.id !== "string" ? req.params.id.toString() : req.params.id,
         complActivity = req.session.completedActivities[id],
         currActivity = req.session.activities[id];
-    //TODO: Delete
-    console.log("\n y en /done tenemos req.session.completedActivities:");
-    console.log(req.session.completedActivities);
     //Once the activity is done, show the results
     res.render('student/activityResults', {
         layout: 'NavBarLayoutS',
         betterActivityResult: req.session.betterActivityResult,
         attemptNumber: complActivity.numberOfAttempts,
         firstAttempt: complActivity.numberOfAttempts === 1,
-        grade: complActivity.grade,
+        grade: complActivity.grade * 10,
         points: complActivity.pointsAwarded,
-        numberOfQuestions: currActivity.numberOfQuestions
+        numberOfQuestions: currActivity.numberOfQuestions,
+        numberOfAttempts: currActivity.numberOfAttempts
     });
     req.betterActivityResult = null;
 });
@@ -761,8 +865,6 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
 
     activityInserted.then(() => {
         getAllActivities().then(activities => {
-            console.log("\nNew activities\n")
-            console.log(activities)
             req.session.activities = activities;//we refresh the session activities
         }).catch(err => {
             console.log("Error when fetching new activity" + err);
@@ -872,33 +974,28 @@ router.get('/student-login', redirectIfLoggedIn, (req, res, next) => {
         });
     } else {    //There's no errors, we check DB
         req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64'); //hashing the password
-        checkStudentLogin(req, res)
-            .then((response) => {
-                req.session.errors = null;
-                req.session.user = JSON.parse(JSON.stringify(response));
-                req.session.userType = "student";
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('/dashboard');
-                });
-            }).catch((error) => {
-                console.log("There are errors on DB access (student log in)");
-                req.session.errors = {
-                    1: {
-                        msg: error
-                    }
-                };
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('back');
-                });
+        checkStudentLogin(req, res).then((response) => {
+            req.session.errors = null;
+            req.session.user = JSON.parse(JSON.stringify(response));
+            req.session.userType = "student";
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/dashboard');
             });
+        }).catch((error) => {
+            console.log("There are errors on DB access (student log in)");
+            req.session.errors = { 1: { msg: error } };
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
+        });
     }
 });
 
@@ -982,35 +1079,85 @@ router.get('/teacher-login', redirectIfLoggedIn, (req, res, next) => {
         });
     } else {//There's no errors, we check DB
         req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
-        checkTeacherLogin(req, res)
-            .then((response) => {
-                req.session.errors = null;
-                req.session.user = JSON.parse(JSON.stringify(response));
-                req.session.userType = "teacher";
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('/dashboard');
-                });
-            }).catch((error) => {
-                console.log("There are errors on DB access (teacher log in)");
-                req.session.errors = {
-                    1: {
-                        msg: error
-                    }
-                };
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('back');
-                });
+        checkTeacherLogin(req, res).then((response) => {
+            req.session.errors = null;
+            req.session.user = JSON.parse(JSON.stringify(response));
+            req.session.userType = "teacher";
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/dashboard');
             });
+        }).catch((error) => {
+            console.log("There are errors on DB access (teacher log in)");
+            req.session.errors = { 1: { msg: error } };
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
+        });
     }
 });
+
+router.get('/admin-login', redirectIfLoggedIn, (req, res, next) => {
+    res.render('admin/login', {
+        title: 'Admin Login',
+        success: req.session.success,
+        errors: req.session.errors
+    });
+    req.session.errors = null;
+    req.session.success = null;
+}).post('/admin-login', (req, res, next) => {
+    req.check('email', 'Invalid email address').isEmail();
+    let errors = req.validationErrors();
+    if (errors) {
+        console.log("There are errors on log in: ", errors);
+        req.session.errors = errors;
+        req.session.save((err) => {
+            if (err) {
+                res.locals.error = err;
+                res.redirect('/');
+            }
+            res.redirect('back');
+        });
+    } else {//There's no errors, we check DB
+        req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
+        checkAdminLogin(req, res).then((response) => {
+            req.session.errors = null;
+            req.session.user = JSON.parse(JSON.stringify(response));
+            req.session.userType = "admin";
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('/dashboard');
+            });
+        }).catch((error) => {
+            console.log("There are errors on DB access (admin log in)");
+            req.session.errors = { 1: { msg: error } };
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
+        });
+    }
+});
+
+router.get('/admin/tools', redirectNonAdmins, (req, res, next) => {
+    res.render('admin/tools', {
+        title: 'Admin Tools',
+        layout: 'NavBarLayoutA'
+    })
+})
 
 //Help and profile
 router.get('/help', redirectIfNotLoggedIn, (req, res, next) => {

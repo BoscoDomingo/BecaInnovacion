@@ -8,7 +8,7 @@
     <title>{{title}}</title>
     <link rel="stylesheet" href="stylesheets/index.css">
     <link rel="stylesheet" href="stylesheets/style.css">
-    <script src="javascripts/signUpTeacher.js"></script>
+    <script type="text/javascript" src="javascripts/signUpTeacher.js" defer></script>
 </head>
 
 <body>
@@ -54,6 +54,10 @@
                 <label for="confirmPassword">Confirm your password:</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" required>
                 <p class="passwordError" id="validatePasswords"></p>
+            </div>
+            <div>
+                <label style="display: inline !important;">Show passwords</label> 
+                <input type="checkbox" onclick="showPasswords()" class="inline">
             </div>
              <button type="submit" class="btn">Sign Up</button>
         </form>

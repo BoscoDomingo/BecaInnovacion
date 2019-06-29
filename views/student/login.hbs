@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="stylesheets/index.css">
     <link rel="stylesheet" href="stylesheets/login.css">
     <link rel="stylesheet" href="stylesheets/nav.css">
+    <script type="text/javascript" src="javascripts/student/login.js" defer></script>
     <title>{{title}}</title>
 </head>
 
@@ -22,7 +23,9 @@
     <section>
         <ul>
             {{#each errors}}
-            <li><h1 class="error">{{this.msg}}</h1></li>
+            <li>
+                <h1 class="error">{{this.msg}}</h1>
+            </li>
             {{/each}}
         </ul>
     </section>
@@ -30,7 +33,7 @@
     <div>
         <div class="wrap-login">
             <img src="img/logoupm.png" class="center">
-            <h1 class="title">Student Log-In</h1>
+            <h1 class="title">Student Login</h1>
             <section class="container">
                 <form id="login-form" class="student-form" action="/student-login" method="POST">
                     <div>
@@ -41,6 +44,9 @@
                     <div>
                         <input type="password" id="password" placeholder="password" name="password"
                             class="wrap-input input100" required>
+                    </div>
+                    <div>
+                        <input type="checkbox" onclick="showPassword()">Show Password
                     </div>
                     <button type="submit" class="btn">Submit</button>
                 </form>
