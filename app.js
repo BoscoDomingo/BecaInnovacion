@@ -85,7 +85,7 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {//TODO: make a better looking error page for production, and keep the current one for dev
+app.use(function (err, req, res, next) {
     if(!INPROD){
         // set locals, only providing error in development
         res.locals.message = err.message;

@@ -1,17 +1,19 @@
 <script src="/javascripts/activity.js"></script>
-<h1 class="title">Inside {{activityID}}</h1>
 <div class="container acontainer">
     <div id="videoPlayer" class="video-container">
         <iframe width="1030" height="580" src={{videoLink}} frameborder="0"
             allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
 
-<form method="post">
-    {{#each questions as |question|}}
-    <section class="answer-container">
-        <h1>{{@key}}) {{this.questionText}}</h1>
-        {{#each this.questionChoices as |choice|}}
-        <input type="radio" name={{question.questionID}} value={{@key}} required><p>{{this}}</p> <br>
+    <form method="post">
+        {{#each questions as |question|}}
+        <section class="answer-container">
+            <h1>{{@key}}) {{this.questionText}}</h1>
+            {{#each this.questionChoices as |choice|}}
+            <input type="radio" name={{question.questionID}} value={{@key}} required>
+            <p>{{this}}</p> <br>
+            {{/each}}
+        </section>
         {{/each}}
         <button type="submit" class="btn2">Finish</button>
     </form>

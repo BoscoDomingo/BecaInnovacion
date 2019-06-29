@@ -883,6 +883,7 @@ router.get('/activity-summary/:id', redirectIntruders, async (req, res, next) =>
         let chosenActivity = req.session.activities[req.params.id] ? req.session.activities[req.params.id] : await getActivity(req.params.id);
         res.render('teacher/activitySummary', {
             layout: 'NavBarLayoutT',
+            videoLink: `https://www.youtube.com/embed/${getYTVideoID(chosenActivity.videoLink)}`,
             title: `Summary of activity ${chosenActivity.activityID}`,
             activity: chosenActivity
         });

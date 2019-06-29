@@ -1,14 +1,21 @@
 <div class="container summary">
     {{#if activity}}
-    <h1 class="title">{{activity.title}}</h1>
-    <h3>Video: <a href={{activity.videoLink}} target="_blank" rel="noopener noreferrer">Link</a></h3>
-    <h3>Number of Questions: {{activity.numberOfQuestions}}</h3>
-    {{#each activity.questions}}
-    <h2>Question {{this.questionNumber}}:</h2>
-    <h3>{{this.questionText}}</h5>
-        <h5>Choices: {{this.questionChoices}}</h5>
-        <h5>Answer: {{this.questionAnswer}}</h5>
-
+        <h1 class="title">{{activity.title}}</h1>
+        <h3>Number of Questions: {{activity.numberOfQuestions}}</h3>
+        <h3>Video:
+            <div id="videoPlayer" class="video-container">
+                <iframe width="1030" height="580" src={{videoLink}} frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+            </div>
+        </h3>
+        
+        <br>
+        {{#each activity.questions}}
+            <h2>{{this.questionText}}</h5>
+            <h5>Choices: {{this.questionChoices}}</h5>
+            <h5>Answer: {{this.questionAnswer}}</h5>
+            <br>
         {{/each}}
-        {{/if}}
+    {{/if}}
 </div>
