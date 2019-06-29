@@ -1,10 +1,15 @@
-{{#if firstAttempt}}
+<head>
+    <link rel='stylesheet' href='stylesheets/style.css' />
+</head>
+<div class="container summary">
+    {{#if firstAttempt}}
 <h1>What a first run! Here are your results:</h1>
-{{else if betterActivityResult}}
-<h1>Congrats! Here are your results:</h1>
-{{else}}
-<h2>Sorry, you didn't improve your best attempt's results. On this attempt you got:</h2>
-{{/if}}
+    {{else if betterActivityResult}}
+    <h1 class="subtitle">Congrats! Here are your results:</h1>
+    {{else}}
+    <h2 class="subtitle">Sorry, you didn't improve your best attempt's results. On this attempt you got:</h2>
+    {{/if}}
+    <h1 class="subtitle">Well done, here are your results:</h1>
 
 <div>
     <ul>
@@ -12,6 +17,8 @@
         <li>Grade: {{grade}}/10</li>
         <li>Points: {{points}}</li>
     </ul>
+    </div>
+    <div class="btn-center">
+        <a href="retry" class="btn2 btn4">Try again</a> <a href="/dashboard" class="btn2 btn4">Go Back</a>
+    </div>
 </div>
-
-<a href="retry">Try again</a> <a href="/dashboard">Go Back</a>

@@ -1,12 +1,14 @@
-{{#if activity}}
-<h1>{{activity.title}}</h1>
-<h3>Video: <a href={{activity.videoLink}} target="_blank" rel="noopener noreferrer">Link</a></h3>
-<h3>Number of Questions: {{activity.numberOfQuestions}}</h3>
-{{#each activity.questions}}
-<h2>Question {{this.questionNumber}}:</h2>
-<h3>{{this.questionText}}</h5>
-<h5>Choices: {{this.questionChoices}}</h5>
-<h5>Answer: {{this.questionAnswer}}</h5>
+<div class="container summary">
+    {{#if activity}}
+    <h1 class="title">{{activity.title}}</h1>
+    <h3>Video: <a href={{activity.videoLink}} target="_blank" rel="noopener noreferrer">Link</a></h3>
+    <h3>Number of Questions: {{activity.numberOfQuestions}}</h3>
+    {{#each activity.questions}}
+    <h2>Question {{this.questionNumber}}:</h2>
+    <h3>{{this.questionText}}</h5>
+        <h5>Choices: {{this.questionChoices}}</h5>
+        <h5>Answer: {{this.questionAnswer}}</h5>
 
-{{/each}}
-{{/if}}
+        {{/each}}
+        {{/if}}
+</div>

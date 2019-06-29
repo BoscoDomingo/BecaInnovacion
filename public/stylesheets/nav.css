@@ -41,6 +41,7 @@ button {
     text-decoration: none;
     font-size: 17px;
 }
+
 .topnav .right-button {
     float: right;
     display: block;
@@ -74,7 +75,7 @@ button {
 
 .topnav a.active {
     background-color: #86c9ff;
-    color: white;
+    color: black;
 }
 
 
