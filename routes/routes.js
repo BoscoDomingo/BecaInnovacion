@@ -43,10 +43,24 @@ const express = require('express'),
         duration: parseInt(process.env.LOGIN_ATTEMPTS_RESET), // Number of seconds before consumed points are reset.
         blockDuration: process.env.LOGIN_BLOCK_TIME, //Number of seconds of user blocking if attempts >= points (before they reset)
         inmemoryBlockOnConsumed: parseInt(process.env.LOGIN_ATTEMPTS), //protection against DDoS, avoids checking with DB if points are consumed
-        inmemoryBlockDuration: process.env.LOGIN_BLOCK_TIME, //Number of seconds of of user blocking (memory stored instead of DB)
+        inmemoryBlockDuration: process.env.LOGIN_BLOCK_TIME //Number of seconds of of user blocking (memory stored instead of DB)
     }, (err) => {
-        if (err) {// log or/and process exit
-            console.log("Error ocurred creating rateLimiter", err);
+        if (err) {// log error and/or exit process
+            console.log("Error ocurred creating loginRateLimiter", err);
+        }
+    }),
+    actionRateLimiter = new RateLimiterMySQL({
+        storeClient: sessionPool,
+        dbName: process.env.db_name,
+        tableName: 'rate_limiter',
+        points: parseInt(process.env.ACTION_ATTEMPTS), // Number of attempts
+        duration: parseInt(process.env.ACTION_ATTEMPTS_RESET), // Number of seconds before consumed points are reset.
+        blockDuration: process.env.ACTION_BLOCK_TIME, //Number of seconds of user blocking if attempts >= points (before they reset)
+        inmemoryBlockOnConsumed: parseInt(process.env.ACTION_ATTEMPTS), //protection against DDoS, avoids checking with DB if points are consumed
+        inmemoryBlockDuration: process.env.ACTION_BLOCK_TIME //Number of seconds of of user blocking (memory stored instead of DB)
+    }, (err) => {
+        if (err) {// log error and/or exit process
+            console.log("Error ocurred creating actionRateLimiter", err);
         }
     });
 
@@ -144,7 +158,7 @@ async function getActivity(activityID) { //returns an object with the desired Ac
                                 results[0].activityLink = `/activity/${activityID}`; //so students can do it
                                 results[0].summaryLink = `/activity-summary/${activityID}`; //so teachers can view it
                                 results[0].questions = makeObject1Indexed(Object.assign({}, questions)); //adding the questions
-                                results[0].tags = parseTags(results[0].tags)
+                                results[0].tags = parseTags(results[0].tags);
                                 resolve();
                             }
                         });
@@ -317,7 +331,7 @@ function signUpStudent(req, res) {
                 console.log(rej);
                 const retrySecs = Math.round(rej.msBeforeNext / 1000) || 1;
                 res.set('Retry-After', String(retrySecs));
-                return res.status(429).send('Too Many Requests');
+                return res.status(429).send(`<p>Too Many Requests. Please try again in ${retrySecs}s</p><br>`);
             });
     });
 }
@@ -347,7 +361,7 @@ function signUpTeacher(req, res) {
                 console.log(rej);
                 const retrySecs = Math.round(rej.msBeforeNext / 1000) || 1;
                 res.set('Retry-After', String(retrySecs));
-                return res.status(429).send('Too Many Requests');
+                return res.status(429).send(`<p>Too Many Requests. Please try again in ${retrySecs}s</p><br>`);
             });
     });
 }
@@ -381,7 +395,7 @@ function checkStudentLogin(req, res) {
                 console.log(rej);
                 const retrySecs = Math.round(rej.msBeforeNext / 1000) || 1;
                 res.set('Retry-After', String(retrySecs));
-                return res.status(429).send('Too Many Requests');
+                return res.status(429).send(`<p>Too Many Requests. Please try again in ${retrySecs}s</p><br>`);
             });
     })
 };
@@ -411,7 +425,7 @@ function checkTeacherLogin(req, res) {
                 console.log(rej);
                 const retrySecs = Math.round(rej.msBeforeNext / 1000) || 1;
                 res.set('Retry-After', String(retrySecs));
-                return res.status(429).send('Too Many Requests');
+                return res.status(429).send(`<p>Too Many Requests. Please try again in ${retrySecs}s</p><br>`);
             });
     });
 }
@@ -441,7 +455,7 @@ function checkAdminLogin(req, res) {
                 console.log(rej);
                 const retrySecs = Math.round(rej.msBeforeNext / 1000) || 1;
                 res.set('Retry-After', String(retrySecs));
-                return res.status(429).send('Too Many Requests');
+                return res.status(429).send(`<p>Too Many Requests. Please try again in ${retrySecs}s</p><br>`);
             });
     });
 }
@@ -530,21 +544,30 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
         });
     }
 }).get('/dashboard/refresh-activities', redirectIfNotLoggedIn, async (req, res, next) => {
-    try {//TODO: 1 attempt every 30s using rate-limiter
-        req.session.activities = await getAllActivities();
-        if (isStudent(req.session)) {
-            req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
-        } else {
-            req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
+    const storedIP = (actionRateLimiter.getKey(req.ip));
+    actionRateLimiter.consume(req.ip).then(async (rateLimiterRes) => { //blocking attempts from same IP
+        try {
+            req.session.activities = await getAllActivities();
+            if (isStudent(req.session)) {
+                req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
+            } else {
+                req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
+            }
+            req.session.save((err) => {
+                if (err) {
+                    console.log(err);
+                    res.redirect('/');
+                } else res.redirect('/dashboard');
+            });
+        } catch (error) {
+            console.log(error);
         }
-    } catch (error) {
-        throw new Error(error);
-    }
-    req.session.save((err) => {
-        if (err) {
-            console.log(err);
-            res.redirect('/');
-        } else res.redirect('/dashboard');
+    }).catch((rej) => {// Blocked, no points left
+        console.log("Not allowed from IP: " + storedIP);
+        console.log(rej);
+        const retrySecs = Math.round(rej.msBeforeNext / 1000) || 1;
+        res.set('Retry-After', String(retrySecs));
+        return res.status(429).send(`<p>Too Many Requests. Please try again in ${retrySecs}s</p><br><a href="/dashboard">Go Back</a>`);
     });
 });
 router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
