@@ -1,5 +1,5 @@
 'use strict'
-const passwordRegEx = /(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[\d\w!"·$%&/()=?¿¡ñç\*\+\-|@#~€¬]{8,}/g;
+const passwordRegEx = /(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[\d\w!"·$%&/()=?¿¡ñç\*\+\-|@#~€¬]{8,}/;
 
 function validatePassword() {
     let password = document.getElementById("password"),

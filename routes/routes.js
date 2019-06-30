@@ -307,7 +307,7 @@ function signUpStudent(req, res) {
         name = req.body.name,
         surname = req.body.surname,
         studentID = req.body.studentID,
-        teacherID = req.body.studentID,
+        teacherID = req.body.teacherID,
         groupID = req.body.groupID,
         includeInRankings = req.body.includeInRankings,
         storedIP = (loginRateLimiter.getKey(req.ip));

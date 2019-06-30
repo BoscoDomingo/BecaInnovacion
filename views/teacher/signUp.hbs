@@ -41,7 +41,7 @@
                 <input type="text" id="surname" name="surname" autocapitalize="words" autocomplete="family-name" required>
             </div>
             <div>
-                <label for="studentID">Teacher ID</label>
+                <label for="teacherID">Teacher ID</label>
                 <input type="text" id="teacherID" name="teacherID" required>
             </div>
             <div>
@@ -50,7 +50,7 @@
             </div>
             <div>
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" onchange="validatePassword()" autocomplete="new-password"  required>
+                <input type="password" id="password" name="password" oninput="validatePassword()" autocomplete="new-password" required>
                 <p class="passwordError" id="correctPassword"></p>
             </div>
             <div>
@@ -64,14 +64,6 @@
             </div>
             <button type="submit" class="btn">Sign Up</button>
         </form>
-
-        {{!-- <ul id="users"></ul> --}}
-
-        <!-- <ul class="items">
-        <li class="item">Item 1</li>
-        <li class="item">Item 2</li>
-        <li class="item">Item 3</li>
-      </ul> -->
     </section>
 </body>
 </html>

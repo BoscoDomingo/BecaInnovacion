@@ -13,8 +13,8 @@
 
 <body>
     <header>
-            <a class="back btn" href="/">Go Back</a>
-            <h1 style="display: inline-block;">Welcome to EFAPC's interactive platform</h1>
+        <a class="back btn" href="/">Go Back</a>
+        <h1 style="display: inline-block;">Welcome to EFAPC's interactive platform</h1>
     </header>
     {{#if errors}}
     <section>
@@ -29,7 +29,7 @@
     {{/if}}
 
     <section class="container">
-        <form id="sign-up-form" class="student-form" action="/student-sign-up" method="POST" autocomplete="on" >
+        <form id="sign-up-form" class="student-form" action="/student-sign-up" method="POST" autocomplete="on">
             <h1 class="title">Student Sign Up</h1>
             <div>
                 <label for="name">Name</label>
@@ -44,7 +44,7 @@
                 <input type="text" id="studentID" name="studentID" required>
             </div>
             <div>
-                <label for="studentID">Teacher ID</label>
+                <label for="teacherID">Teacher ID</label>
                 <input type="text" id="teacherID" name="teacherID" required>
             </div>
             <div>
@@ -58,12 +58,15 @@
             </div>
             <div>
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" onchange="validatePassword()" required>
-                <p class="passwordError" id="correctPassword"></p>
+                <input type="password" id="password" name="password" oninput="validatePassword()"
+                    autocomplete="new-password" required>
+                <p class="passwordError" id="correctPassword">Password must contain 8 characters, one UPPER case letter,
+                    one lower case and one number (0-9)</p>
             </div>
             <div>
                 <label for="confirmPassword">Confirm your password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" oninput="checkConfirm()" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" oninput="checkConfirm()"
+                    autocomplete="new-password" required>
                 <p class="passwordError" id="validatePasswords"></p>
             </div>
             <div>

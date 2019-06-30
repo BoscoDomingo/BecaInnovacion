@@ -224,8 +224,8 @@ a.fill-div {
 }
 
 .student-form .passwordError {
-    color: red;
-    display: none;
+    color: dodgerblue;
+    display: inline;
 }
 
 .teacher-form {
