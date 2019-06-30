@@ -1,5 +1,5 @@
-'use strict';
-const passwordRegEx = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$/g;
+'use strict'
+const passwordRegEx = /(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[\d\w!"·$%&/()=?¿¡ñç\*\+\-|@#~€¬]{8,}/g;
 
 function validatePassword() {
     let password = document.getElementById("password"),
@@ -9,7 +9,7 @@ function validatePassword() {
         correctPassword.innerHTML = "";
         correctPassword.style.display = "none";
     } else {
-        correctPassword.innerHTML = "Password must contain 8 characters, one UPPER case letter, one lower case and one number";
+        correctPassword.innerHTML = "Password must contain 8 characters, one UPPER case letter, one lower case and one number (0-9)";
         correctPassword.style.display = "inline";
     }
 }

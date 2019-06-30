@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{title}}</title>
-    <link rel="stylesheet" href="stylesheets/index.css">
-    <link rel="stylesheet" href="stylesheets/style.css">
-    <script type="text/javascript" src="javascripts/signUpTeacher.js" defer></script>
+    <link rel="stylesheet" href="/stylesheets/index.css">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <script type="text/javascript" src="/javascripts/teacher/signUp.js" defer></script>
 </head>
 
 <body>
@@ -49,12 +49,12 @@
             </div>
             <div>
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" onkeyup="validatePassword()" autocomplete="new-password"  required>
+                <input type="password" id="password" name="password" onchange="validatePassword()" autocomplete="new-password"  required>
                 <p class="passwordError" id="correctPassword"></p>
             </div>
             <div>
                 <label for="confirmPassword">Confirm your password:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" autocomplete="new-password" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" oninput="checkConfirm()" autocomplete="new-password" required>
                 <p class="passwordError" id="validatePasswords"></p>
             </div>
             <div>
