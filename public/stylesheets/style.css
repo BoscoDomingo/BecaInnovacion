@@ -131,6 +131,22 @@ th {
     margin-left: 0.5rem;
 }
 
+.ranking-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+    grid-gap: 1rem 0;
+    margin: 0 15%;
+    text-align: center;
+}
+
+.ranking-grid>div {
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 1px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
+    width: 85%;
+}
+
 .activity-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

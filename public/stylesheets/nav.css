@@ -6,6 +6,7 @@
 
 .acontainer {
     width: 900px !important;
+    margin: 3rem auto;
 }
 
 h3 button {
@@ -117,4 +118,9 @@ button {
     .topnav input[type=text] {
         border: 1px solid #ccc;
     }
+}
+
+.log-out {
+    background-color: #b8dcfa;
+    color: #003561 !important;
 }

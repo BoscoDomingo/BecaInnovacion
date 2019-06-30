@@ -1,62 +1,65 @@
 <head>
-    <link rel='stylesheet' href='stylesheets/style.css'/>
+    <link rel='stylesheet' href='stylesheets/style.css' />
     <script type="text/javascript" src="javascripts/ranking.js"></script>
 </head>
 
 <h1 class="title">Rankings</h1>
-<div id="ranking_container" class="container">
-    {{#if error}}
-    <h2 class="error" id="error">
-        There was an error contacting DB. Please try again. If problem persists, contact an administrator
-    </h2>
-    {{else}}
-    <h2>All students:</h2>
-    <input type="text" id="searchbar" onkeyup="searchByID()" placeholder="Search by Student ID" class="searchbar">
-    <table class="rankingTable" id="ranking_table">
-        <thead>
-            <tr>
-                <th onclick="sortTable(0)">Student ID</th>
-                <th onclick="sortTable(1)">Group ID</th>
-                <th onclick="sortTable(2)">Points</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each students as |student|}}
-            <tr>
-                <td>{{this.studentID}}</td>
-                <td>{{this.groupID}}</td>
-                <td>{{this.totalPoints}}</td>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
-    {{/if}}
-</div>
-{{#if groupID}}
-<div id="group_ranking_container" class="container">
-    {{#if error}}
-    <h2 class="error" id="group_error">
-        There was an error contacting DB. Please try again. If problem persists, contact an administrator
-    </h2>
-    {{else}}
-    <h2>Your group ({{groupID}}):</h2>
-    <input type="text" id="group_searchbar" onkeyup="searchByID('group')" placeholder="Search by ID" class="searchbar">
-    <table class="rankingTable" id="group_ranking_table">
-        <thead>
-            <tr>
-                <th onclick="sortTable(0, 'group')">Student ID</th>
-                <th onclick="sortTable(1, 'group')">Points</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each groupmates as |groupmate|}}
-            <tr>
-                <td>{{this.studentID}}</td>
-                <td>{{this.totalPoints}}</td>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
-    {{/if}}
+<div class="ranking-grid">
+    <div id="ranking_container" class="container con2">
+        {{#if error}}
+        <h2 class="error" id="error">
+            There was an error contacting DB. Please try again. If problem persists, contact an administrator
+        </h2>
+        {{else}}
+        <h2 class="subtitle">All students:</h2>
+        <input type="text" id="searchbar" onkeyup="searchByID()" placeholder="Search by Student ID" class="searchbar">
+        <table class="rankingTable" id="ranking_table">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Student ID</th>
+                    <th onclick="sortTable(1)">Group ID</th>
+                    <th onclick="sortTable(2)">Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each students as |student|}}
+                <tr>
+                    <td>{{this.studentID}}</td>
+                    <td>{{this.groupID}}</td>
+                    <td>{{this.totalPoints}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{/if}}
+    </div>
+    {{#if groupID}}
+    <div id="group_ranking_container" class="container con3">
+        {{#if error}}
+        <h2 class="error" id="group_error">
+            There was an error contacting DB. Please try again. If problem persists, contact an administrator
+        </h2>
+        {{else}}
+        <h2 class="subtitle">Your group ({{groupID}}):</h2>
+        <input type="text" id="group_searchbar" onkeyup="searchByID('group')" placeholder="Search by ID"
+            class="searchbar">
+        <table class="rankingTable" id="group_ranking_table">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0, 'group')">Student ID</th>
+                    <th onclick="sortTable(1, 'group')">Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each groupmates as |groupmate|}}
+                <tr>
+                    <td>{{this.studentID}}</td>
+                    <td>{{this.totalPoints}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{/if}}
+    </div>
 </div>
 {{/if}}
