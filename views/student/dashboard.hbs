@@ -20,11 +20,11 @@
         {{#each activities}}
         <div class="activity-container newpad">
             <li onclick="location.href='{{this.activityLink}}';">
-                <h3 class="title">{{this.title}}</h3>
-                <h4 class="author">{{this.teacherID}}</h4>
+                <h3 class="title">{{this.title}} - </h3>
+                <h3 class="id">{{this.activityID}}</h3>
+                <h4 class="author">{{this.creatorName}}</h4>
                 <h4 class="category">{{this.category}}</h4>
                 <h4 class="tags">{{this.tags}}</h4>
-                <h4 class="id">{{this.activityID}}</h4>
             </li>
         </div>
         {{/each}}
@@ -43,9 +43,9 @@
         {{#each completedActivities}}
         <div class="activity-container newpad">
             <li onclick="location.href='{{this.activityLink}}';">
-                <h3 class="title">{{this.title}}</h3>
-                <h4 class="id">{{this.activityID}}</h4>
-                <h4 class="author">{{this.teacherID}}</h4>
+                <h3 class="title">{{this.title}} - </h3>
+                <h3 class="id">{{this.activityID}}</h3>
+                <h4 class="author">{{this.creatorName}}</h4>
                 <h4 class="category">{{this.category}}</h4>
                 <h4 class="tags">{{this.tags}}</h4>
             </li>
