@@ -881,6 +881,11 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
 router.get('/activity-summary/:id', redirectIntruders, async (req, res, next) => {
     try {
         let chosenActivity = req.session.activities[req.params.id] ? req.session.activities[req.params.id] : await getActivity(req.params.id);
+        Object.values(chosenActivity.questions).forEach((question, index, arr) => {
+            if (typeof question.questionChoices === 'string') {
+                arr[index].questionChoices = parseQuestionChoices(question.questionChoices);
+            }
+        });
         res.render('teacher/activitySummary', {
             layout: 'NavBarLayoutT',
             videoLink: `https://www.youtube.com/embed/${getYTVideoID(chosenActivity.videoLink)}`,

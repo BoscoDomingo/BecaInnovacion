@@ -12,10 +12,15 @@
         
         <br>
         {{#each activity.questions}}
+        <section class="answer-container">
             <h2>{{this.questionText}}</h5>
-            <h5>Choices: {{this.questionChoices}}</h5>
-            <h5>Answer: {{this.questionAnswer}}</h5>
+            {{#each this.questionChoices as |choice|}}
+            <input type="radio" name={{question.questionID}} value={{@key}} required disabled><p>{{this}}</p>
             <br>
+            {{/each}}
+            <br>
+            <h5>Answer: {{this.questionAnswer}}</h5>
+            </section>
         {{/each}}
     {{/if}}
 </div>
