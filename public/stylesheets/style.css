@@ -133,9 +133,11 @@ th {
 
 .ranking-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+    grid-template-columns: repeat(auto-fit, 45rem);
     grid-gap: 1rem 0;
-    margin: 0 15%;
+    justify-content: center;
+    margin: 0 auto;
+    list-style: none;
     text-align: center;
 }
 
@@ -451,3 +453,9 @@ ul {
 .title-container {
     height: 4rem;
 }
+
+ul.profile {
+    list-style-type: circle;
+}
+
+section.rank {}
