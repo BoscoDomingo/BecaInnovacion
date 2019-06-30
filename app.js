@@ -19,6 +19,7 @@ app.engine('hbs', hbs.express4({ layoutsDir: __dirname + "/views/layouts", defau
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('env', process.env.NODE_ENV);
+app.set('x-powered-by', false);
 
 //Middleware
 app.use(logger('dev'));
@@ -45,7 +46,7 @@ app.use(session({
     cookie: {
         maxAge: parseInt(process.env.SESS_LIFETIME), //ms before expiration after last request
         sameSite: true, //cookies only work in our domain
-        // secure: INPROD //they will require HTTPS
+        //secure: INPROD //they will require HTTPS
     }
 }));
 
@@ -92,16 +93,13 @@ app.use(function(err, req, res, next) {
         res.locals.error = !INPROD ? err : {}; //res.locals.error = req.app.get('env') === 'development' ? err : {};
         res.status(err.status || 500);
 
-        // render the error page
         res.render('error');
 
-        //redirect to main page
-        //res.redirect('/');
-    } else {
-        // render the error page
+    //redirect to main page
+    //res.redirect('/');
+    }else{
         res.render('errorProd');
     }
-
 });
 
 //response headers

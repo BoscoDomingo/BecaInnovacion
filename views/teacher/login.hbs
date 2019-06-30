@@ -16,16 +16,27 @@
     <header>
         <h1>Welcome to EFAPC's interactive platform</h1>
     </header>
+    {{#if errors}}
+    <section>
+        <ul>
+            {{#each errors}}
+            <li>
+                <h1 class="error">{{this.msg}}</h1>
+            </li>
+            {{/each}}
+        </ul>
+    </section>
+    {{/if}}
     <div id="contenedor">
         <div class="wrap-login">
             <img src="img/logoupm.png" class="center">
             <h1 class="title">Teacher Login</h1>
             <section class="container">
                 <div class="lgns">
-                    <form id="login-form" class="teacher-form" action="/teacher-login" method="POST">
-                        <input type="email" name="email" id="email" placeholder="user@upm.es"
+                    <form id="login-form" class="teacher-form" action="/teacher-login" method="POST" autocomplete="on">
+                        <input type="email" name="email" id="email" placeholder="user@upm.es" autocomplete="email"
                             class="emailInput wrap-input input100" required />
-                        <input type="password" name="password" id="password" placeholder="Password"
+                        <input type="password" name="password" id="password" placeholder="Password" autocomplete="current-password"
                             class="wrap-input input100" required />
                         <div>
                             <input type="checkbox" onclick="showPassword()">Show Password

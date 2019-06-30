@@ -1,5 +1,4 @@
 'use strict';
-//TODO: CHECK ALL console.log() and see which ones to delete
 require('dotenv').config();
 const express = require('express'),
     router = express.Router(),
@@ -493,7 +492,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
         try {
             req.session.activities = await getAllActivities();
         } catch (error) {
-            throw new Error(error);
+            console.log(error);
         }
     }
     if (isStudent(req.session)) {
@@ -501,7 +500,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
             try {
                 req.session.completedActivities = await getCompletedActivities(res.locals.user.studentID, req.session.activities);
             } catch (error) {
-                throw new Error(error);
+                console.log(error);
             }
         }
         req.session.save((err) => {
@@ -520,7 +519,7 @@ router.get('/dashboard', redirectIfNotLoggedIn, async (req, res, next) => {
             try {
                 req.session.ownActivities = await getOwnActivities(req.session.activities, res.locals.user.teacherID);
             } catch (error) {
-                throw new Error(error);
+                console.log(error);
             }
         }
         req.session.save((err) => {
@@ -870,7 +869,7 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
     try {
         req.body.questionIDs = await questionsInserted;
     } catch (error) {
-        throw new Error(error);
+        console.log(error);
     }
 
     //once questions are inserted, we can insert the new activity
@@ -930,8 +929,9 @@ router.get('/student-sign-up', (req, res, next) => {
     req.session.errors = null; //to flush them on reload
 }).post('/student-sign-up', (req, res, next) => {
     req.body.email = convertToUPMEmail(req.body.email);
+    req.check('teacherID', 'ID is too long').isLength({max:8});
     req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
-    // req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx); //TODO: uncomment
+    req.check('password', 'Invalid password. Must contain at least 1 uppercase, 1 lowercase and 1 number').equals(req.body.confirmPassword).matches(passwordRegEx);
     let errors = req.validationErrors();
     if (errors) {
         console.log("There are errors on sign up: ", errors);
@@ -948,34 +948,32 @@ router.get('/student-sign-up', (req, res, next) => {
         req.body.includeInRankings = req.body.includeInRankings === "on" ? true : false;
         req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64'); //hashing the password
         req.body.confirmPassword = crypto.createHash('sha256').update(req.body.confirmPassword).digest('base64');
-        signUpStudent(req, res)
-            .then(() => {
-                console.log("Inserted successfully\n");
-                req.session.signUpSuccess = true;
-                req.session.errors = null;
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('/student-login');
-                });
-            }).catch((error) => {
-                console.log("There are errors on DB access (student sign up)\n");
-                req.session.errors = {
-                    1: {
-                        msg: error
-                    }
-                };
-                req.session.signUpSuccess = false;
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('back');
-                });
+        signUpStudent(req, res).then(() => {
+            req.session.signUpSuccess = true;
+            req.session.errors = null;
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.status(200).redirect('/student-login');
             });
+        }).catch((error) => {
+            console.log("There are errors on DB access (student sign up)\n");
+            req.session.errors = {
+                1: {
+                    msg: error
+                }
+            };
+            req.session.signUpSuccess = false;
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
+        });
     }
 });
 
@@ -996,6 +994,7 @@ router.get('/student-login', redirectIfLoggedIn, (req, res, next) => {
         req.session.errors = errors;
         req.session.save((err) => {
             if (err) {
+                console.log(err);
                 res.locals.error = err;
                 res.redirect('/');
             }
@@ -1009,10 +1008,12 @@ router.get('/student-login', redirectIfLoggedIn, (req, res, next) => {
             req.session.userType = "student";
             req.session.save((err) => {
                 if (err) {
+                    console.log(err);
                     res.locals.error = err;
                     return res.redirect('/');
                 }
                 return res.redirect('/dashboard');
+                return res.status(200).redirect('/dashboard');
             });
         }).catch((error) => {
             console.log("There are errors on DB access (student log in)");

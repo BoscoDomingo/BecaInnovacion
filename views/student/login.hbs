@@ -16,10 +16,10 @@
     <header>
         <h1>Welcome to EFAPC's interactive platform</h1>
     </header>
-    {{# if signUpSuccess}}
-    <h1 class="text1" style="color: red">Sign Up Successful!</h1>
+    {{#if signUpSuccess}}
+    <h1 class="success">Sign Up Successful!</h1>
     {{/if}}
-    {{# if errors}}
+    {{#if errors}}
     <section>
         <ul>
             {{#each errors}}
@@ -35,7 +35,7 @@
             <img src="img/logoupm.png" class="center">
             <h1 class="title">Student Login</h1>
             <section class="container">
-                <form id="login-form" class="student-form" action="/student-login" method="POST">
+                <form id="login-form" class="student-form" action="/student-login" method="POST" autocomplete="on">
                     <div>
                         <input type="text" id="email" name="email" placeholder="user"
                             class="wrap-input input100 studentemail" required>
@@ -43,7 +43,7 @@
                     </div>
                     <div>
                         <input type="password" id="password" placeholder="password" name="password"
-                            class="wrap-input input100" required>
+                            class="wrap-input input100" autocomplete="current-password" required>
                     </div>
                     <div>
                         <input type="checkbox" onclick="showPassword()">Show Password

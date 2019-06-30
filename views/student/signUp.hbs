@@ -16,26 +16,28 @@
         <a class="back btn" href="/">Go Back</a>
         <h1>Welcome to EFAPC's interactive platform</h1>
     </header>
-    {{# if errors}}
+    {{#if errors}}
     <section>
         <ul>
             {{#each errors}}
-            <li style="color: red">{{this.msg}}</li>
+            <li>
+                <h1 class="error">{{this.msg}}</h1>
+            </li>
             {{/each}}
         </ul>
     </section>
     {{/if}}
 
     <section class="container">
-        <form id="sign-up-form" class="student-form" action="/student-sign-up" method="POST">
+        <form id="sign-up-form" class="student-form" action="/student-sign-up" method="POST" autocomplete="on" >
             <h1 class="title">Student Sign Up</h1>
             <div>
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" autocomplete="name" required>
             </div>
             <div>
                 <label for="surname">Surname</label>
-                <input type="text" id="surname" name="surname" required>
+                <input type="text" id="surname" name="surname" autocomplete="family-name" required>
             </div>
             <div>
                 <label for="studentID">Student ID</label>
@@ -56,12 +58,12 @@
             </div>
             <div>
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" onkeyup="validatePassword()" required>
+                <input type="password" id="password" name="password" onkeyup="validatePassword()" autocomplete="new-password" required>
                 <p class="passwordError" id="correctPassword"></p>
             </div>
             <div>
                 <label for="confirmPassword">Confirm your password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" autocomplete="new-password" required>
                 <p class="passwordError" id="validatePasswords"></p>
             </div>
             <div>
@@ -69,7 +71,7 @@
                 <input type="checkbox" onclick="showPasswords()" class="inline">
             </div>
             <div>
-                <label for="includeInRankings" style="display: inline !important;" >Want to be included in
+                <label for="includeInRankings" style="display: inline !important;">Want to be included in
                     rankings?</label>
                 <input type="checkbox" id="includeInRankings" name="includeInRankings" class="inline" checked>
             </div>

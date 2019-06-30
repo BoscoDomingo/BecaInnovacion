@@ -15,11 +15,13 @@
     <header>
         <h1>Welcome to EFAPC's interactive platform. This section is for teachers only!</h1>
     </header>
-    {{# if errors}}
+    {{#if errors}}
     <section>
         <ul>
             {{#each errors}}
-            <li style="color: red">{{this.msg}}</li>
+            <li>
+                <h1 class="error">{{this.msg}}</h1>
+            </li>
             {{/each}}
         </ul>
     </section>
@@ -31,11 +33,11 @@
             <div class="msg"></div>
             <div>
                 <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" autocapitalize="words" autocomplete="name" required>
             </div>
             <div>
                 <label for="surname">Surname:</label>
-                <input type="text" id="surname" name="surname" required>
+                <input type="text" id="surname" name="surname" autocapitalize="words" autocomplete="family-name" required>
             </div>
             <div>
                 <label for="studentID">Teacher ID</label>
@@ -47,19 +49,19 @@
             </div>
             <div>
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" onkeyup="validatePassword()" required>
+                <input type="password" id="password" name="password" onkeyup="validatePassword()" autocomplete="new-password"  required>
                 <p class="passwordError" id="correctPassword"></p>
             </div>
             <div>
                 <label for="confirmPassword">Confirm your password:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" onkeyup="checkConfirm()" autocomplete="new-password" required>
                 <p class="passwordError" id="validatePasswords"></p>
             </div>
             <div>
-                <label style="display: inline !important;">Show passwords</label> 
+                <label style="display: inline !important;">Show passwords</label>
                 <input type="checkbox" onclick="showPasswords()" class="inline">
             </div>
-             <button type="submit" class="btn">Sign Up</button>
+            <button type="submit" class="btn">Sign Up</button>
         </form>
 
         {{!-- <ul id="users"></ul> --}}
