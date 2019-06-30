@@ -458,4 +458,9 @@ ul.profile {
     list-style-type: circle;
 }
 
-section.rank {}
+.back {
+    text-align: left !important;
+    position: absolute !important;
+    max-width: 6rem !important;
+    margin-top: 0 !important;
+}
