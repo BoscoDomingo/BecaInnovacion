@@ -2,6 +2,8 @@
     {{#if activity}}
         <h1 class="title">{{activity.title}}</h1>
         <h3>Number of Questions: {{activity.numberOfQuestions}}</h3>
+        <h3>Number of Attempts: {{activity.numberOfAttempts}}</h3>
+        <h3>Penalisation per Attempt: {{activity.penalisationPerAttempt}}</h3>
         <h3>Video:
             <div id="videoPlayer" class="video-container">
                 <iframe width="1030" height="580" src={{videoLink}} frameborder="0"
