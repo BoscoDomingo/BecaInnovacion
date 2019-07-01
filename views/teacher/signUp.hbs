@@ -14,7 +14,7 @@
 <body>
     <header>
         <a class="back btn" href="/">Go Back</a>
-        <h1>Welcome to EFAPC's interactive platform. This section is for teachers only!</h1>
+        <h1>Welcome to EFPAC's interactive platform. This section is for teachers only!</h1>
     </header>
     {{#if errors}}
     <section>
@@ -38,7 +38,8 @@
             </div>
             <div>
                 <label for="surname">Surname:</label>
-                <input type="text" id="surname" name="surname" autocapitalize="words" autocomplete="family-name" required>
+                <input type="text" id="surname" name="surname" autocapitalize="words" autocomplete="family-name"
+                    required>
             </div>
             <div>
                 <label for="teacherID">Teacher ID</label>
@@ -50,12 +51,14 @@
             </div>
             <div>
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" oninput="validatePassword()" autocomplete="new-password" required>
+                <input type="password" id="password" name="password" oninput="validatePassword()"
+                    autocomplete="new-password" required>
                 <p class="passwordError" id="correctPassword"></p>
             </div>
             <div>
                 <label for="confirmPassword">Confirm your password:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" oninput="checkConfirm()" autocomplete="new-password" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" oninput="checkConfirm()"
+                    autocomplete="new-password" required>
                 <p class="passwordError" id="validatePasswords"></p>
             </div>
             <div>
@@ -66,4 +69,5 @@
         </form>
     </section>
 </body>
+
 </html>
