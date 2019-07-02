@@ -16,6 +16,9 @@
     <header>
         <h1>Welcome to EFPAC's interactive platform</h1>
     </header>
+    {{#if signUpSuccess}}
+    <h1 class="success">Sign Up Successful! Your account must now be validated by another teacher</h1>
+    {{/if}}
     {{#if errors}}
     <section>
         <ul>
@@ -45,7 +48,7 @@
                     </form>
                 </div>
             </section>
-            <h4>Don't have an account yet? <a href="teacher-sign-up">Sign Up!</a></h4>{{!-- TODO: delete --}}
+            <h4>Don't have an account yet? <a href="teacher-sign-up">Sign Up!</a></h4>{{!-- TODO: delete before roll-out once enough teachers are in--}}
             <h4>Not a teacher? <a href="/">Go Back</a></h4>
         </div>
     </div>

@@ -63,7 +63,7 @@ const express = require('express'),
         }
     });
 
-const studentEmailRegExp = /^(?:[\w\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+(?:\.[A-Za-zñç\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")+(@alumnos.upm.es)$/, 
+const studentEmailRegExp = /^(?:[\w\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+(?:\.[A-Za-zñç\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")+(@alumnos.upm.es)$/,
     passwordRegEx = /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\W\w\S]{8,}$/; //Has 1 uppercase, 1 lowercase, 1 number
 
 //HELPERS
@@ -117,8 +117,9 @@ const makeObject1Indexed = (object) => { //gives an object with numbered keys, s
     return renameKeys(newKeys, object);
 };
 
-const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests or deleted accounts
-    if (!req.session.user || req.session.user.isDeleted === 1) {
+const redirectIfNotLoggedIn = (req, res, next) => { //redirects non-auth requests, deleted accounts or non-validated teachers
+    const user = req.session.user;
+    if (!user || user.isDeleted === 1 || req.session.userType === "teacher" && user.isValidated === 0) {
         return res.redirect('/');
     }
     next();
@@ -129,8 +130,8 @@ const redirectIfLoggedIn = (req, res, next) => { //redirects if already authenti
     }
     next();
 };
-const redirectIntruders = (req, res, next) => { //redirects both students and non-auth requests
-    if (!req.session.userType || isStudent(req.session)) {
+const redirectIntruders = (req, res, next) => { //redirects students, non-auth requests or non-validated teachers
+    if (!req.session.userType || isStudent(req.session) || req.session.userType === "teacher" && req.session.user.isValidated === 0) {
         return res.redirect('/');
     }
     next();
@@ -412,8 +413,11 @@ function checkTeacherLogin(req, res) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
                         reject("Error during DB Query. Please contact an administrator");
                     } else if (results.length <= 0 || results[0].password !== password) {
-                        console.log("Login failed");
+                        console.log("Teacher Login failed");
                         reject("Wrong username or password. Please try again");
+                    } else if (results[0].isValidated == 0) {
+                        console.log("Teacher Login failed");
+                        reject("Account has not yet been validated. Please contact a fellow teacher or an administrator");
                     } else {
                         console.log("Login successful");
                         delete results[0].password;
@@ -972,11 +976,7 @@ router.get('/student-sign-up', (req, res, next) => {
             });
         }).catch((error) => {
             console.log("There are errors on DB access (student sign up)\n");
-            req.session.errors = {
-                1: {
-                    msg: error
-                }
-            };
+            req.session.errors = { 1: { msg: error } };
             req.session.signUpSuccess = false;
             req.session.save((err) => {
                 if (err) {
@@ -1052,7 +1052,8 @@ router.get('/teacher-sign-up', (req, res, next) => {
 }).post('/teacher-sign-up', (req, res, next) => {
     req.check('teacherID', 'ID is too long').isLength({ max: process.env.TEACHER_ID_LENGTH });
     req.check('email', 'Invalid email address').isEmail();
-    req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx);
+    req.check('password', 'Passwords don\'t match').equals(req.body.confirmPassword);
+    req.check('password', 'Invalid password').matches(passwordRegEx);
     let errors = req.validationErrors();
     if (errors) {
         console.log("There are errors on sign up: ", errors);
@@ -1068,45 +1069,39 @@ router.get('/teacher-sign-up', (req, res, next) => {
     } else {//info is correct, we insert into DB
         req.body.password = crypto.createHash('sha256').update(req.body.password).digest('base64');
         req.body.confirmPassword = crypto.createHash('sha256').update(req.body.confirmPassword).digest('base64');
-        signUpTeacher(req, res)
-            .then(() => {
-                console.log("Inserted successfully\n");
-                req.session.signUpSuccess = true;
-                req.session.errors = null;
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('/teacher-login');
-                });
-            }).catch((error) => {
-                console.log("There are errors on DB access (teacher sign up)\n");
-                req.session.errors = {
-                    1: {
-                        msg: error
-                    }
-                };
-                req.session.signUpSuccess = false;
-                req.session.save((err) => {
-                    if (err) {
-                        res.locals.error = err;
-                        return res.redirect('/');
-                    }
-                    return res.redirect('back');
-                });
+        signUpTeacher(req, res).then(() => {
+            req.session.signUpSuccess = true;
+            req.session.errors = null;
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.status(200).redirect('/teacher-login');
             });
+        }).catch((error) => {
+            console.log("There are errors on DB access (teacher sign up)\n");
+            req.session.errors = { 1: { msg: error } };
+            req.session.signUpSuccess = false;
+            req.session.save((err) => {
+                if (err) {
+                    res.locals.error = err;
+                    return res.redirect('/');
+                }
+                return res.redirect('back');
+            });
+        });
     }
 });
 
 router.get('/teacher-login', redirectIfLoggedIn, (req, res, next) => {
     res.render('teacher/login', {
         title: 'Login',
-        success: req.session.success,
+        signUpSuccess: req.session.signUpSuccess,
         errors: req.session.errors
     });
     req.session.errors = null;
-    req.session.success = null;
+    req.session.signUpSuccess = null;
 }).post('/teacher-login', (req, res, next) => {
     req.check('email', 'Invalid email address').isEmail();
     let errors = req.validationErrors();
