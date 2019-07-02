@@ -635,6 +635,7 @@ router.get('/ranking', redirectIfNotLoggedIn, async (req, res, next) => {
             title: 'Ranking',
             students: students,
             error: false,
+            isTeacher: true,
             layout: 'NavBarLayoutT'
         });
     }

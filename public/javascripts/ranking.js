@@ -3,19 +3,24 @@
 function searchByID(choice) {
     // Declare variables
     if (!document.getElementById("error")) {
-        if (choice === "group") { //add more options if desired. Can use a switch too or use choice = choice ? choice += "_" : ""; var input = document.getElementById(choice +"searchbar"),...
+        if (choice === "group2") { //add more options if desired. Can use a switch too or use choice = choice ? choice += "_" : ""; var input = document.getElementById(choice +"searchbar"),...
             var input = document.getElementById("group_searchbar"),
-                table = document.getElementById("group_ranking_table");
+                table = document.getElementById("ranking_table"),
+                index = 1;
+        } else if (choice === "group") { //add more options if desired. Can use a switch too or use choice = choice ? choice += "_" : ""; var input = document.getElementById(choice +"searchbar"),...
+            var input = document.getElementById("group_searchbar"),
+                table = document.getElementById("group_ranking_table"),
+                index = 0;
         } else {
             var input = document.getElementById("searchbar"),
-                table = document.getElementById("ranking_table");
+                table = document.getElementById("ranking_table"), index = 0;
         }
         var filter = input.value.toUpperCase(), //remove to make case sensitive
             tr = table.getElementsByTagName("tr"), td, txtValue;
 
         // Loop through all table rows, and hide those who don't match the search query
         for (let i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[0]; //to search by ID
+            td = tr[i].getElementsByTagName("td")[index]; //index = 0 => 1st column, index = 1 => 2nd column...
             if (td) {
                 txtValue = td.textContent || td.innerText;
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
