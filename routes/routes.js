@@ -738,7 +738,11 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
             grade: -1,
             pointsAwarded: 0,
             completedOn: new Date(), //only for the purpose of having the date here, DB doesn't need it
-            numberOfAttempts: 0
+            numberOfAttempts: 0,
+            title: currActivity.title,
+            activityLink: currActivity.activityLink,
+            category: currActivity.category,
+            tags: currActivity.tags
         };
     } else {
         oldPoints = doneActivity.pointsAwarded;
@@ -766,7 +770,7 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
     } catch (error) {
         console.log(`Error on ${DBAction}; activity results from student ${req.session.user.studentID} on activity ${currActivity.activityID}: ${err}`);
     }
-    req.session.completedActivities = await getCompletedActivities; //we update completedActivities
+    req.session.completedActivities[doneActivity.activityID] = doneActivity;
     req.session.save((err) => {
         if (err) {
             console.log(err);
@@ -788,9 +792,10 @@ router.get('/activity/:id/done', redirectIfNotLoggedIn, (req, res, next) => {
         grade: complActivity.grade * 10,
         points: complActivity.pointsAwarded,
         numberOfQuestions: currActivity.numberOfQuestions,
-        numberOfAttempts: currActivity.numberOfAttempts
+        numberOfAttempts: currActivity.numberOfAttempts,
+        canRetry: complActivity.numberOfAttempts < currActivity.numberOfAttempts && complActivity.grade < 1
     });
-    req.betterActivityResult = null;
+    req.session.betterActivityResult = null;
 });
 
 router.get('/activity/:id/retry', redirectIfNotLoggedIn, (req, res, next) => {
