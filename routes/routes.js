@@ -63,17 +63,19 @@ const express = require('express'),
         }
     });
 
-const studentEmailRegExp = /^[\w.!#$%&’*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸç]+(@alumnos.upm.es)$/, //accepted email characters
+const studentEmailRegExp = /^(?:[\w\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+(?:\.[A-Za-zñç\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")+(@alumnos.upm.es)$/, 
     passwordRegEx = /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\W\w\S]{8,}$/; //Has 1 uppercase, 1 lowercase, 1 number
 
 //HELPERS
 const convertToUPMEmail = (emailInput) => {
-    let auxIndex = emailInput.indexOf("@");
-    if (auxIndex !== -1) {
-        emailInput = emailInput.substring(0, auxIndex);
-    }
-    emailInput = emailInput + "@alumnos.upm.es";
-    return emailInput;
+    //This removed anything after an '@', but was commented out to ensure proper emails are used. Left it anyways in case we want to use it again
+    // let auxIndex = emailInput.indexOf("@");
+    // if (auxIndex !== -1) {
+    //     emailInput = emailInput.substring(0, auxIndex);
+    // }
+    // emailInput = emailInput + "@alumnos.upm.es";
+    // return emailInput;
+    return emailInput + "@alumnos.upm.es";
 };
 const arrayOfObjectsToObject = (array, keyField) =>//[{ activityID: "A1", questions: 5 }, { activityID: "A2", questions: 3 }] => {{ activityID: "A1", questions: 5 }, { activityID: "A2", questions: 3 }};
     array.reduce((obj, item) => {
@@ -763,7 +765,7 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
     req.session.completedActivities = await getCompletedActivities; //we update completedActivities
     req.session.save((err) => {
         if (err) {
-           console.log(err);
+            console.log(err);
             res.redirect('/');
         } else res.redirect(`/activity/${req.params.id}/done`);
     });
@@ -805,7 +807,7 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
 }).post('/create-activity', redirectIntruders, async (req, res, next) => {
     req.body.questions = {};
     do {//Generates pseudo-random activityID (AXXXXXXXX), checks if it already exists. If it does, generates a new one. If it doesn't, inserts into DB
-        req.body.activityID = generateNewID("A", 9);
+        req.body.activityID = generateNewID("A", process.env.ACTIVITY_ID_LENGTH - 1);
     } while (!isValidActivityID(req.body.activityID, req.session.activities));
 
     //we start by inserting questions into DB under the new activityID:
@@ -817,7 +819,7 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
 
             do { //generate unique questionID for each
                 try {
-                    generatedQuestionID.id = generateNewID("Q", 9);
+                    generatedQuestionID.id = generateNewID("Q", process.env.QUESTION_ID_LENGTH - 1);
                     isValid = await isValidQuestionID(generatedQuestionID.id);
                 } catch (error) {
                     reject(error);
@@ -888,7 +890,7 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
 
     activityInserted.then(() => {
         getAllActivities().then(activities => {//we refresh the session activities, all with the same format
-            req.session.activities = activities; 
+            req.session.activities = activities;
             req.session.save((err) => {
                 if (err) {
                     console.log(err);
@@ -935,8 +937,12 @@ router.get('/student-sign-up', (req, res, next) => {
     req.session.errors = null; //to flush them on reload
 }).post('/student-sign-up', (req, res, next) => {
     req.body.email = convertToUPMEmail(req.body.email);
-    req.check('teacherID', 'ID is too long').isLength({ max: 8 });
-    req.check('email', 'Invalid email address').isEmail().matches(studentEmailRegExp);
+    req.body.confirmEmail = convertToUPMEmail(req.body.confirmEmail);
+    req.check('studentID', 'studentID is too long').isLength({ max: process.env.STUDENT_ID_LENGTH });
+    req.check('teacherID', 'teacherID is too long').isLength({ max: process.env.TEACHER_ID_LENGTH });
+    req.check('groupID', 'groupID is too long').isLength({ max: process.env.GROUP_ID_LENGTH });
+    req.check('email', 'Invalid email address').matches(studentEmailRegExp);
+    req.check('email', 'Emails don\'t match').equals(req.body.confirmEmail);
     req.check('password', 'Invalid password. Must contain at least 1 uppercase, 1 lowercase and 1 number').equals(req.body.confirmPassword).matches(passwordRegEx);
     let errors = req.validationErrors();
     if (errors) {
@@ -1044,6 +1050,7 @@ router.get('/teacher-sign-up', (req, res, next) => {
     req.session.errors = null;
     req.session.success = null;
 }).post('/teacher-sign-up', (req, res, next) => {
+    req.check('teacherID', 'ID is too long').isLength({ max: process.env.TEACHER_ID_LENGTH });
     req.check('email', 'Invalid email address').isEmail();
     req.check('password', 'Invalid password').equals(req.body.confirmPassword).matches(passwordRegEx);
     let errors = req.validationErrors();
