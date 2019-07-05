@@ -64,7 +64,8 @@ const express = require('express'),
     });
 
 const studentEmailRegExp = /^(?:[\w\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+(?:\.[A-Za-zñç\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")+(@alumnos.upm.es)$/,
-    passwordRegEx = /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\W\w\S]{8,}$/; //Has 1 uppercase, 1 lowercase, 1 number
+    passwordRegEx = /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\W\w\S]{8,}$/, //Has 1 uppercase, 1 lowercase, 1 number
+    categories = ["Space", "Communication and Transport", "Computing and robotics", "Energy", "Industry and construction", "Sports", "Science"];
 
 //HELPERS
 const convertToUPMEmail = (emailInput) => {
@@ -265,7 +266,7 @@ async function insertOrUpdateTable(tableName, args, action) {
         }
         case "activities": {
             teacherPool.query("INSERT INTO activities (activityID, teacherID, title, pointsMultiplier, videoLink, numberOfAttempts, penalisationPerAttempt,"
-                + " questionIDs, numberOfQuestions, category, tags, creatorName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", args, (err, results, fields) => {
+                + " questionIDs, numberOfQuestions, category, tags, creatorName, penalisationLimit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", args, (err, results, fields) => {
                     if (err) {
                         console.log("WARNING: Error ocurred during DB Query\n", err);
                         Promise.reject("Error during DB Query. Please contact an administrator");
@@ -811,6 +812,7 @@ router.get('/activity/:id/retry', redirectIfNotLoggedIn, (req, res, next) => {
 router.get('/create-activity', redirectIntruders, async (req, res, next) => {
     res.render('teacher/createActivity', {
         layout: 'NavBarLayoutT',
+        categories: categories,
         title: "Creating activity"
     });
 }).post('/create-activity', redirectIntruders, async (req, res, next) => {
@@ -887,14 +889,15 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
     //once questions are inserted, we can insert the new activity
     let activityInserted = new Promise((resolve, reject) => {
         let numberOfAttempts = req.body.number_of_attempts ? req.body.number_of_attempts : 3,
-            penalisationPerAttempt = req.body.penalisation_per_attempt ? req.body.penalisation_per_attempt : 0;
+            penalisationPerAttempt = req.body.penalisation_per_attempt ? req.body.penalisation_per_attempt : 20;
         insertOrUpdateTable("activities", [req.body.activityID, req.session.user.teacherID, req.body.title, req.body.points_multiplier, req.body.video_link,
-            numberOfAttempts, penalisationPerAttempt, req.body.questionIDs, req.body.number_of_questions, req.body.category, req.body.tags, res.locals.user.name + " " + res.locals.user.surname],
+            numberOfAttempts, penalisationPerAttempt, req.body.questionIDs, req.body.number_of_questions, req.body.category, req.body.tags, res.locals.user.name + " " + res.locals.user.surname,
+            req.body.penalisation_limit],
             "insert").then((res) => {
                 resolve();
             }).catch((err) => {
                 reject(err);
-            })
+            });
     });
 
     activityInserted.then(() => {

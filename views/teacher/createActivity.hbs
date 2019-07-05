@@ -14,7 +14,7 @@
         <input type="text" name="video_link" id="video_link" required placeholder="https://www.youtube.com/watch?v=">
     </div>
     <div>
-        <label for="number_of_questions">Number of questions (Leave on 5 for now!):</label>
+        <label for="number_of_questions">Number of questions (Leave on 5 for now):</label>
         <input type="number" name="number_of_questions" id="number_of_questions" onkeyup="changeNumberOfQuestions()"
             required value="5" min="1" max="10">
     </div>
@@ -28,8 +28,12 @@
         <input type="number" name="points_multiplier" id="points_multiplier" required value="10" min="10">
     </div>
     <div>
-        <label for="penalisation_per_attempt">Penalisation per attempt:</label>
+        <label for="penalisation_per_attempt">Penalisation per attempt (%):</label>
         <input type="number" name="penalisation_per_attempt" id="penalisation_per_attempt" value="20" min="0" max="100">
+    </div>
+    <div>
+        <label for="penalisation_limit">Penalisation limit (%, activity points' multiplier won't be lower than this value):</label>
+        <input type="number" name="penalisation_limit" id="penalisation_limit" value="50" min="0" max="100">
     </div>
 
     <div id="questions_container">
@@ -235,10 +239,9 @@
             <h3>Category:</h3>
         </label>
         <select name="category" id="category">
-            <option>Technology</option>
-            <option>Education</option>
-            <option>Lifestyle</option>
-            <option>Finance</option>
+            {{#each categories as |category|}}
+                <option>{{this}}</option>
+            {{/each}}
         </select>
     </div>
     <div>
