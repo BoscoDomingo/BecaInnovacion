@@ -1,28 +1,30 @@
 <div class="container summary">
     {{#if activity}}
-        <h1 class="title">{{activity.title}}</h1>
-        <h3>Number of Questions: {{activity.numberOfQuestions}}</h3>
-        <h3>Number of Attempts: {{activity.numberOfAttempts}}</h3>
-        <h3>Penalisation per Attempt: {{activity.penalisationPerAttempt}}</h3>
-        <h3>Video:
-            <div id="videoPlayer" class="video-container">
-                <iframe width="1030" height="580" src={{videoLink}} frameborder="0"
-                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
-            </div>
-        </h3>
-        
-        <br>
-        {{#each activity.questions}}
-        <section class="answer-container">
-            <h2>{{this.questionText}}</h5>
+    <h1 class="title">{{activity.title}}</h1>
+    <h3>Number of Questions: {{activity.numberOfQuestions}}</h3>
+    <h3>Number of Attempts: {{activity.numberOfAttempts}}</h3>
+    <h3>Penalisation per Attempt: -{{activity.penalisationPerAttempt}}%</h3>
+    <h3>Penalisation limit: {{activity.penalisationLimit}}%</h3>
+    <h3>Video:
+        <div id="videoPlayer" class="video-container">
+            <iframe width="1030" height="580" src={{videoLink}} frameborder="0"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+        </div>
+    </h3>
+
+    <br>
+    {{#each activity.questions}}
+    <section class="answer-container">
+        <h2>{{this.questionText}}</h5>
             {{#each this.questionChoices as |choice|}}
-            <input type="radio" name={{question.questionID}} value={{@key}} required disabled><p>{{this}}</p>
+            <input type="radio" name={{question.questionID}} value={{@key}} required disabled>
+            <p>{{this}}</p>
             <br>
             {{/each}}
             <br>
             <h5>Answer: {{this.questionAnswer}}</h5>
-            </section>
-        {{/each}}
+    </section>
+    {{/each}}
     {{/if}}
 </div>

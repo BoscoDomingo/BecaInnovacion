@@ -7,14 +7,14 @@
     {{else if betterActivityResult}}
     <h1 class="subtitle">Congrats! Here are your results:</h1>
     {{else}}
-    <h2 class="subtitle">Sorry, you didn't improve your best results. On this run you got:</h2>
+    <h2 class="subtitle">Your best results:</h2>
     {{/if}}
 
     <div>
         <ul>
-            <li>Attempt: {{attemptNumber}}/{{numberOfAttempts}}</li>
-            <li>Grade: {{grade}}/10</li>
-            <li>Points: {{points}}</li>
+            <li>Attempts: {{attemptNumber}}/{{numberOfAttempts}}</li>
+            <li>Best Attempt's Grade: {{grade}}/10</li>
+            <li>Best Attempt's Points: {{points}}</li>
         </ul>
     </div>
     <div class="btn-center">

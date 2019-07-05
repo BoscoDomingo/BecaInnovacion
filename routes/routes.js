@@ -217,6 +217,7 @@ async function getCompletedActivities(studentID, activities) { //returns an obje
                     array[index].activityLink = activities[element.activityID].activityLink;
                     array[index].category = activities[element.activityID].category;
                     array[index].tags = activities[element.activityID].tags;
+                    array[index].creatorName = activities[element.activityID].creatorName;
                 });
                 resolve(arrayOfObjectsToObject(results, "activityID"));
             } else resolve({});
@@ -736,6 +737,7 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
             studentID: req.session.user.studentID,
             activityID: currActivity.activityID,
             groupID: req.session.user.groupID,
+            creatorName: currActivity.creatorName,
             grade: -1,
             pointsAwarded: 0,
             completedOn: new Date(), //only for the purpose of having the date here, DB doesn't need it
@@ -752,22 +754,22 @@ router.get('/activity/:id', redirectIfNotLoggedIn, (req, res, next) => {
     Object.values(currActivity.questions).forEach(element => {//calculating the number of correct answers
         correctAnswers = req.body[element.questionID] === element.questionAnswer.toString() ? correctAnswers + 1 : correctAnswers;
     });
-    let newGrade = correctAnswers / currActivity.numberOfQuestions;
-    if (doneActivity.grade < newGrade) { //we only update if results are strictly better or insert if it's first attempt
+    let newGrade = correctAnswers / currActivity.numberOfQuestions,
+        newPointsAwarded = newGrade * 10 * currActivity.pointsMultiplier * Math.max(currActivity.penalisationLimit / 100, (1 - ((currActivity.penalisationPerAttempt / 100) * (doneActivity.numberOfAttempts))));
+    console.log(newPointsAwarded, newGrade, Math.max(currActivity.penalisationLimit / 100, (1 - ((currActivity.penalisationPerAttempt / 100) * (doneActivity.numberOfAttempts)))));
+    if (newPointsAwarded >= oldPoints) { //we only update if results are better or insert if it's first attempt
         req.session.betterActivityResult = true;
         doneActivity.grade = newGrade;
-        doneActivity.pointsAwarded = newGrade * 10 * currActivity.pointsMultiplier;
+        doneActivity.pointsAwarded = newPointsAwarded;
         doneActivity.completedOn = new Date();
     } else {
         req.session.betterActivityResult = false;
     }
-
     doneActivity.numberOfAttempts = doneActivity.numberOfAttempts + 1; //attempts done always go up
-    let pointsForUpdate = doneActivity.pointsAwarded - oldPoints; //calculate the points for DB
-
+    let pointsForUpdate = newPointsAwarded - oldPoints; //calculate the points for DB
     try {
-        await insertOrUpdateTable("student_activities",
-            [doneActivity.studentID, doneActivity.activityID, doneActivity.groupID, doneActivity.grade, doneActivity.pointsAwarded, doneActivity.numberOfAttempts, pointsForUpdate], DBAction);
+        await insertOrUpdateTable("student_activities", [doneActivity.studentID, doneActivity.activityID, doneActivity.groupID, doneActivity.grade,
+        doneActivity.pointsAwarded, doneActivity.numberOfAttempts, pointsForUpdate], DBAction);
     } catch (error) {
         console.log(`Error on ${DBAction}; activity results from student ${req.session.user.studentID} on activity ${currActivity.activityID}: ${err}`);
     }
@@ -840,11 +842,11 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
             //Parse choices of current question into one string
             let choices = { choicesString: "" };
             if (req.body["question_type_" + i] === "test") {
-                for (let j = (i - 1) * 4 + 1; j <= (i - 1) * 4 + 4; j++) { //assuming 4 choices per question
+                for (let j = (i - 1) * 4 + 1; j <= (i - 1) * 4 + 4; j++) { //assuming 4 choices per question, this will have to be changed when we want to introduce different number of answers
                     choices.choicesString += (req.body["choice_" + j] + "--");
                     delete req.body["choice_" + j]; //because we move them to another place
                 }
-                choices.choicesString = choices.choicesString.substring(0, choices.choicesString.length - 2) //erase the final 2 characters
+                choices.choicesString = choices.choicesString.substring(0, choices.choicesString.length - 2); //erase the final 2 characters
             }
 
             try {
@@ -876,7 +878,7 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
                 reject(error);
             }
         }
-        generatedQuestionIDs.ids = generatedQuestionIDs.ids.substring(0, generatedQuestionIDs.ids.length - 2) //take out the final 2 characters
+        generatedQuestionIDs.ids = generatedQuestionIDs.ids.substring(0, generatedQuestionIDs.ids.length - 2); //take out the final 2 characters
         resolve(generatedQuestionIDs.ids);
     });
 
@@ -889,11 +891,14 @@ router.get('/create-activity', redirectIntruders, async (req, res, next) => {
     //once questions are inserted, we can insert the new activity
     let activityInserted = new Promise((resolve, reject) => {
         let numberOfAttempts = req.body.number_of_attempts ? req.body.number_of_attempts : 3,
-            penalisationPerAttempt = req.body.penalisation_per_attempt ? req.body.penalisation_per_attempt : 20;
-        insertOrUpdateTable("activities", [req.body.activityID, req.session.user.teacherID, req.body.title, req.body.points_multiplier, req.body.video_link,
-            numberOfAttempts, penalisationPerAttempt, req.body.questionIDs, req.body.number_of_questions, req.body.category, req.body.tags, res.locals.user.name + " " + res.locals.user.surname,
-            req.body.penalisation_limit],
-            "insert").then((res) => {
+            penalisationPerAttempt = req.body.penalisation_per_attempt ? req.body.penalisation_per_attempt : 20,
+            penalisation_limit = req.body.penalisation_limit ? req.body.penalisation_limit : 50,
+            numberOfQuestions = req.body.number_of_questions ? req.body.number_of_questions : 5,
+            pointsMultiplier = req.body.points_multiplier ? req.body.points_multiplier : 10;
+
+        insertOrUpdateTable("activities", [req.body.activityID, req.session.user.teacherID, req.body.title, pointsMultiplier, req.body.video_link, numberOfAttempts,
+            penalisationPerAttempt, req.body.questionIDs, numberOfQuestions, req.body.category, req.body.tags, res.locals.user.name + " " + res.locals.user.surname,
+            penalisation_limit], "insert").then((res) => {
                 resolve();
             }).catch((err) => {
                 reject(err);
