@@ -65,7 +65,7 @@ const express = require('express'),
 
 const studentEmailRegExp = /^(?:[\w\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+(?:\.[A-Za-zñç\d!#$%&'*+/=?^_`{|}~-ÑñÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÕãõÄËÏÖÜŸäëïöüŸÇç]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")+(@alumnos.upm.es)$/,
     passwordRegEx = /^(?=.*[A-ZÑÁÉÍÓÚÜ])(?=.*[a-zñáéíóúü])(?=.*\d)[\W\w\S]{8,}$/, //Has 1 uppercase, 1 lowercase, 1 number
-    categories = ["Space", "Communication and Transport", "Computing and robotics", "Energy", "Industry and construction", "Sports", "Science"];
+    categories = ["Space And Universe", "Communication and Transport", "Computing and Robotics", "Energy And Power", "Industry and construction", "Sport Science", "Science News"];
 
 //HELPERS
 const convertToUPMEmail = (emailInput) => {
