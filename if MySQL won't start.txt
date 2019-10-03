@@ -1,9 +1,10 @@
-cd "C:\Program Files\MySQL\MySQL Server 8.0\bin\"
+cd "C:\Program Files\MySQL\MySQL Server X.X\bin\" (change X for the correct numbers)
 
-mysqld.exe --defaults-file="D:\ProgramData\MySQL\MySQL Server 8.0\my.ini
+mysqld.exe --defaults-file="D:\ProgramData\MySQL\MySQL Server X.X\my.ini"
 
-mysqld --console 
-mysqld --log-error 
-Will give you a detailed error message in console why it can't start (log error will go to C:\Program Files\MySQL\MySQL Server 8.0\data\BoscoDesktop.err)
+mysqld --console
+mysqld --log-error
+
+Will give you a detailed error message in console why it can't start (log error will go to C:\Program Files\MySQL\MySQL Server 8.0\data\YourPCName.err)
 
 Make sure my.ini encoding is set to UTF-8

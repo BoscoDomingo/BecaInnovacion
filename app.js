@@ -56,19 +56,19 @@ It would overlap with the login one, which would have to be changed to a user-ba
 sources: https://github.com/animir/node-rate-limiter-flexible/wiki/Overall-example
         https://github.com/animir/node-rate-limiter-flexible/wiki/API-methods
 */
-// app.use((req, res, next) => {
-//     rateLimiterByRequest.consume(req.ip)
-//         .then((rateLimiterRes) => {
-//             console.log("Successful request by IP: " + req.ip);
-//             console.log(rateLimiterRes);
-//             next();
-//         })
-//         .catch((rejection) => {
-//             console.log("Blocked request by IP: " + req.ip);
-//             console.log(rejection);
-//             res.status(429).send('Too Many Requests');
-//         });
-// })
+/* app.use((req, res, next) => {
+    rateLimiterByRequest.consume(req.ip)
+        .then((rateLimiterRes) => {
+            console.log("Successful request by IP: " + req.ip);
+            console.log(rateLimiterRes);
+            next();
+        })
+        .catch((rejection) => {
+            console.log("Blocked request by IP: " + req.ip);
+            console.log(rejection);
+            res.status(429).send('Too Many Requests');
+        });
+}) */
 
 //if user is logged in, we move him to locals
 app.use((req, res, next) => {
